@@ -63,6 +63,27 @@ enum ParticipantStatus {
   FAILED
 }
 
+enum RewardType {
+  VOUCHER
+  MERCHANDISE
+  DONATION
+  CASHBACK
+}
+
+enum RewardStatus {
+  AVAILABLE
+  OUT_OF_STOCK
+  INACTIVE
+}
+
+enum RedemptionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+  CANCELLED
+}
+
 // ======================================================
 // Models
 // ======================================================
@@ -93,6 +114,7 @@ model User {
   verifications         ActivityVerification[]
   challengeParticipants ChallengeParticipant[]
   challengeProgresses   ChallengeProgress[]
+  rewardRedemptions     RewardRedemption[]
 
   @@index([username])
   @@index([name])
@@ -314,6 +336,81 @@ model ChallengeProgress {
   @@unique([challengeId, userId])
   @@index([userId])
   @@map("challenge_progresses")
+}
+
+model RewardCategory {
+  id String @id @default(uuid()) @db.Uuid
+
+  name        String  @db.VarChar(100)
+  description String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  rewards Reward[]
+
+  @@index([name])
+  @@map("reward_categories")
+}
+
+model Reward {
+  id String @id @default(uuid()) @db.Uuid
+
+  categoryId String @db.Uuid
+
+  name String @db.VarChar(150)
+
+  description String? @db.Text
+
+  type RewardType
+
+  pointCost Int
+
+  stock Int
+
+  imageUrl String? @db.VarChar(255)
+
+  status RewardStatus @default(AVAILABLE)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  category RewardCategory @relation(fields: [categoryId], references: [id])
+
+  redemptions RewardRedemption[]
+
+  @@index([categoryId])
+  @@index([type])
+  @@index([status])
+  @@map("rewards")
+}
+
+model RewardRedemption {
+  id String @id @default(uuid()) @db.Uuid
+
+  rewardId String @db.Uuid
+
+  userId String @db.Uuid
+
+  pointUsed Int
+
+  status RedemptionStatus @default(PENDING)
+
+  redemptionCode String? @unique @db.VarChar(50)
+
+  redeemedAt DateTime @default(now())
+
+  completedAt DateTime?
+
+  reward Reward @relation(fields: [rewardId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([rewardId])
+  @@index([status])
+  @@map("reward_redemptions")
 }
 
 // Account
