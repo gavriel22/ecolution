@@ -1,7 +1,6 @@
 // ======================================================
-// ECOLUTION ERD
-// Sprint 1 - Core System
-// Database : PostgreSQL
+// ECOLUTION ERD FINAL
+// PART 1 - ENUM & CORE MODULE
 // ======================================================
 
 Enum UserRole {
@@ -10,11 +9,33 @@ Enum UserRole {
   ADMIN
 }
 
+Enum NotificationType {
+  SYSTEM
+  ACTIVITY
+  REWARD
+  ORDER
+  CHALLENGE
+}
+
+Enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  VERIFY
+  APPROVE
+  REJECT
+}
+
 Table User {
   id uuid [pk]
 
   name varchar(100)
+
+  username varchar(50) [unique]
+
   email varchar(255) [unique]
+
   passwordHash varchar(255)
 
   role UserRole
@@ -24,19 +45,29 @@ Table User {
   phone varchar(20)
 
   province varchar(100)
+
   city varchar(100)
+
   district varchar(100)
+
   postalCode varchar(10)
+
   address text
 
   totalPoint int [default: 0]
+
   trustScore int [default: 100]
 
   emailVerified boolean [default: false]
 
+  isActive boolean [default: true]
+
+  lastLoginAt timestamp
+
   deletedAt timestamp
 
   createdAt timestamp
+
   updatedAt timestamp
 }
 
@@ -46,9 +77,10 @@ Table Notification {
   userId uuid
 
   title varchar(150)
+
   message text
 
-  type varchar(50)
+  type NotificationType
 
   actionUrl varchar(255)
 
@@ -62,7 +94,7 @@ Table AuditLog {
 
   adminId uuid
 
-  action varchar(100)
+  action AuditAction
 
   entity varchar(100)
 
@@ -74,4 +106,676 @@ Table AuditLog {
 }
 
 Ref: Notification.userId > User.id
+
 Ref: AuditLog.adminId > User.id
+
+// ======================================================
+// PART 2 - ACTIVITY MODULE
+// ======================================================
+
+Enum ActivityStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+Enum VerificationMethod {
+  MANUAL
+  AI
+}
+
+Enum PointTransactionType {
+  EARN
+  REDEEM
+  BONUS
+  PENALTY
+  ADJUSTMENT
+}
+
+Table ActivityCategory {
+  id uuid [pk]
+
+  name varchar(100)
+  description text
+
+  pointReward int
+
+  iconUrl varchar(255)
+
+  isActive boolean [default: true]
+
+  createdAt timestamp
+  updatedAt timestamp
+}
+
+Table Activity {
+  id uuid [pk]
+
+  userId uuid
+  categoryId uuid
+
+  title varchar(150)
+
+  description text
+
+  activityDate timestamp
+
+  location varchar(255)
+
+  latitude decimal(10,7)
+
+  longitude decimal(10,7)
+
+  status ActivityStatus [default: 'PENDING']
+
+  adminNote text
+
+  createdAt timestamp
+  updatedAt timestamp
+}
+
+Table ActivityPhoto {
+  id uuid [pk]
+
+  activityId uuid
+
+  imageUrl varchar(255)
+
+  isPrimary boolean [default: false]
+
+  uploadedAt timestamp
+}
+
+Table ActivityVerification {
+  id uuid [pk]
+
+  activityId uuid
+
+  verifiedBy uuid
+
+  method VerificationMethod
+
+  aiConfidence decimal(5,2)
+
+  verifiedStatus ActivityStatus
+
+  note text
+
+  verifiedAt timestamp
+}
+
+Table PointHistory {
+  id uuid [pk]
+
+  userId uuid
+
+  activityId uuid
+
+  type PointTransactionType
+
+  pointChange int
+
+  balanceAfter int
+
+  description text
+
+  createdAt timestamp
+}
+
+// ======================================================
+// RELATIONSHIP
+// ======================================================
+
+Ref: Activity.userId > User.id
+
+Ref: Activity.categoryId > ActivityCategory.id
+
+Ref: ActivityPhoto.activityId > Activity.id
+
+Ref: ActivityVerification.activityId > Activity.id
+
+Ref: ActivityVerification.verifiedBy > User.id
+
+Ref: PointHistory.userId > User.id
+
+Ref: PointHistory.activityId > Activity.id
+
+// ======================================================
+// PART 3 - CHALLENGE & REWARD MODULE
+// ======================================================
+
+Enum ChallengeStatus {
+  DRAFT
+  UPCOMING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+Enum ChallengeParticipantStatus {
+  JOINED
+  COMPLETED
+  FAILED
+}
+
+Enum BadgeType {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+Enum VoucherType {
+  PERCENTAGE
+  FIXED
+}
+
+Enum VoucherStatus {
+  ACTIVE
+  USED
+  EXPIRED
+  DISABLED
+}
+
+Table Challenge {
+  id uuid [pk]
+
+  adminId uuid
+
+  title varchar(150)
+
+  description text
+
+  targetPoint int
+
+  bonusPoint int
+
+  maxParticipant int
+
+  startDate timestamp
+
+  endDate timestamp
+
+  status ChallengeStatus
+
+  createdAt timestamp
+  updatedAt timestamp
+}
+
+Table ChallengeParticipant {
+  id uuid [pk]
+
+  challengeId uuid
+
+  userId uuid
+
+  currentPoint int [default: 0]
+
+  status ChallengeParticipantStatus
+
+  joinedAt timestamp
+
+  completedAt timestamp
+}
+
+Table ChallengeProgress {
+  id uuid [pk]
+
+  participantId uuid
+
+  activityId uuid
+
+  currentProgress int
+
+  createdAt timestamp
+}
+
+Table Badge {
+  id uuid [pk]
+
+  challengeId uuid
+
+  name varchar(100)
+
+  description text
+
+  type BadgeType
+
+  iconUrl varchar(255)
+
+  createdAt timestamp
+}
+
+Table UserBadge {
+  id uuid [pk]
+
+  userId uuid
+
+  badgeId uuid
+
+  earnedAt timestamp
+}
+
+Table Voucher {
+  id uuid [pk]
+
+  code varchar(50) [unique]
+
+  title varchar(100)
+
+  description text
+
+  type VoucherType
+
+  value decimal(10,2)
+
+  maxDiscount decimal(10,2)
+
+  minimumPurchase decimal(10,2)
+
+  pointRequired int
+
+  quota int
+
+  status VoucherStatus
+
+  startAt timestamp
+
+  expiredAt timestamp
+
+  createdAt timestamp
+}
+
+Table UserVoucher {
+  id uuid [pk]
+
+  userId uuid
+
+  voucherId uuid
+
+  status VoucherStatus
+
+  redeemedAt timestamp
+
+  usedAt timestamp
+}
+
+// ======================================================
+// RELATIONSHIP
+// ======================================================
+
+Ref: Challenge.adminId > User.id
+
+Ref: ChallengeParticipant.challengeId > Challenge.id
+
+Ref: ChallengeParticipant.userId > User.id
+
+Ref: ChallengeProgress.participantId > ChallengeParticipant.id
+
+Ref: ChallengeProgress.activityId > Activity.id
+
+Ref: Badge.challengeId > Challenge.id
+
+Ref: UserBadge.userId > User.id
+
+Ref: UserBadge.badgeId > Badge.id
+
+Ref: UserVoucher.userId > User.id
+
+Ref: UserVoucher.voucherId > Voucher.id
+
+// ======================================================
+// PART 4 - MARKETPLACE MODULE
+// ======================================================
+
+Enum ProductStatus {
+  DRAFT
+  ACTIVE
+  OUT_OF_STOCK
+  ARCHIVED
+}
+
+Enum OrderStatus {
+  PENDING
+  PAID
+  PROCESSING
+  SHIPPED
+  COMPLETED
+  CANCELLED
+}
+
+Enum PaymentMethod {
+  QRIS
+  BANK_TRANSFER
+  E_WALLET
+}
+
+Table UMKMProfile {
+  id uuid [pk]
+
+  userId uuid
+
+  businessName varchar(150)
+
+  ownerName varchar(100)
+
+  description text
+
+  phone varchar(20)
+
+  address text
+
+  logoUrl varchar(255)
+
+  isVerified boolean [default: false]
+
+  createdAt timestamp
+
+  updatedAt timestamp
+}
+
+Table ProductCategory {
+  id uuid [pk]
+
+  name varchar(100)
+
+  description text
+
+  createdAt timestamp
+}
+
+Table Product {
+  id uuid [pk]
+
+  umkmId uuid
+
+  categoryId uuid
+
+  name varchar(150)
+
+  description text
+
+  price decimal(10,2)
+
+  stock int
+
+  sku varchar(100)
+
+  weight int
+
+  status ProductStatus
+
+  isFeatured boolean [default: false]
+
+  createdAt timestamp
+
+  updatedAt timestamp
+}
+
+Table ProductImage {
+  id uuid [pk]
+
+  productId uuid
+
+  imageUrl varchar(255)
+
+  isPrimary boolean [default: false]
+
+  uploadedAt timestamp
+}
+
+Table Cart {
+  id uuid [pk]
+
+  userId uuid
+
+  createdAt timestamp
+
+  updatedAt timestamp
+}
+
+Table CartItem {
+  id uuid [pk]
+
+  cartId uuid
+
+  productId uuid
+
+  quantity int
+
+  createdAt timestamp
+}
+
+Table Order {
+  id uuid [pk]
+
+  userId uuid
+
+  addressId uuid
+
+  voucherId uuid
+
+  orderNumber varchar(50) [unique]
+
+  subtotal decimal(10,2)
+
+  discount decimal(10,2)
+
+  shippingCost decimal(10,2)
+
+  total decimal(10,2)
+
+  paymentMethod PaymentMethod
+
+  status OrderStatus
+
+  paidAt timestamp
+
+  createdAt timestamp
+}
+
+Table OrderItem {
+  id uuid [pk]
+
+  orderId uuid
+
+  productId uuid
+
+  quantity int
+
+  price decimal(10,2)
+
+  subtotal decimal(10,2)
+}
+
+Table Review {
+  id uuid [pk]
+
+  userId uuid
+
+  productId uuid
+
+  rating int
+
+  comment text
+
+  createdAt timestamp
+
+  updatedAt timestamp
+}
+
+// ======================================================
+// RELATIONSHIP
+// ======================================================
+
+Ref: UMKMProfile.userId > User.id
+
+Ref: Product.umkmId > UMKMProfile.id
+
+Ref: Product.categoryId > ProductCategory.id
+
+Ref: ProductImage.productId > Product.id
+
+Ref: Cart.userId > User.id
+
+Ref: CartItem.cartId > Cart.id
+
+Ref: CartItem.productId > Product.id
+
+Ref: Order.userId > User.id
+
+Ref: Order.voucherId > Voucher.id
+
+Ref: OrderItem.orderId > Order.id
+
+Ref: OrderItem.productId > Product.id
+
+Ref: Review.userId > User.id
+
+Ref: Review.productId > Product.id
+
+Ref: Order.addressId > UserAddress.id
+
+// ======================================================
+// PART 5 - FINAL MODULE
+// ======================================================
+
+Enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+Enum ShipmentStatus {
+  PENDING
+  PICKED_UP
+  IN_TRANSIT
+  DELIVERED
+}
+
+Table UserAddress {
+  id uuid [pk]
+
+  userId uuid
+
+  recipientName varchar(100)
+
+  phone varchar(20)
+
+  province varchar(100)
+
+  city varchar(100)
+
+  district varchar(100)
+
+  postalCode varchar(10)
+
+  address text
+
+  isDefault boolean [default: false]
+
+  createdAt timestamp
+
+  updatedAt timestamp
+}
+
+Table Payment {
+  id uuid [pk]
+
+  orderId uuid
+
+  transactionId varchar(100)
+
+  paymentGateway varchar(50)
+
+  paymentMethod PaymentMethod
+
+  amount decimal(10,2)
+
+  status PaymentStatus
+
+  paidAt timestamp
+
+  createdAt timestamp
+}
+
+Table Shipment {
+  id uuid [pk]
+
+  orderId uuid
+
+  courier varchar(50)
+
+  trackingNumber varchar(100)
+
+  status ShipmentStatus
+
+  shippedAt timestamp
+
+  deliveredAt timestamp
+}
+
+Table Wishlist {
+  id uuid [pk]
+
+  userId uuid
+
+  createdAt timestamp
+}
+
+Table WishlistItem {
+  id uuid [pk]
+
+  wishlistId uuid
+
+  productId uuid
+
+  createdAt timestamp
+}
+
+Table Banner {
+  id uuid [pk]
+
+  title varchar(100)
+
+  imageUrl varchar(255)
+
+  redirectUrl varchar(255)
+
+  isActive boolean
+
+  createdAt timestamp
+
+  updatedAt timestamp
+}
+
+Table FAQ {
+  id uuid [pk]
+
+  question varchar(255)
+
+  answer text
+
+  isActive boolean [default: true]
+
+  createdAt timestamp
+
+  updatedAt timestamp
+}
+
+// ======================================================
+// RELATIONSHIP
+// ======================================================
+
+Ref: UserAddress.userId > User.id
+
+Ref: Payment.orderId > Order.id
+
+Ref: Shipment.orderId > Order.id
+
+Ref: Wishlist.userId > User.id
+
+Ref: WishlistItem.wishlistId > Wishlist.id
+
+Ref: WishlistItem.productId > Product.id
