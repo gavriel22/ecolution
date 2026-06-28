@@ -25,6 +25,24 @@ enum UserRole {
   ADMIN
 }
 
+enum ActivityStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum VerificationMethod {
+  MANUAL
+  AI
+}
+
+enum PointTransactionType {
+  EARN
+  REDEEM
+  BONUS
+  PENALTY
+}
+
 // ======================================================
 // Models
 // ======================================================
@@ -48,10 +66,117 @@ model User {
   updatedAt       DateTime  @updatedAt
   deletedAt       DateTime?
 
-  accounts Account[]
-  sessions Session[]
+  accounts       Account[]
+  sessions       Session[]
+  activities     Activity[]
+  pointHistories PointHistory[]
+  verifications  ActivityVerification[]
 
   @@map("users")
+}
+
+model ActivityCategory {
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String  @db.VarChar(100)
+  description String?
+  pointReward Int
+  isActive    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  activities Activity[]
+
+  @@map("activity_categories")
+}
+
+model Activity {
+  id String @id @default(uuid()) @db.Uuid
+
+  userId     String @db.Uuid
+  categoryId String @db.Uuid
+
+  title       String  @db.VarChar(150)
+  description String?
+
+  activityDate DateTime
+
+  status ActivityStatus @default(PENDING)
+
+  adminNote String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  category ActivityCategory @relation(fields: [categoryId], references: [id])
+
+  photos ActivityPhoto[]
+
+  verification ActivityVerification?
+
+  pointHistory PointHistory?
+
+  @@map("activities")
+}
+
+model ActivityPhoto {
+  id String @id @default(uuid()) @db.Uuid
+
+  activityId String @db.Uuid
+
+  imageUrl String @db.VarChar(255)
+
+  uploadedAt DateTime @default(now())
+
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@map("activity_photos")
+}
+
+model ActivityVerification {
+  id String @id @default(uuid()) @db.Uuid
+
+  activityId String @unique @db.Uuid
+
+  verifiedBy String @db.Uuid
+
+  method VerificationMethod
+
+  confidence Decimal? @db.Decimal(5, 2)
+
+  note String?
+
+  verifiedAt DateTime @default(now())
+
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  verifier User @relation(fields: [verifiedBy], references: [id])
+
+  @@map("activity_verifications")
+}
+
+model PointHistory {
+  id String @id @default(uuid()) @db.Uuid
+
+  userId String @db.Uuid
+
+  activityId String? @unique @db.Uuid
+
+  type PointTransactionType
+
+  point Int
+
+  description String?
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  activity Activity? @relation(fields: [activityId], references: [id])
+
+  @@map("point_histories")
 }
 
 // Account
