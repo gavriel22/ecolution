@@ -43,6 +43,26 @@ enum PointTransactionType {
   PENALTY
 }
 
+enum ChallengeType {
+  DAILY
+  WEEKLY
+  MONTHLY
+  EVENT
+}
+
+enum ChallengeStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+enum ParticipantStatus {
+  JOINED
+  COMPLETED
+  FAILED
+}
+
 // ======================================================
 // Models
 // ======================================================
@@ -66,15 +86,16 @@ model User {
   updatedAt       DateTime  @updatedAt
   deletedAt       DateTime?
 
-  accounts       Account[]
-  sessions       Session[]
-  activities     Activity[]
-  pointHistories PointHistory[]
-  verifications  ActivityVerification[]
+  accounts              Account[]
+  sessions              Session[]
+  activities            Activity[]
+  pointHistories        PointHistory[]
+  verifications         ActivityVerification[]
+  challengeParticipants ChallengeParticipant[]
+  challengeProgresses   ChallengeProgress[]
 
   @@index([username])
   @@index([name])
-
   @@map("users")
 }
 
@@ -125,7 +146,6 @@ model Activity {
   @@index([categoryId])
   @@index([status])
   @@index([activityDate])
-
   @@map("activities")
 }
 
@@ -141,7 +161,6 @@ model ActivityPhoto {
   activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
 
   @@index([activityId])
-
   @@map("activity_photos")
 }
 
@@ -165,7 +184,6 @@ model ActivityVerification {
   verifier User @relation(fields: [verifiedBy], references: [id])
 
   @@index([verifiedBy])
-
   @@map("activity_verifications")
 }
 
@@ -190,8 +208,112 @@ model PointHistory {
 
   @@index([userId])
   @@index([type])
-
   @@map("point_histories")
+}
+
+model ChallengeCategory {
+  id String @id @default(uuid()) @db.Uuid
+
+  name        String  @db.VarChar(100)
+  description String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  challenges Challenge[]
+
+  @@index([name])
+  @@map("challenge_categories")
+}
+
+model Challenge {
+  id String @id @default(uuid()) @db.Uuid
+
+  categoryId String @db.Uuid
+
+  title String @db.VarChar(150)
+
+  description String? @db.Text
+
+  type ChallengeType
+
+  target Int
+
+  pointReward Int
+
+  startDate DateTime
+
+  endDate DateTime
+
+  status ChallengeStatus @default(DRAFT)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  category ChallengeCategory @relation(fields: [categoryId], references: [id])
+
+  participants ChallengeParticipant[]
+
+  progresses ChallengeProgress[]
+
+  @@index([categoryId])
+  @@index([type])
+  @@index([status])
+  @@map("challenges")
+}
+
+model ChallengeParticipant {
+  id String @id @default(uuid()) @db.Uuid
+
+  challengeId String @db.Uuid
+
+  userId String @db.Uuid
+
+  status ParticipantStatus @default(JOINED)
+
+  joinedAt DateTime @default(now())
+
+  completedAt DateTime?
+
+  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([challengeId, userId])
+  @@index([userId])
+  @@index([status])
+  @@map("challenge_participants")
+}
+
+model ChallengeProgress {
+  id String @id @default(uuid()) @db.Uuid
+
+  challengeId String @db.Uuid
+
+  userId String @db.Uuid
+
+  currentValue Int @default(0)
+
+  targetValue Int
+
+  progressPercent Decimal @default(0) @db.Decimal(5, 2)
+
+  updatedAt DateTime @updatedAt
+
+  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([challengeId, userId])
+  @@index([userId])
+  @@map("challenge_progresses")
 }
 
 // Account
