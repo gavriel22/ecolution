@@ -1,0 +1,77 @@
+// ======================================================
+// ECOLUTION ERD
+// Sprint 1 - Core System
+// Database : PostgreSQL
+// ======================================================
+
+Enum UserRole {
+  USER
+  UMKM
+  ADMIN
+}
+
+Table User {
+  id uuid [pk]
+
+  name varchar(100)
+  email varchar(255) [unique]
+  passwordHash varchar(255)
+
+  role UserRole
+
+  avatarUrl varchar(255)
+
+  phone varchar(20)
+
+  province varchar(100)
+  city varchar(100)
+  district varchar(100)
+  postalCode varchar(10)
+  address text
+
+  totalPoint int [default: 0]
+  trustScore int [default: 100]
+
+  emailVerified boolean [default: false]
+
+  deletedAt timestamp
+
+  createdAt timestamp
+  updatedAt timestamp
+}
+
+Table Notification {
+  id uuid [pk]
+
+  userId uuid
+
+  title varchar(150)
+  message text
+
+  type varchar(50)
+
+  actionUrl varchar(255)
+
+  isRead boolean [default: false]
+
+  createdAt timestamp
+}
+
+Table AuditLog {
+  id uuid [pk]
+
+  adminId uuid
+
+  action varchar(100)
+
+  entity varchar(100)
+
+  entityId uuid
+
+  metadata json
+
+  createdAt timestamp
+}
+
+Ref: Notification.userId > User.id
+Ref: AuditLog.adminId > User.id
