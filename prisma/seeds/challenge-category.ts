@@ -21,7 +21,9 @@ export async function seedChallengeCategories(prisma: PrismaClient) {
       where: {
         name: category.name,
       },
-      update: {},
+      update: {
+        description: category.description,
+      },
       create: category,
     });
   }

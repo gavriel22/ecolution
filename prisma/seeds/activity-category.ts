@@ -39,7 +39,10 @@ export async function seedActivityCategories(prisma: PrismaClient) {
       where: {
         name: category.name,
       },
-      update: {},
+      update: {
+        description: category.description,
+        pointReward: category.pointReward,
+      },
       create: category,
     });
   }

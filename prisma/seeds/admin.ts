@@ -2,18 +2,19 @@ import bcrypt from "bcrypt";
 import { PrismaClient, UserRole } from "@prisma/client";
 
 export async function seedAdmin(prisma: PrismaClient) {
-  const existing = await prisma.user.findUnique({
+  const passwordHash = await bcrypt.hash("Admin123!", 10);
+
+  await prisma.user.upsert({
     where: {
       email: "admin@ecolution.id",
     },
-  });
-
-  if (existing) return;
-
-  const passwordHash = await bcrypt.hash("Admin123!", 10);
-
-  await prisma.user.create({
-    data: {
+    update: {
+      name: "Administrator",
+      username: "admin",
+      role: UserRole.ADMIN,
+      isActive: true,
+    },
+    create: {
       name: "Administrator",
       username: "admin",
       email: "admin@ecolution.id",

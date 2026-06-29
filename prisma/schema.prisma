@@ -247,7 +247,7 @@ model VoucherRedemption {
 
 model Merchant {
   id           String         @id @default(uuid()) @db.Uuid
-  ownerId      String         @db.Uuid
+  ownerId      String         @unique  @db.Uuid
   businessName String         @db.VarChar(150)
   description  String?
   logoUrl      String?        @db.VarChar(255)
@@ -285,6 +285,9 @@ model Product {
 
   @@index([merchantId])
   @@index([status])
+
+  @@unique([merchantId, name])
+
   @@index([price])
   @@map("products")
 }
@@ -451,6 +454,7 @@ enum MerchantStatus {
   PENDING
   VERIFIED
   SUSPENDED
+  APPROVED
 }
 
 enum ProductStatus {
