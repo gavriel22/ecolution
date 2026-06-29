@@ -63,23 +63,36 @@ enum ParticipantStatus {
   FAILED
 }
 
-enum RewardType {
-  VOUCHER
-  MERCHANDISE
-  DONATION
-  CASHBACK
-}
-
-enum RewardStatus {
+enum VoucherStatus {
   AVAILABLE
   OUT_OF_STOCK
-  INACTIVE
+  EXPIRED
 }
 
 enum RedemptionStatus {
   PENDING
   APPROVED
   REJECTED
+  COMPLETED
+  CANCELLED
+}
+
+enum MerchantStatus {
+  PENDING
+  VERIFIED
+  SUSPENDED
+}
+
+enum ProductStatus {
+  AVAILABLE
+  OUT_OF_STOCK
+  INACTIVE
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  PROCESSING
   COMPLETED
   CANCELLED
 }
@@ -109,12 +122,15 @@ model User {
 
   accounts              Account[]
   sessions              Session[]
+  refreshTokens         RefreshToken[]
   activities            Activity[]
   pointHistories        PointHistory[]
   verifications         ActivityVerification[]
   challengeParticipants ChallengeParticipant[]
   challengeProgresses   ChallengeProgress[]
-  rewardRedemptions     RewardRedemption[]
+  voucherRedemptions    VoucherRedemption[]
+  merchants             Merchant[]
+  orders                Order[]
 
   @@index([username])
   @@index([name])
@@ -144,6 +160,7 @@ model Activity {
 
   title       String  @db.VarChar(150)
   description String? @db.Text
+  location    String? @db.VarChar(255)
 
   activityDate DateTime
 
@@ -257,6 +274,8 @@ model Challenge {
 
   description String? @db.Text
 
+  imageUrl String? @db.VarChar(255)
+
   type ChallengeType
 
   target Int
@@ -338,7 +357,7 @@ model ChallengeProgress {
   @@map("challenge_progresses")
 }
 
-model RewardCategory {
+model VoucherCategory {
   id String @id @default(uuid()) @db.Uuid
 
   name        String  @db.VarChar(100)
@@ -347,22 +366,22 @@ model RewardCategory {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  rewards Reward[]
+  vouchers Voucher[]
 
   @@index([name])
-  @@map("reward_categories")
+  @@map("voucher_categories")
 }
 
-model Reward {
+model Voucher {
   id String @id @default(uuid()) @db.Uuid
+
+  merchantId String @db.Uuid
 
   categoryId String @db.Uuid
 
-  name String @db.VarChar(150)
+  title String @db.VarChar(150)
 
   description String? @db.Text
-
-  type RewardType
 
   pointCost Int
 
@@ -370,47 +389,183 @@ model Reward {
 
   imageUrl String? @db.VarChar(255)
 
-  status RewardStatus @default(AVAILABLE)
+  expiredAt DateTime?
+
+  status VoucherStatus @default(AVAILABLE)
 
   createdAt DateTime @default(now())
 
   updatedAt DateTime @updatedAt
 
-  category RewardCategory @relation(fields: [categoryId], references: [id])
+  merchant Merchant @relation(fields: [merchantId], references: [id])
 
-  redemptions RewardRedemption[]
+  category VoucherCategory @relation(fields: [categoryId], references: [id])
 
+  redemptions VoucherRedemption[]
+
+  @@index([merchantId])
   @@index([categoryId])
-  @@index([type])
   @@index([status])
-  @@map("rewards")
+  @@index([expiredAt])
+  @@map("vouchers")
 }
 
-model RewardRedemption {
+model VoucherRedemption {
   id String @id @default(uuid()) @db.Uuid
 
-  rewardId String @db.Uuid
+  voucherId String @db.Uuid
 
   userId String @db.Uuid
 
-  pointUsed Int
+  voucherCode String @unique @db.VarChar(100)
 
   status RedemptionStatus @default(PENDING)
-
-  redemptionCode String? @unique @db.VarChar(50)
 
   redeemedAt DateTime @default(now())
 
   completedAt DateTime?
 
-  reward Reward @relation(fields: [rewardId], references: [id], onDelete: Cascade)
+  voucher Voucher @relation(fields: [voucherId], references: [id], onDelete: Cascade)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([voucherId, userId])
   @@index([userId])
-  @@index([rewardId])
+  @@index([voucherId])
   @@index([status])
-  @@map("reward_redemptions")
+  @@map("voucher_redemptions")
+}
+
+model Merchant {
+  id String @id @default(uuid()) @db.Uuid
+
+  ownerId String @db.Uuid
+
+  businessName String @db.VarChar(150)
+
+  description String? @db.Text
+
+  logoUrl String? @db.VarChar(255)
+
+  address String? @db.Text
+
+  phone String? @db.VarChar(20)
+
+  email String? @db.VarChar(255)
+
+  website String? @db.VarChar(255)
+
+  status MerchantStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  products Product[]
+
+  vouchers Voucher[]
+
+  @@index([ownerId])
+  @@index([status])
+  @@index([businessName])
+  @@map("merchants")
+}
+
+model Product {
+  id String @id @default(uuid()) @db.Uuid
+
+  merchantId String @db.Uuid
+
+  name String @db.VarChar(150)
+
+  description String? @db.Text
+
+  imageThumbnail String? @db.VarChar(255)
+
+  price Decimal @db.Decimal(12, 2)
+
+  stock Int
+
+  status ProductStatus @default(AVAILABLE)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  merchant Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+
+  images ProductImage[]
+
+  orderItems OrderItem[]
+
+  @@index([merchantId])
+  @@index([status])
+  @@index([price])
+  @@map("products")
+}
+
+model ProductImage {
+  id String @id @default(uuid()) @db.Uuid
+
+  productId String @db.Uuid
+
+  imageUrl String @db.VarChar(255)
+
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@map("product_images")
+}
+
+model Order {
+  id String @id @default(uuid()) @db.Uuid
+
+  orderNumber String @unique @db.VarChar(30)
+
+  userId String @db.Uuid
+
+  totalPrice Decimal @db.Decimal(12, 2)
+
+  status OrderStatus @default(PENDING)
+
+  note String? @db.Text
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  items OrderItem[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id String @id @default(uuid()) @db.Uuid
+
+  orderId String @db.Uuid
+
+  productId String @db.Uuid
+
+  quantity Int
+
+  price Decimal @db.Decimal(12, 2)
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  product Product @relation(fields: [productId], references: [id])
+
+  @@unique([orderId, productId])
+  @@index([productId])
+  @@map("order_items")
 }
 
 // Account
@@ -446,6 +601,35 @@ model Session {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("sessions")
+}
+
+model RefreshToken {
+  id String @id @default(uuid()) @db.Uuid
+
+  userId String @db.Uuid
+
+  token String @unique @db.VarChar(512)
+
+  deviceName String? @db.VarChar(100)
+
+  ipAddress String? @db.VarChar(45)
+
+  userAgent String? @db.Text
+
+  isRevoked Boolean @default(false)
+
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@index([isRevoked])
+  @@map("refresh_tokens")
 }
 
 // Verification Token
