@@ -1,0 +1,174 @@
+import bcrypt from "bcrypt";
+import { userRepository } from "@/repositories/user.repository";
+import { UserRole } from "@prisma/client";
+import {
+  ConflictError,
+  UnauthorizedError,
+  NotFoundError,
+  ValidationError,
+} from "@/utils/errors";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyRefreshToken,
+  JWTPayload,
+} from "@/lib/jwt";
+
+export interface SafeUser {
+  id: string;
+  name: string;
+  username: string;
+  email: string;
+  role: UserRole;
+  trustScore: number;
+  totalPoint: number;
+  createdAt: Date;
+}
+
+export class AuthService {
+  private toSafeUser(user: any): SafeUser {
+    return {
+      id: user.id,
+      name: user.name,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      trustScore: user.trustScore,
+      totalPoint: user.totalPoint,
+      createdAt: user.createdAt,
+    };
+  }
+
+  async register(data: {
+    name: string;
+    username: string;
+    email: string;
+    password: string;
+    role?: UserRole;
+  }): Promise<SafeUser> {
+    if (!data.name || !data.username || !data.email || !data.password) {
+      throw new ValidationError("Missing required registration fields");
+    }
+
+    const existingEmail = await userRepository.findByEmail(data.email);
+    if (existingEmail) {
+      throw new ConflictError("Email is already registered");
+    }
+
+    const existingUsername = await userRepository.findByUsername(data.username);
+    if (existingUsername) {
+      throw new ConflictError("Username is already taken");
+    }
+
+    const passwordHash = await bcrypt.hash(data.password, 10);
+
+    const user = await userRepository.create({
+      name: data.name,
+      username: data.username,
+      email: data.email,
+      passwordHash,
+      role: data.role,
+    });
+
+    return this.toSafeUser(user);
+  }
+
+  async login(
+    credentials: { email: string; password?: string },
+    context: { deviceName?: string; ipAddress?: string; userAgent?: string }
+  ): Promise<{ user: SafeUser; accessToken: string; refreshToken: string }> {
+    if (!credentials.email || !credentials.password) {
+      throw new ValidationError("Email and password are required");
+    }
+
+    const user = await userRepository.findByEmail(credentials.email);
+    if (!user || !user.passwordHash || !user.isActive) {
+      throw new UnauthorizedError("Invalid email or password");
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      credentials.password,
+      user.passwordHash
+    );
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedError("Invalid email or password");
+    }
+
+    const payload: JWTPayload = {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      username: user.username,
+    };
+
+    const accessToken = await generateAccessToken(payload);
+    const refreshToken = await generateRefreshToken(payload);
+
+    // Refresh Token expires in 30 days
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 30);
+
+    await userRepository.saveRefreshToken({
+      userId: user.id,
+      token: refreshToken,
+      expiresAt,
+      deviceName: context.deviceName,
+      ipAddress: context.ipAddress,
+      userAgent: context.userAgent,
+    });
+
+    return {
+      user: this.toSafeUser(user),
+      accessToken,
+      refreshToken,
+    };
+  }
+
+  async refresh(token: string): Promise<{ accessToken: string }> {
+    if (!token) {
+      throw new ValidationError("Refresh token is required");
+    }
+
+    const dbToken = await userRepository.findRefreshToken(token);
+    if (!dbToken || dbToken.isRevoked || new Date() > dbToken.expiresAt) {
+      throw new UnauthorizedError("Invalid or expired refresh token");
+    }
+
+    const payload = await verifyRefreshToken(token);
+    if (!payload) {
+      throw new UnauthorizedError("Invalid or expired refresh token");
+    }
+
+    const user = await userRepository.findById(payload.id);
+    if (!user || !user.isActive) {
+      throw new UnauthorizedError("User is no longer active");
+    }
+
+    const newAccessToken = await generateAccessToken({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      username: user.username,
+    });
+
+    return { accessToken: newAccessToken };
+  }
+
+  async logout(token: string): Promise<void> {
+    if (!token) {
+      throw new ValidationError("Refresh token is required to logout");
+    }
+    await userRepository.deleteRefreshToken(token);
+  }
+
+  async me(userId: string): Promise<SafeUser> {
+    const user = await userRepository.findById(userId);
+    if (!user || !user.isActive) {
+      throw new NotFoundError("User not found or inactive");
+    }
+    return this.toSafeUser(user);
+  }
+}
+
+export const authService = new AuthService();
