@@ -19,7 +19,7 @@ export class ValidationError extends AppError {
 
 export class UnauthorizedError extends AppError {
   constructor(message: string = "Unauthorized") {
-    super(419, message, "UNAUTHORIZED");
+    super(401, message, "UNAUTHORIZED");
   }
 }
 

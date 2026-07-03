@@ -37,7 +37,7 @@ export async function middleware(req: NextRequest) {
     if (path.startsWith("/api/")) {
       return NextResponse.json(
         { success: false, error: { code: "UNAUTHORIZED", message: "Token missing or invalid" } },
-        { status: 419 }
+        { status: 401 }
       );
     }
     return NextResponse.redirect(new URL("/login", req.url));
