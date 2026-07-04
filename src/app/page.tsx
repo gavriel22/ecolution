@@ -1,8 +1,10 @@
-<<<<<<< HEAD
 import { Navbar } from "@/features/landing/components/Navbar";
 import { Hero } from "@/features/landing/components/Hero";
+import { Features } from "@/features/landing/components/Features";
 import { MarketplacePreview } from "@/features/landing/components/MarketplacePreview";
+import { WhyRecycling } from "@/features/landing/components/WhyRecycling";
 import { MissionCommunity } from "@/features/landing/components/MissionCommunity";
+import { CTA } from "@/features/landing/components/CTA";
 import { Footer } from "@/features/landing/components/Footer";
 
 export default function Home() {
@@ -11,16 +13,13 @@ export default function Home() {
       <Navbar />
       <main>
         <Hero />
+        <Features />
         <MarketplacePreview />
+        <WhyRecycling />
         <MissionCommunity />
+        <CTA />
       </main>
       <Footer />
     </div>
   );
-=======
-import { redirect } from "next/navigation";
-
-export default function Home() {
-  redirect("/activity");
->>>>>>> 61b3f5a5b82009e1ec9ccaddd8cbe8af1049357e
 }

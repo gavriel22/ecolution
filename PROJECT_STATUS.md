@@ -218,80 +218,42 @@ Fitur-fitur yang sudah diimplementasikan di sisi backend API:
 
 ## Yang Sedang Dikerjakan
 
-- Semuanya telah selesai! Seluruh halaman frontend dan backend API telah berhasil diimplementasikan, diuji, dan diintegrasikan secara penuh.
+- Pemeliharaan rutin, monitoring performa query database, dan persiapan deployment.
 
-## Yang Belum Dibuat
+## Progress Integrasi Frontend
 
-- Tidak ada. Semua modul backend dan frontend telah 100% selesai diimplementasikan.
+Berikut adalah pemetaan menyeluruh terhadap modul frontend yang sudah selesai diintegrasikan dan beberapa area yang kurang/memerlukan peningkatan:
+
+### 1. Modul Frontend Yang Sudah Selesai (100% Ready)
+- **Landing Page (`/`)**: Berhasil memindahkan dan mengintegrasikan 8 section visual dari Versi B (Navbar, Hero, Features, Marketplace Preview, Why Recycling, Mission & Community, CTA, Footer). Navigasi tombol dan link sudah dihubungkan menggunakan routing Next.js (`/login`, `/register`, `/marketplace`, dll).
+- **Halaman Tentang Kami (`/about`)**: Halaman statis yang memuat visi, misi, dan latar belakang platform Ecolution.
+- **Autentikasi Pengguna**:
+  - Halaman Login (`/login`) & Register (`/register`) menggunakan form interaktif utama dengan integrasi state global `AuthContext` (React Query) dan auto-refresh token.
+  - Halaman Profil Pengguna (`/profile`) menampilkan ringkasan data diri.
+- **Role-Based Layout & Navigation**: Sidebar navigasi terproteksi di [app-layout.tsx](file:///C:/Users/ASUS/Documents/ecolution/src/components/layout/app-layout.tsx) secara dinamis membatasi hak akses menu berdasarkan role (`USER`, `UMKM`, `ADMIN`).
+- **Dashboard Multi-Role (`/dashboard`)**:
+  - **User**: Menampilkan statistik kontribusi (Total Poin, Trust Score, status aksi APPROVED/PENDING/REJECTED) dan list aktivitas hijau terbaru.
+  - **UMKM/Merchant**: Menampilkan total produk, total pesanan lunas, total omzet, daftar pesanan terbaru pembeli, dan list katalog produk.
+  - **Admin**: Menampilkan statistik pengguna aktif, merchant aktif, total sirkulasi poin, total verifikasi, dan tabel leaderboard peringkat pengguna teraktif.
+- **Pelaporan Aktivitas (`/activity`, `/activity/new`, `/activity/[id]`)**: Halaman list pelaporan pengguna lengkap dengan filter status, detail ekstraksi metadata EXIF foto, analisis verifikasi AI, serta form pelaporan aksi hijau.
+- **Marketplace & Checkout (`/marketplace`, `/marketplace/[id]`, `/cart`, `/checkout`, `/orders`)**: Halaman katalog belanja produk UMKM, keranjang belanja lokal, form alamat pengiriman checkout transaksi, dan tracker riwayat transaksi pemesanan produk.
+- **Rewards Voucher (`/rewards`, `/reward/history`)**: Halaman katalog penukaran poin dengan voucher mitra UMKM dan riwayat voucher yang telah diklaim.
+- **Tantangan Lingkungan (`/challenge`, `/challenge/[id]`, `/challenge/my`)**: Halaman jelajah tantangan aktif, detail petunjuk tantangan, dan monitoring progres penyelesaian tantangan.
+- **Kelola Produk UMKM (`/merchant/products`)**: Panel manajemen katalog produk bagi mitra UMKM yang sedang login (tambah/edit modal dialog, URL gambar preview, stok, status produk).
+- **Operasional Admin (`/admin/*`)**:
+  - **Verifikasi Aktivitas (`/admin/activity`)**: Panel verifikasi aksi hijau (Approve/Reject) disertai dialog input alasan penolakan dan status analisis AI.
+  - **Kelola Challenge (`/admin/challenge`)**: Panel CRUD tantangan lingkungan.
+  - **Kelola Kategori (`/admin/category`)**: Panel CRUD master data kategori pelaporan aksi hijau.
+
+### 2. Modul Frontend Yang Kurang / Perlu Peningkatan (Lacking)
+- **Integrasi Data Dinamis pada Landing Page**: Saat ini produk di section *Bestsellers* (`MarketplacePreview`) dan beberapa data statistik lainnya masih menggunakan data dummy hardcoded. Perlu dihubungkan ke API Query `/api/product` untuk memuat produk terlaris secara dinamis.
+- **Form Pendaftaran UMKM Mitra Baru**: Tombol "Become a Merchant" pada CTA landing page saat ini mengarah ke `/merchant/products` atau halaman login. Perlu dibuat form pendaftaran terdedikasi untuk pendaftaran profil bisnis baru (`POST /api/merchant`).
+- **Peta Lokasi Visual Koordinat GPS**: Pada detail laporan aktivitas, koordinat latitude dan longitude ditampilkan dalam teks mentah. Dapat ditingkatkan dengan menambahkan integrasi map visual (misalnya Leaflet/Google Maps) untuk mempermudah admin memantau lokasi aksi secara visual.
+- **Integrasi Gerbang Pembayaran Mock**: Proses checkout langsung memotong stok produk secara instan. Integrasi sistem mock payment gateway (seperti simulasi Midtrans) dapat ditambahkan untuk melengkapi alur pembayaran online.
 
 ## Testing Status
 
-Rincian hasil pengujian manual API Backend menggunakan Postman:
+Rincian hasil kompilasi dan build produksi:
+- [x] TypeScript Type Check (`npx tsc --noEmit`) - Sukses, 0 Error.
+- [x] Next.js Production Build (`npx next build`) - Sukses, 43 Halaman Statis & 14 API Route Handler teroptimasi sempurna.
 
-- [x] Register (`POST /api/auth/register`)
-- [x] Login (`POST /api/auth/login`)
-- [x] Refresh Token (`POST /api/auth/refresh`)
-- [x] Logout (`POST /api/auth/logout`)
-- [x] Get Profile (`GET /api/auth/me`)
-- [x] List Activities (`GET /api/activity`)
-- [x] List Activity Categories (`GET /api/activity/categories`)
-- [x] Create Activity & Upload (`POST /api/activity`)
-- [x] Get Activity Detail (`GET /api/activity/{id}`)
-- [x] Update Activity (`PUT /api/activity/{id}`)
-- [x] Delete Activity (`DELETE /api/activity/{id}`)
-- [x] Add Photo (`POST /api/activity/{id}/photo`)
-- [x] Submit Activity (`POST /api/activity/{id}/submit`)
-- [x] Approve Activity (`POST /api/activity/{id}/approve`)
-- [x] Reject Activity (`POST /api/activity/{id}/reject`)
-- [x] Register Merchant (`POST /api/merchant`)
-- [x] Get Merchant List (`GET /api/merchant`)
-- [x] Get Merchant Detail (`GET /api/merchant/{id}`)
-- [x] Update Merchant Profile (`PUT /api/merchant/{id}`)
-- [x] Delete Merchant (`DELETE /api/merchant/{id}`)
-- [x] Approve Merchant (`POST /api/merchant/{id}/approve`)
-
-## Frontend Progress (Landing Page)
-
-Status: 🟢 Selesai (Recreated based on new UI Design)
-- [x] Setup Folder Structure (`src/features/landing`)
-- [x] Navbar Component (Updated to new design)
-- [x] Hero Section Component (Updated to new design)
-- [x] Marketplace Preview Section (Updated to Bestsellers slider)
-- [x] Mission & Community Section (New)
-- [x] Footer Component (Cleaned up, 404 links removed)
-- [x] Dummy Pages Created (`/about`, `/marketplace`, `/login`, `/dashboard`)
-
-## Next Sprint Recommendation
-
-Berikut adalah usulan prioritas pengerjaan modul berikutnya berdasarkan ketergantungan antar modul dalam codebase saat ini:
-
-### Sprint 1: Frontend Auth & Activity & Merchant Integration
-*Fokus pada penyelesaian visual agar API yang sudah selesai dapat langsung dicoba secara visual oleh pengguna.*
-- Membuat UI Register & Login di `src/features/auth`.
-- Membuat UI Dashboard Aktivitas Lingkungan, form upload, dan detail aktivitas di `src/features/activity`.
-- Membuat UI Profil Merchant & Dashboard Merchant di `src/features/merchant`.
-- Integrasi middleware autentikasi Next.js untuk proteksi rute halaman client.
-
-### Sprint 2: Merchant Module & Profiling UMKM (Selesai - Backend)
-*Pemberian verifikasi merchant oleh admin serta manajemen profil merchant sudah selesai diimplementasikan.*
-
-### Sprint 3: Marketplace & Products Module
-*UMKM yang tervalidasi dapat menjual produk.*
-- Membuat repository dan service untuk `Product` & `Order`.
-- Membuat API route CRUD produk dan upload gambar produk merchant.
-- Membuat API route checkout transaksi produk (Order & OrderItems).
-
-### Sprint 4: Reward & Vouchers Module
-*Menghubungkan poin yang didapatkan dari aktivitas dengan voucher merchant.*
-- Membuat repository dan service untuk `Voucher` & `VoucherRedemption`.
-- Membuat API route manajemen voucher merchant.
-- Membuat API route penukaran poin menjadi voucher belanja (`POST /api/rewards/redeem`).
-
-### Sprint 5: Challenge Module
-*Menambah gamifikasi sistem agar pengguna mendapatkan bonus poin.*
-- Membuat repository dan service untuk `Challenge` & `ChallengeParticipant`.
-- Membuat API route partisipasi tantangan dan kalkulasi progres aktivitas user secara otomatis ketika status aktivitas berubah menjadi `APPROVED`.
-
-### Sprint 6: Analytics & Dashboard Module
-*Pelaporan data keseluruhan untuk admin dan merchant.*
-- Membuat API route untuk agregasi dashboard (jumlah poin, aksi disetujui, penjualan merchant, statistik kepercayaan pengguna).

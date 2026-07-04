@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export function MissionCommunity() {
   return (
     <section className="bg-white">
@@ -48,9 +50,9 @@ export function MissionCommunity() {
             participate in joint projects aimed at preserving the<br className="hidden md:block"/>
             environment
           </p>
-          <button className="mt-8 px-10 py-3 bg-[#fbbc04] hover:bg-[#e3aa04] text-gray-900 rounded-full font-medium transition-colors shadow-lg">
+          <Link href="/login" className="mt-8 px-10 py-3 bg-[#fbbc04] hover:bg-[#e3aa04] text-gray-900 rounded-full font-medium transition-colors shadow-lg inline-block">
             Sign In
-          </button>
+          </Link>
         </div>
       </div>
     </section>

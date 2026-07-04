@@ -29,20 +29,30 @@ export function Footer() {
           <div>
             <h4 className="font-bold text-[#2c3d25] mb-6 text-lg">Platform</h4>
             <ul className="space-y-4 text-gray-600">
-              <li><Link href="/" className="hover:text-[#fbbc04] transition-colors">Home</Link></li>
-              <li><Link href="/about" className="hover:text-[#fbbc04] transition-colors">About Us</Link></li>
+              <li><Link href="/" className="hover:text-[#fbbc04] transition-colors">Beranda</Link></li>
+              <li><Link href="/about" className="hover:text-[#fbbc04] transition-colors">Tentang Kami</Link></li>
               <li><Link href="/marketplace" className="hover:text-[#fbbc04] transition-colors">Marketplace</Link></li>
-              <li><Link href="/login" className="hover:text-[#fbbc04] transition-colors">Login</Link></li>
+              <li><Link href="/challenge" className="hover:text-[#fbbc04] transition-colors">Challenge</Link></li>
+            </ul>
+          </div>
+
+          {/* Account */}
+          <div>
+            <h4 className="font-bold text-[#2c3d25] mb-6 text-lg">Akun</h4>
+            <ul className="space-y-4 text-gray-600">
+              <li><Link href="/login" className="hover:text-[#fbbc04] transition-colors">Masuk</Link></li>
+              <li><Link href="/register" className="hover:text-[#fbbc04] transition-colors">Daftar</Link></li>
+              <li><Link href="/dashboard" className="hover:text-[#fbbc04] transition-colors">Dashboard</Link></li>
             </ul>
           </div>
 
           {/* Newsletter */}
-          <div className="lg:col-span-2">
+          <div>
             <h4 className="font-bold text-[#2c3d25] mb-6 text-lg">Stay Updated</h4>
             <p className="text-gray-600 mb-4">
               Get the latest updates on eco-challenges and new rewards.
             </p>
-            <form className="flex gap-2 max-w-md">
+            <form className="flex gap-2">
               <input 
                 type="email" 
                 placeholder="Enter your email" 
