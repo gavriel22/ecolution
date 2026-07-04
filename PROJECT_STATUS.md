@@ -133,9 +133,13 @@ Endpoint:
 ===================
 
 ### Challenge
-Status: 🔴 Belum Dibuat
+Status: ✅ Selesai
 Endpoint:
-- Belum ada API route handler yang diimplementasikan.
+- `GET /api/challenge` - Mendapatkan daftar tantangan aktif.
+- `GET /api/challenge/{id}` - Mendapatkan rincian tantangan beserta data progres user terkait.
+- `POST /api/challenge/join` - Bergabung ke tantangan baru (membuat record partisipasi & progres).
+- `GET /api/challenge/my` - Mendapatkan daftar tantangan yang sedang diikuti oleh pengguna.
+- `POST /api/challenge/{id}/leave` - Keluar/membatalkan partisipasi dalam tantangan (dilarang jika sudah selesai).
 
 ===================
 
@@ -155,9 +159,11 @@ Testing:
 ===================
 
 ### Dashboard
-Status: 🔴 Belum Dibuat
+Status: ✅ Selesai
 Endpoint:
-- Belum ada API route handler yang diimplementasikan.
+- `GET /api/dashboard/admin` - Agregasi analitik untuk admin (total users, total merchants, status log aktivitas, sirkulasi poin, top users).
+- `GET /api/dashboard/user` - Agregasi analitik pengguna (total poin, trust score, status aktivitas, riwayat poin terbaru, tantangan aktif).
+- `GET /api/dashboard/merchant` - Agregasi analitik performa penjualan merchant (total revenue, total items sold, list produk terlaris).
 
 ## Yang Sudah Berhasil
 
@@ -189,6 +195,8 @@ Fitur-fitur yang sudah diimplementasikan di sisi backend API:
 - [x] Integrasi Halaman Dashboard dengan Modul Activity: visualisasi ringkasan kontribusi (Total Poin, Trust Score, status aktivitas PENDING/APPROVED/REJECTED) dan list aktivitas terbaru menggunakan hooks React Query.
 - [x] Modul Marketplace (Backend): Manajemen produk UMKM (CRUD produk, list produk, detail produk) dan checkout transaksi order secara transaksional aman dengan verifikasi stok menggunakan Prisma transactions.
 - [x] Modul Reward (Backend): Manajemen voucher belanja (CRUD voucher, list voucher) dan penukaran poin user menjadi kode voucher digital secara transaksional (Prisma transactions) dengan validasi poin balance.
+- [x] Modul Challenge (Backend): Fitur gamifikasi bagi pengguna, termasuk join/leave tantangan, pelacakan progres secara transaksional, dan auto-progress/auto-completion saat status pelaporan aktivitas disetujui (APPROVED).
+- [x] Modul Dashboard Analytics (Backend): Penyediaan data agregasi yang dioptimalkan secara terpisah untuk peran Admin, User biasa, dan UMKM/Merchant menggunakan operator agregasi/groupby Prisma.
 - [x] Halaman-halaman frontend berikut telah aktif dan diimplementasikan secara visual menggunakan Tailwind CSS dan font premium:
   - Halaman Login (`/login`)
   - Halaman Register (`/register`)
@@ -205,8 +213,6 @@ Fitur-fitur yang sudah diimplementasikan di sisi backend API:
 ## Yang Belum Dibuat
 
 Modul-modul berikut belum memiliki implementasi endpoint API (Route Handlers), Services, maupun Repositories:
-- **Modul Challenge**: List tantangan aktif, bergabung ke tantangan, tracking progres tantangan secara berkala saat aktivitas disetujui.
-- **Modul Dashboard**: Perhitungan analitik dashboard tingkat lanjut (poin beredar, total merchant, dll.) di tingkat API.
 - **Halaman UI/Frontend**: UI untuk modul Merchant, Marketplace, Reward, dan Challenge.
 
 ## Testing Status

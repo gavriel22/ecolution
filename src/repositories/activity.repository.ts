@@ -267,6 +267,75 @@ export class ActivityRepository {
         },
       });
 
+      // Update challenge progresses for the user
+      const activeParticipants = await tx.challengeParticipant.findMany({
+        where: {
+          userId: activity.userId,
+          status: "JOINED",
+          challenge: {
+            status: "ACTIVE",
+            startDate: { lte: new Date() },
+            endDate: { gte: new Date() },
+          },
+        },
+        include: {
+          challenge: true,
+        },
+      });
+
+      for (const participant of activeParticipants) {
+        const progress = await tx.challengeProgress.findUnique({
+          where: {
+            challengeId_userId: {
+              challengeId: participant.challengeId,
+              userId: activity.userId,
+            },
+          },
+        });
+
+        if (progress) {
+          const nextValue = Math.min(progress.targetValue, progress.currentValue + 1);
+          const nextPercent = Number(((nextValue / progress.targetValue) * 100).toFixed(2));
+          const isCompleted = nextValue >= progress.targetValue;
+
+          await tx.challengeProgress.update({
+            where: { id: progress.id },
+            data: {
+              currentValue: nextValue,
+              progressPercent: nextPercent,
+            },
+          });
+
+          if (isCompleted) {
+            await tx.challengeParticipant.update({
+              where: { id: participant.id },
+              data: {
+                status: "COMPLETED",
+                completedAt: new Date(),
+              },
+            });
+
+            await tx.user.update({
+              where: { id: activity.userId },
+              data: {
+                totalPoint: {
+                  increment: participant.challenge.pointReward,
+                },
+              },
+            });
+
+            await tx.pointHistory.create({
+              data: {
+                userId: activity.userId,
+                point: participant.challenge.pointReward,
+                type: "BONUS",
+                description: `Reward menyelesaikan tantangan: ${participant.challenge.title}`,
+              },
+            });
+          }
+        }
+      }
+
       return activity;
     });
   }
