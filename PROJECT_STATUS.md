@@ -106,16 +106,29 @@ Testing:
 ===================
 
 ### Marketplace
-Status: 🔴 Belum Dibuat
+Status: ✅ Selesai
 Endpoint:
-- Belum ada API route handler yang diimplementasikan.
+- `GET /api/product` - Mendapatkan daftar produk dengan filter pencarian, harga, merchant, status, sorting, dan paginasi.
+- `POST /api/product` - Menambahkan produk baru (khusus UMKM/Mitra yang disetujui).
+- `GET /api/product/{id}` - Mendapatkan detail lengkap suatu produk beserta relasi gambar.
+- `PUT /api/product/{id}` - Memperbarui detail produk (khusus pemilik/owner).
+- `DELETE /api/product/{id}` - Menghapus produk (khusus pemilik/owner).
+- `POST /api/order` - Membuat transaksi pembelian produk (checkout) secara transaksional dengan pengurangan stok otomatis.
+- `GET /api/order` - Mendapatkan daftar riwayat transaksi pembelian milik user.
+- `GET /api/order/{id}` - Mendapatkan detail transaksi pembelian tertentu beserta rincian produk.
 
 ===================
 
 ### Reward
-Status: 🔴 Belum Dibuat
+Status: ✅ Selesai
 Endpoint:
-- Belum ada API route handler yang diimplementasikan.
+- `GET /api/voucher` - Mendapatkan daftar semua voucher belanja yang tersedia dengan filter.
+- `POST /api/voucher` - Membuat voucher belanja baru (khusus UMKM/Mitra yang disetujui).
+- `GET /api/voucher/{id}` - Mendapatkan detail lengkap voucher belanja.
+- `PUT /api/voucher/{id}` - Memperbarui detail voucher belanja (khusus pemilik/owner).
+- `DELETE /api/voucher/{id}` - Menghapus voucher belanja (khusus pemilik/owner).
+- `POST /api/reward/redeem` - Menukar poin user dengan kode voucher digital secara transaksional (Prisma transaction) dengan pengurangan poin user, stock voucher, dan pencatatan riwayat poin.
+- `GET /api/reward/history` - Mendapatkan daftar riwayat penukaran voucher milik user.
 
 ===================
 
@@ -174,6 +187,8 @@ Fitur-fitur yang sudah diimplementasikan di sisi backend API:
 - [x] Persetujuan Merchant oleh Admin (`POST /api/merchant/{id}/approve`) serta otomatis meng-upgrade role user terkait ke UMKM.
 - [x] Integrasi Frontend untuk Auth & Activity: registrasi, login, logout, pengenalan sesi otomatis (silent refresh), daftar aktivitas dengan filter status dan paginasi, pelaporan aktivitas baru, serta detail status aktivitas.
 - [x] Integrasi Halaman Dashboard dengan Modul Activity: visualisasi ringkasan kontribusi (Total Poin, Trust Score, status aktivitas PENDING/APPROVED/REJECTED) dan list aktivitas terbaru menggunakan hooks React Query.
+- [x] Modul Marketplace (Backend): Manajemen produk UMKM (CRUD produk, list produk, detail produk) dan checkout transaksi order secara transaksional aman dengan verifikasi stok menggunakan Prisma transactions.
+- [x] Modul Reward (Backend): Manajemen voucher belanja (CRUD voucher, list voucher) dan penukaran poin user menjadi kode voucher digital secara transaksional (Prisma transactions) dengan validasi poin balance.
 - [x] Halaman-halaman frontend berikut telah aktif dan diimplementasikan secara visual menggunakan Tailwind CSS dan font premium:
   - Halaman Login (`/login`)
   - Halaman Register (`/register`)
@@ -190,8 +205,6 @@ Fitur-fitur yang sudah diimplementasikan di sisi backend API:
 ## Yang Belum Dibuat
 
 Modul-modul berikut belum memiliki implementasi endpoint API (Route Handlers), Services, maupun Repositories:
-- **Modul Marketplace**: Manajemen produk UMKM (CRUD produk, list produk, detail produk) dan transaksi pembelian produk (order & order items).
-- **Modul Reward**: Manajemen voucher belanja dari merchant (CRUD voucher) dan penukaran poin user untuk mendapatkan kode voucher belanja.
 - **Modul Challenge**: List tantangan aktif, bergabung ke tantangan, tracking progres tantangan secara berkala saat aktivitas disetujui.
 - **Modul Dashboard**: Perhitungan analitik dashboard tingkat lanjut (poin beredar, total merchant, dll.) di tingkat API.
 - **Halaman UI/Frontend**: UI untuk modul Merchant, Marketplace, Reward, dan Challenge.

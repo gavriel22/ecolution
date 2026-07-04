@@ -268,12 +268,14 @@ Berikut adalah rangkuman kesiapan project Ecolution saat ini:
   - **Manajemen Aktivitas Lingkungan**: Pembuatan dengan EXIF GPS extractor, detail aktivitas, list aktivitas dengan pagination & filter status, serta integrasi frontend lengkap dengan halaman `/activity`, `/activity/new`, `/activity/[id]`.
   - **Verifikasi Aktivitas & Reward**: AI Mock verification, approval & rejection manual oleh Admin, alokasi poin reward, dan visualisasi dashboard ringkasan statistik (Poin, Trust Score, status aktivitas) serta list aktivitas terbaru di halaman `/dashboard`.
   - **Manajemen Merchant (Backend)**: Register, detail, list dengan filter, update/delete merchant, serta admin approval untuk upgrade role owner.
+  - **Marketplace Produk (Backend)**: CRUD produk, detail produk, list produk dengan filter, serta checkout order secara transaksional dengan auto-reduction stock (Prisma transactions).
+  - **Reward Voucher (Backend)**: CRUD voucher, detail voucher, list voucher dengan filter, penukaran poin user menjadi kode voucher digital secara transaksional dengan safe decrement stock dan point history logging (Prisma transactions).
   - **Skema Database Prisma & Seeder**: Lengkap dengan data awal.
 - **Fitur yang Sedang Dikerjakan**:
   - Integrasi UI Frontend untuk modul Merchant/UMKM (dashboard mitra, pendaftaran merchant).
 - **Fitur yang Belum Ada**:
-  - Backend API & UI Frontend untuk modul Marketplace Produk.
-  - Backend API & UI Frontend untuk modul Rewards & Penukaran Voucher.
+  - UI Frontend untuk modul Marketplace Produk.
+  - UI Frontend untuk modul Rewards & Penukaran Voucher.
   - Backend API & UI Frontend untuk modul Tantangan (Challenge).
   - Visual dashboard analitik tingkat lanjut.
 
