@@ -1,13 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/auth-context";
 import { useRedemptionHistory } from "@/features/reward/hooks/use-rewards";
 
 export default function RewardHistoryPage() {
+  const router = useRouter();
+  const { user, isLoading: authLoading } = useAuth();
   const [page, setPage] = useState(1);
   const { data, isLoading, isError } = useRedemptionHistory({ page, limit: 10 });
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push("/login");
+    }
+  }, [user, authLoading, router]);
+
+  if (authLoading || !user) {
+    return (
+      <div className="flex h-[400px] items-center justify-center font-body text-sm text-ink-400">
+        Memproses otorisasi...
+      </div>
+    );
+  }
 
   const redemptions = data?.redemptions || [];
   const meta = data?.meta;

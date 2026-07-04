@@ -216,6 +216,34 @@ Fitur-fitur yang sudah diimplementasikan di sisi backend API:
   - Halaman Kelola Kategori (`/admin/category`) untuk CRUD kategori master aktivitas oleh Admin
   - Pembagian visual dashboard dan akses navigasi secara dinamis berdasarkan role (USER, UMKM, ADMIN)
 
+## 🚧 Frontend Update (Landing Page Integration & Routing Fix)
+
+### ✅ Completed
+
+- Fixed routing pada landing page agar tidak redirect ke dashboard
+- Memastikan seluruh konten publik (marketplace, challenge, dll) tetap di landing page
+- Mengubah konsep landing page menjadi seperti e-commerce (Shopee-style)
+- Memisahkan fungsi dashboard sebagai halaman khusus CRUD & management
+- Menyesuaikan navbar landing page:
+  - Marketplace → landing page (bukan dashboard)
+  - Challenge → landing page
+- Membersihkan hasil merge conflict
+- Menghapus redirect yang tidak sesuai
+- Merapikan struktur UI tanpa mengubah arsitektur
+
+### 🔄 In Progress
+
+- Penyempurnaan UI/UX landing page
+- Integrasi data real dari backend ke landing page
+
+### 🧠 Notes
+
+- Dashboard difokuskan hanya untuk:
+  - User activity
+  - UMKM product management
+  - Admin management (challenge, approval, kategori)
+- Landing page menjadi pusat seluruh konten publik
+
 ## Yang Sedang Dikerjakan
 
 - Pemeliharaan rutin, monitoring performa query database, dan persiapan deployment.

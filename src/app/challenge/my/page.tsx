@@ -1,10 +1,29 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/auth-context";
 import { useMyChallenges } from "@/features/challenge/hooks/use-challenges";
 
 export default function MyChallengesPage() {
+  const router = useRouter();
+  const { user, isLoading: authLoading } = useAuth();
   const { data: myChallenges = [], isLoading, isError } = useMyChallenges();
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push("/login");
+    }
+  }, [user, authLoading, router]);
+
+  if (authLoading || !user) {
+    return (
+      <div className="flex h-[400px] items-center justify-center font-body text-sm text-ink-400">
+        Memproses otorisasi...
+      </div>
+    );
+  }
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("id-ID", {
