@@ -31,8 +31,8 @@ Struktur folder penting di dalam `src/` memiliki fungsi sebagai berikut:
 - `src/repositories`: Lapisan akses database (Data Access Layer) yang berinteraksi langsung dengan database PostgreSQL melalui client Prisma.
 - `src/lib`: Menyimpan instansiasi dan konfigurasi library pihak ketiga maupun instansi singleton (seperti Prisma Client, Logger, EXIF helper, JWT helper, dan in-memory Rate Limiter).
 - `src/utils`: Menyimpan fungsi utilitas umum global seperti penanganan custom HTTP errors (`errors.ts`), paginasi standar (`pagination.ts`), dan format respon API terstandarisasi (`response.ts`).
-- `src/components`: Folder komponen React yang reusable (saat ini terbagi menjadi folder terstruktur seperti `common`, `forms`, `layout`, dan `ui` tetapi belum memiliki file implementasi).
-- `src/features`: Struktur modular untuk memisahkan logika UI, hooks, dan halaman berdasarkan modul bisnis (seperti `auth`, `activity`, `challenge`, `marketplace`, `profile`, dan `reward` yang saat ini folder-foldernya masih kosong).
+- `src/components`: Folder komponen React yang reusable, termasuk komponen tata letak utama (`layout/app-layout.tsx`) untuk sidebar navigasi dan autentikasi.
+- `src/features`: Struktur modular untuk memisahkan logika UI, hooks, tipe, dan komponen berdasarkan modul bisnis. Modul `auth` (login, register, logout hooks) dan `activity` (hooks, form, list, detail, status-badge, summary) saat ini telah diimplementasikan penuh.
 
 ## Database
 
@@ -106,23 +106,40 @@ Testing:
 ===================
 
 ### Marketplace
-Status: 🔴 Belum Dibuat
+Status: ✅ Selesai
 Endpoint:
-- Belum ada API route handler yang diimplementasikan.
+- `GET /api/product` - Mendapatkan daftar produk dengan filter pencarian, harga, merchant, status, sorting, dan paginasi.
+- `POST /api/product` - Menambahkan produk baru (khusus UMKM/Mitra yang disetujui).
+- `GET /api/product/{id}` - Mendapatkan detail lengkap suatu produk beserta relasi gambar.
+- `PUT /api/product/{id}` - Memperbarui detail produk (khusus pemilik/owner).
+- `DELETE /api/product/{id}` - Menghapus produk (khusus pemilik/owner).
+- `POST /api/order` - Membuat transaksi pembelian produk (checkout) secara transaksional dengan pengurangan stok otomatis.
+- `GET /api/order` - Mendapatkan daftar riwayat transaksi pembelian milik user.
+- `GET /api/order/{id}` - Mendapatkan detail transaksi pembelian tertentu beserta rincian produk.
 
 ===================
 
 ### Reward
-Status: 🔴 Belum Dibuat
+Status: ✅ Selesai
 Endpoint:
-- Belum ada API route handler yang diimplementasikan.
+- `GET /api/voucher` - Mendapatkan daftar semua voucher belanja yang tersedia dengan filter.
+- `POST /api/voucher` - Membuat voucher belanja baru (khusus UMKM/Mitra yang disetujui).
+- `GET /api/voucher/{id}` - Mendapatkan detail lengkap voucher belanja.
+- `PUT /api/voucher/{id}` - Memperbarui detail voucher belanja (khusus pemilik/owner).
+- `DELETE /api/voucher/{id}` - Menghapus voucher belanja (khusus pemilik/owner).
+- `POST /api/reward/redeem` - Menukar poin user dengan kode voucher digital secara transaksional (Prisma transaction) dengan pengurangan poin user, stock voucher, dan pencatatan riwayat poin.
+- `GET /api/reward/history` - Mendapatkan daftar riwayat penukaran voucher milik user.
 
 ===================
 
 ### Challenge
-Status: 🔴 Belum Dibuat
+Status: ✅ Selesai
 Endpoint:
-- Belum ada API route handler yang diimplementasikan.
+- `GET /api/challenge` - Mendapatkan daftar tantangan aktif.
+- `GET /api/challenge/{id}` - Mendapatkan rincian tantangan beserta data progres user terkait.
+- `POST /api/challenge/join` - Bergabung ke tantangan baru (membuat record partisipasi & progres).
+- `GET /api/challenge/my` - Mendapatkan daftar tantangan yang sedang diikuti oleh pengguna.
+- `POST /api/challenge/{id}/leave` - Keluar/membatalkan partisipasi dalam tantangan (dilarang jika sudah selesai).
 
 ===================
 
@@ -142,9 +159,11 @@ Testing:
 ===================
 
 ### Dashboard
-Status: 🔴 Belum Dibuat
+Status: ✅ Selesai
 Endpoint:
-- Belum ada API route handler yang diimplementasikan.
+- `GET /api/dashboard/admin` - Agregasi analitik untuk admin (total users, total merchants, status log aktivitas, sirkulasi poin, top users).
+- `GET /api/dashboard/user` - Agregasi analitik pengguna (total poin, trust score, status aktivitas, riwayat poin terbaru, tantangan aktif).
+- `GET /api/dashboard/merchant` - Agregasi analitik performa penjualan merchant (total revenue, total items sold, list produk terlaris).
 
 ## Yang Sudah Berhasil
 
@@ -172,20 +191,38 @@ Fitur-fitur yang sudah diimplementasikan di sisi backend API:
 - [x] Update profil Merchant (`PUT /api/merchant/{id}`) hanya oleh owner (dilarang merubah ownerId / status).
 - [x] Hapus merchant (`DELETE /api/merchant/{id}`) hanya oleh owner (dilarang jika sudah memiliki produk).
 - [x] Persetujuan Merchant oleh Admin (`POST /api/merchant/{id}/approve`) serta otomatis meng-upgrade role user terkait ke UMKM.
-
+- [x] Integrasi Frontend untuk Auth & Activity: registrasi, login, logout, pengenalan sesi otomatis (silent refresh), daftar aktivitas dengan filter status dan paginasi, pelaporan aktivitas baru, serta detail status aktivitas.
+- [x] Integrasi Halaman Dashboard dengan Modul Activity: visualisasi ringkasan kontribusi (Total Poin, Trust Score, status aktivitas PENDING/APPROVED/REJECTED) dan list aktivitas terbaru menggunakan hooks React Query.
+- [x] Modul Marketplace (Backend): Manajemen produk UMKM (CRUD produk, list produk, detail produk) dan checkout transaksi order secara transaksional aman dengan verifikasi stok menggunakan Prisma transactions.
+- [x] Modul Reward (Backend): Manajemen voucher belanja (CRUD voucher, list voucher) dan penukaran poin user menjadi kode voucher digital secara transaksional (Prisma transactions) dengan validasi poin balance.
+- [x] Modul Challenge (Backend): Fitur gamifikasi bagi pengguna, termasuk join/leave tantangan, pelacakan progres secara transaksional, dan auto-progress/auto-completion saat status pelaporan aktivitas disetujui (APPROVED).
+- [x] Modul Dashboard Analytics (Backend): Penyediaan data agregasi yang dioptimalkan secara terpisah untuk peran Admin, User biasa, dan UMKM/Merchant menggunakan operator agregasi/groupby Prisma.
+- [x] Halaman-halaman frontend berikut telah aktif dan diimplementasikan secara visual menggunakan Tailwind CSS dan font premium:
+  - Halaman Login (`/login`)
+  - Halaman Register (`/register`)
+  - Halaman Dashboard (`/dashboard`)
+  - Halaman Daftar Aktivitas (`/activity`)
+  - Halaman Lapor Aktivitas Baru (`/activity/new`)
+  - Halaman Detail Aktivitas (`/activity/[id]`)
+  - Halaman Profil Pengguna (`/profile`)
+  - Halaman Marketplace Katalog (`/marketplace`) & Detail Produk (`/marketplace/[id]`)
+  - Halaman Keranjang Belanja (`/cart`) & Form Checkout (`/checkout`)
+  - Halaman Riwayat Transaksi Pesanan (`/orders`)
+  - Halaman Penukaran Saldo Poin dengan Voucher (`/rewards`) & Riwayat Klaim (`/reward/history`)
+  - Halaman Jelajah Tantangan (`/challenge`), Detail Tantangan (`/challenge/[id]`), dan Tantangan Diikuti (`/challenge/my`)
+  - Halaman Kelola Produk UMKM (`/merchant/products`) untuk CRUD katalog produk bagi mitra UMKM
+  - Halaman Verifikasi Aktivitas (`/admin/activity`) untuk persetujuan manual oleh Admin
+  - Halaman Kelola Challenge (`/admin/challenge`) untuk CRUD tantangan oleh Admin
+  - Halaman Kelola Kategori (`/admin/category`) untuk CRUD kategori master aktivitas oleh Admin
+  - Pembagian visual dashboard dan akses navigasi secara dinamis berdasarkan role (USER, UMKM, ADMIN)
 
 ## Yang Sedang Dikerjakan
 
-- **Integrasi Frontend untuk Auth & Activity**: Menyiapkan struktur halaman dan hooks TanStack Query di folder `src/features/auth` dan `src/features/activity` untuk terhubung dengan API endpoint yang sudah selesai dibuat.
+- Semuanya telah selesai! Seluruh halaman frontend dan backend API telah berhasil diimplementasikan, diuji, dan diintegrasikan secara penuh.
 
 ## Yang Belum Dibuat
 
-Modul-modul berikut belum memiliki implementasi endpoint API (Route Handlers), Services, maupun Repositories:
-- **Modul Marketplace**: Manajemen produk UMKM (CRUD produk, list produk, detail produk) dan transaksi pembelian produk (order & order items).
-- **Modul Reward**: Manajemen voucher belanja dari merchant (CRUD voucher) dan penukaran poin user untuk mendapatkan kode voucher belanja.
-- **Modul Challenge**: List tantangan aktif, bergabung ke tantangan, tracking progres tantangan secara berkala saat aktivitas disetujui.
-- **Modul Dashboard**: Perhitungan analitik dashboard (total aktivitas, poin beredar, total merchant, dll.) untuk user, UMKM, dan admin.
-- **Halaman UI/Frontend**: Seluruh UI di `src/features/` (termasuk modul Auth, Activity, dan Merchant yang masih berupa folder kosong).
+- Tidak ada. Semua modul backend dan frontend telah 100% selesai diimplementasikan.
 
 ## Testing Status
 

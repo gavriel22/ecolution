@@ -1,5 +1,36 @@
 @import "tailwindcss";
 
+@theme {
+  /* Paper — latar belakang, kartu */
+  --color-paper-50: #f1f4ee;
+  --color-paper-100: #e7ebe1;
+  --color-paper-200: #d3d9c9;
+
+  /* Moss — warna utama brand, aksi positif/approved */
+  --color-moss-500: #2f6b4f;
+  --color-moss-600: #255740;
+  --color-moss-700: #1b4332;
+  --color-moss-900: #102a20;
+
+  /* Ochre — pending / poin / highlight */
+  --color-ochre-400: #d99a3d;
+  --color-ochre-500: #c97c1c;
+  --color-ochre-600: #a8630f;
+
+  /* Rust — rejected / destructive */
+  --color-rust-500: #a5432d;
+  --color-rust-600: #8a3423;
+
+  /* Ink — teks utama */
+  --color-ink-900: #16241d;
+  --color-ink-700: #37473d;
+  --color-ink-400: #6b7a70;
+
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;

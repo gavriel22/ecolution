@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { Navbar } from "@/features/landing/components/Navbar";
 import { Footer } from "@/features/landing/components/Footer";
 
@@ -28,5 +29,14 @@ export default function LoginPage() {
       </main>
       <Footer />
     </div>
+=======
+import { LoginForm } from "@/features/auth/components/login-form";
+
+export default function LoginPage() {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-paper-50 px-4">
+      <LoginForm />
+    </main>
+>>>>>>> 61b3f5a5b82009e1ec9ccaddd8cbe8af1049357e
   );
 }

@@ -1,33 +1,157 @@
-export async function fetchClient<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const baseURL = process.env.NEXT_PUBLIC_API_URL || "";
-  
-  // We can retrieve the access token from localStorage or any state manager
-  // Since this is a simple client, we will assume localStorage for access token
-  let token: string | null = null;
-  if (typeof window !== "undefined") {
-    token = localStorage.getItem("accessToken");
+/**
+ * Central fetch wrapper for Ecolution.
+ *
+ * - Attaches `Authorization: Bearer <accessToken>` automatically.
+ * - Access token lives only in memory (never localStorage) — safer against XSS.
+ *   It is synced with AuthProvider via the subscribe/notify pair below.
+ * - On 401/419 (expired/invalid token) it silently calls /api/auth/refresh
+ *   (refresh token is an HttpOnly cookie, sent automatically) and retries
+ *   the original request ONCE.
+ * - Normalizes both JSON and multipart/form-data bodies.
+ */
+
+export interface ApiSuccess<T> {
+  success: true;
+  data: T;
+  meta?: {
+    page: number;
+    limit: number;
+    totalCount: number;
+    totalPages: number;
+  };
+}
+
+export interface ApiErrorBody {
+  success: false;
+  error: {
+    code: string;
+    message: string;
+    details?: unknown;
+  };
+}
+
+export class ApiError extends Error {
+  status: number;
+  code: string;
+  details?: unknown;
+
+  constructor(status: number, code: string, message: string, details?: unknown) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+    this.code = code;
+    this.details = details;
+  }
+}
+
+type TokenListener = (token: string | null) => void;
+
+let accessToken: string | null = null;
+const listeners = new Set<TokenListener>();
+
+export function setAccessToken(token: string | null) {
+  accessToken = token;
+  listeners.forEach((listener) => listener(token));
+}
+
+export function getAccessToken() {
+  return accessToken;
+}
+
+export function onAccessTokenChange(listener: TokenListener) {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+/**
+ * Calls /api/auth/refresh using the HttpOnly refresh_token cookie.
+ * Returns the new access token, or null if the session is no longer valid.
+ */
+export async function refreshAccessToken(): Promise<string | null> {
+  try {
+    const res = await fetch("/api/auth/refresh", {
+      method: "POST",
+      credentials: "include",
+    });
+
+    if (!res.ok) {
+      setAccessToken(null);
+      return null;
+    }
+
+    const json = (await res.json()) as ApiSuccess<{ accessToken: string }>;
+    setAccessToken(json.data.accessToken);
+    return json.data.accessToken;
+  } catch {
+    setAccessToken(null);
+    return null;
+  }
+}
+
+interface ApiFetchOptions extends Omit<RequestInit, "body"> {
+  body?: BodyInit | Record<string, any> | null;
+  /** internal flag to prevent infinite refresh loops */
+  _isRetry?: boolean;
+}
+
+function isPlainObjectBody(body: unknown): body is Record<string, any> {
+  return (
+    typeof body === "object" &&
+    body !== null &&
+    !(body instanceof FormData) &&
+    !(body instanceof Blob) &&
+    !(body instanceof ArrayBuffer)
+  );
+}
+
+export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): Promise<ApiSuccess<T>> {
+  const { body, headers, _isRetry, ...rest } = options;
+  const finalHeaders = new Headers(headers);
+
+  let finalBody: BodyInit | undefined;
+  if (isPlainObjectBody(body)) {
+    finalHeaders.set("Content-Type", "application/json");
+    finalBody = JSON.stringify(body);
+  } else if (body != null) {
+    finalBody = body as BodyInit;
+    // Don't set Content-Type for FormData — the browser needs to add its own boundary.
   }
 
-  const headers = new Headers(options.headers);
-  if (!headers.has("Content-Type") && !(options.body instanceof FormData)) {
-    headers.set("Content-Type", "application/json");
-  }
-  
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
+  if (accessToken) {
+    finalHeaders.set("Authorization", `Bearer ${accessToken}`);
   }
 
-  const response = await fetch(`${baseURL}${endpoint}`, {
-    ...options,
-    headers,
+  const res = await fetch(path, {
+    ...rest,
+    headers: finalHeaders,
+    body: finalBody,
+    credentials: "include",
   });
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    const errorMsg = data?.error?.message || data?.message || "An error occurred while fetching the data.";
-    throw new Error(errorMsg);
+  // Access token missing/expired — try refreshing once, then retry the request.
+  if ((res.status === 401 || res.status === 419) && !_isRetry) {
+    const newToken = await refreshAccessToken();
+    if (newToken) {
+      return apiFetch<T>(path, { ...options, _isRetry: true });
+    }
   }
 
-  return data.data; // Assumes backend returns { data: ..., meta: ... } in successResponse
+  let json: ApiSuccess<T> | ApiErrorBody | null = null;
+  try {
+    json = await res.json();
+  } catch {
+    // no body (e.g. some 500s) — fall through to generic error below
+  }
+
+  if (!res.ok || !json || json.success === false) {
+    const errorBody = json as ApiErrorBody | null;
+    throw new ApiError(
+      res.status,
+      errorBody?.error?.code ?? "UNKNOWN_ERROR",
+      errorBody?.error?.message ?? "Terjadi kesalahan yang tidak terduga. Coba lagi.",
+      errorBody?.error?.details
+    );
+  }
+
+  return json as ApiSuccess<T>;
 }

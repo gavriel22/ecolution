@@ -10,3 +10,47 @@ export async function GET(req: NextRequest) {
     return errorResponse(error);
   }
 }
+
+/**
+ * POST /api/activity/categories
+ * Create new activity category (Admin only)
+ */
+export async function POST(req: NextRequest) {
+  try {
+    const user = await getAuthContext(req);
+    const body = await req.json();
+    const result = await activityService.createCategory(user.role, body);
+    return successResponse(result, 201);
+  } catch (error) {
+    return errorResponse(error);
+  }
+}
+
+import { verifyAccessToken } from "@/lib/jwt";
+import { UnauthorizedError } from "@/utils/errors";
+import { UserRole } from "@prisma/client";
+
+async function getAuthContext(req: NextRequest) {
+  const authHeader = req.headers.get("authorization");
+  if (!authHeader) {
+    throw new UnauthorizedError("Token missing or invalid");
+  }
+
+  const parts = authHeader.split(" ");
+  if (parts.length !== 2 || parts[0].toLowerCase() !== "bearer") {
+    throw new UnauthorizedError("Token missing or invalid");
+  }
+
+  const token = parts[1];
+  const payload = await verifyAccessToken(token);
+  if (!payload) {
+    throw new UnauthorizedError("Token missing or invalid");
+  }
+
+  return {
+    id: payload.id,
+    email: payload.email,
+    role: payload.role as UserRole,
+    username: payload.username,
+  };
+}

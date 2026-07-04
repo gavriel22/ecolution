@@ -38,7 +38,7 @@ Project Ecolution terbagi menjadi struktur direktori berikut di dalam root folde
 - **`design`**: Berisi aset desain UI/UX.
 
 > [!NOTE]
-> Folder `src/components` ( common, forms, layout, ui ) dan subfolder di `src/features` ( auth, activity, dll. ) saat ini masih berupa folder kosong/placeholder untuk pengerjaan frontend di masa mendatang. Validasi input API dilakukan di dalam lapisan **Service** menggunakan library Zod, sehingga folder `src/validations` secara terpisah tidak digunakan dalam project ini.
+> Folder `src/components` berisi komponen React yang reusable (termasuk layout global `layout/app-layout.tsx` untuk navigasi dashboard dan aktivitas). Folder di `src/features` seperti `src/features/auth` (autentikasi) dan `src/features/activity` (manajemen aktivitas) sudah memiliki implementasi UI, hooks, dan tipe data yang siap digunakan. Validasi input API dilakukan di dalam lapisan **Service** menggunakan library Zod.
 
 ---
 
@@ -263,20 +263,24 @@ Seluruh anggota tim wajib mematuhi workflow kolaborasi Git berikut:
 
 Berikut adalah rangkuman kesiapan project Ecolution saat ini:
 
-- **Fitur yang Sudah Selesai (Backend API)**:
-  - Autentikasi Pengguna lengkap (Register, Login, Rate Limiting Login, Logout, Refresh Token cookie, Get Profile).
-  - Manajemen Aktivitas lingkungan (Create dengan EXIF extractor, Get detail, List dengan filter & paginasi, Update/Delete PENDING activity).
-  - Verifikasi aktivitas (AI Mock verification, manual approval & rejection oleh Admin, serta penambahan poin reward).
-  - Manajemen Merchant lengkap (Register, Get detail, List dengan filter status & paginasi, Update/Delete merchant, serta admin approval untuk upgrade role owner).
-  - Skema Relasi Database Prisma & Seeder lengkap.
+- **Fitur yang Sudah Selesai (Backend & Frontend)**:
+  - **Autentikasi Pengguna**: Register, Login, Rate Limiting Login, Logout, Refresh Token cookie, Get Profile, dan integrasi frontend dengan halaman `/login`, `/register`, serta `/profile`.
+  - **Manajemen Aktivitas Lingkungan**: Pembuatan dengan EXIF GPS extractor, detail aktivitas, list aktivitas dengan pagination & filter status, serta integrasi frontend lengkap dengan halaman `/activity`, `/activity/new`, `/activity/[id]`.
+  - **Verifikasi Aktivitas & Reward**: AI Mock verification, approval & rejection manual oleh Admin, alokasi poin reward, dan visualisasi dashboard ringkasan statistik (Poin, Trust Score, status aktivitas) serta list aktivitas terbaru di halaman `/dashboard`.
+  - **Manajemen Merchant (Backend)**: Register, detail, list dengan filter, update/delete merchant, serta admin approval untuk upgrade role owner.
+  - **Marketplace Produk (Backend)**: CRUD produk, detail produk, list produk dengan filter, serta checkout order secara transaksional dengan auto-reduction stock (Prisma transactions).
+  - **Reward Voucher (Backend)**: CRUD voucher, detail voucher, list voucher dengan filter, penukaran poin user menjadi kode voucher digital secara transaksional dengan safe decrement stock dan point history logging (Prisma transactions).
+  - **Tantangan / Challenge (Backend)**: Join/leave tantangan, tracking progres tantangan secara transaksional, dan integrasi progress auto-increment/auto-completion saat status pelaporan aktivitas disetujui (APPROVED).
+  - **Dashboard Analytics (Backend)**: Data agregasi yang dioptimalkan secara terpisah untuk peran Admin, User, dan UMKM/Merchant menggunakan operator aggregasi/groupby Prisma (Prisma aggregation).
+  - **Otorisasi & Pembagian Role (Frontend)**: Pembagian navigasi menu sidebar dan tampilan halaman dashboard secara terpisah dan dinamis berdasarkan role (USER, UMKM, ADMIN).
+  - **Halaman Operasional Admin (Frontend)**: Halaman Verifikasi Aktivitas (Approve/Reject), Kelola Challenge (CRUD), dan Kelola Kategori Master (CRUD).
+  - **Skema Database Prisma & Seeder**: Lengkap dengan data awal.
 - **Fitur yang Sedang Dikerjakan**:
-  - Persiapan UI/Frontend di dalam Next.js client-side untuk modul Autentikasi & Aktivitas.
+  - Integrasi UI Frontend untuk modul Merchant/UMKM (dashboard mitra, pendaftaran merchant).
 - **Fitur yang Belum Ada**:
-  - UI Frontend untuk modul Merchant/UMKM.
-  - Backend API & UI Frontend untuk modul Marketplace Produk.
-  - Backend API & UI Frontend untuk modul Rewards & Penukaran Voucher.
-  - Backend API & UI Frontend untuk modul Tantangan (Challenge).
-  - Visual dashboard analitik pengguna, UMKM, dan Admin.
+  - UI Frontend untuk modul Marketplace Produk.
+  - UI Frontend untuk modul Rewards & Penukaran Voucher.
+  - UI Frontend untuk modul Tantangan (Challenge).
 
 
 ---

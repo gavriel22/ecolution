@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import Link from "next/link";
 import { Leaf } from "lucide-react";
 
@@ -36,5 +37,14 @@ export default function RegisterPage() {
         </p>
       </div>
     </div>
+=======
+import { RegisterForm } from "@/features/auth/components/register-form";
+
+export default function RegisterPage() {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-paper-50 px-4">
+      <RegisterForm />
+    </main>
+>>>>>>> 61b3f5a5b82009e1ec9ccaddd8cbe8af1049357e
   );
 }
