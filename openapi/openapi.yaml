@@ -1,0 +1,1509 @@
+openapi: 3.1.0
+info:
+  title: Ecolution API
+  description: |
+    API documentation for Ecolution, an environmental activity and tracking system built with Next.js 16 (App Router), TypeScript, Prisma, and PostgreSQL.
+    
+    ### Authentication
+    Authentication is handled via **Bearer JWT**.
+    - For protected endpoints, pass `Authorization: Bearer <your_jwt_token>` in the request headers.
+    - Refresh tokens are managed automatically using HttpOnly cookies (`refresh_token`) set on the `/api/auth` path.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+    description: Local Development Server
+tags:
+  - name: Auth
+    description: Authentication endpoints (Register, Login, Logout, Refresh, Profile)
+  - name: Activity
+    description: Eco-activity logging, uploads, submission, and verification
+paths:
+  /api/auth/register:
+    post:
+      summary: Register a new user
+      description: Create a new user account with the specified name, username, email, password, and optional role (USER, UMKM, or ADMIN).
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Register'
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Validation error (missing or invalid fields)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict (Email or Username already taken)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/login:
+    post:
+      summary: User login
+      description: Authenticate user credentials and return an access token. A refresh token is set as an HttpOnly cookie.
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+      responses:
+        '200':
+          description: Login successful
+          headers:
+            Set-Cookie:
+              description: HttpOnly cookie containing the refresh token
+              schema:
+                type: string
+                example: refresh_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; Path=/api/auth; HttpOnly; SameSite=Strict; Max-Age=2592000
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    required:
+                      - user
+                      - accessToken
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+                      accessToken:
+                        type: string
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '400':
+          description: Validation error (missing fields)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized (invalid email or password)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Too many login attempts (Rate limited)
+          headers:
+            Retry-After:
+              description: Seconds to wait before next attempt
+              schema:
+                type: string
+                example: "900"
+            X-RateLimit-Limit:
+              schema:
+                type: string
+                example: "5"
+            X-RateLimit-Remaining:
+              schema:
+                type: string
+                example: "0"
+            X-RateLimit-Reset:
+              schema:
+                type: string
+                example: "1720094700"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/logout:
+    post:
+      summary: User logout
+      description: Revoke the active refresh token and clear the refresh_token HttpOnly cookie.
+      tags:
+        - Auth
+      responses:
+        '200':
+          description: Successfully logged out
+          headers:
+            Set-Cookie:
+              description: Clears the refresh token cookie
+              schema:
+                type: string
+                example: refresh_token=; Path=/api/auth; HttpOnly; SameSite=Strict; Max-Age=0
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    required:
+                      - message
+                    properties:
+                      message:
+                        type: string
+                        example: Successfully logged out
+        '401':
+          description: Already logged out or refresh token missing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/refresh:
+    post:
+      summary: Refresh access token
+      description: Generate a new access token using the refresh token sent in the HttpOnly cookie.
+      tags:
+        - Auth
+      responses:
+        '200':
+          description: Access token refreshed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    required:
+                      - accessToken
+                    properties:
+                      accessToken:
+                        type: string
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/me:
+    get:
+      summary: Get current user profile
+      description: Retrieve the currently authenticated user's profile details.
+      tags:
+        - Auth
+      security:
+        - BearerJWT: []
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized (Token missing or invalid)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: User not found or inactive
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '419':
+          description: Authentication token expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/activity:
+    get:
+      summary: List activities
+      description: Retrieve a list of activities with pagination and filters. Non-admin users can only view their own activities. Admins can view all activities and filter by userId.
+      tags:
+        - Activity
+      security:
+        - BearerJWT: []
+      parameters:
+        - name: page
+          in: query
+          description: Page number for pagination (starts at 1)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of activities per page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+        - name: search
+          in: query
+          description: Search term matching title or description (case-insensitive)
+          required: false
+          schema:
+            type: string
+        - name: categoryId
+          in: query
+          description: Filter by activity category UUID
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          description: Filter by activity status
+          required: false
+          schema:
+            type: string
+            enum: [PENDING, APPROVED, REJECTED]
+        - name: userId
+          in: query
+          description: Filter by user ID (Only applies to ADMIN roles)
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: sortBy
+          in: query
+          description: Field to sort by (e.g. createdAt, activityDate)
+          required: false
+          schema:
+            type: string
+        - name: sortOrder
+          in: query
+          description: Sort ordering direction
+          required: false
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+      responses:
+        '200':
+          description: List of activities retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Activity'
+                  meta:
+                    type: object
+                    required:
+                      - page
+                      - limit
+                      - totalCount
+                      - totalPages
+                    properties:
+                      page:
+                        type: integer
+                        example: 1
+                      limit:
+                        type: integer
+                        example: 10
+                      totalCount:
+                        type: integer
+                        example: 45
+                      totalPages:
+                        type: integer
+                        example: 5
+        '401':
+          description: Unauthorized (Token missing or invalid)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden (insufficient roles or querying another user's activities)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '419':
+          description: Authentication token expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      summary: Create activity with image upload
+      description: |
+        Create a new activity with photo upload using multipart/form-data.
+        The service extracts EXIF metadata from the image. If EXIF metadata (GPS coordinates and original date time) is missing, the activity status will be set to **REJECTED**.
+      tags:
+        - Activity
+      security:
+        - BearerJWT: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - image
+                - title
+                - categoryId
+                - activityDate
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: File upload containing the activity image (JPEG, HEIC, TIFF; max 10MB)
+                title:
+                  type: string
+                  minLength: 3
+                  maxLength: 150
+                  description: Title of the activity
+                  example: "Recycling PET Plastic Bottles"
+                description:
+                  type: string
+                  description: Optional description of the activity
+                  example: "Collected 20 PET plastic bottles from the neighborhood park."
+                categoryId:
+                  type: string
+                  format: uuid
+                  description: UUID of the activity category
+                  example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+                activityDate:
+                  type: string
+                  format: date-time
+                  description: Date and time when the activity was performed (ISO 8601)
+                  example: "2026-07-04T07:30:00.000Z"
+                location:
+                  type: string
+                  description: Optional textual location description
+                  example: "Central Park Block B"
+      responses:
+        '201':
+          description: Activity created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    required:
+                      - id
+                      - title
+                      - description
+                      - categoryId
+                      - activityDate
+                      - location
+                      - status
+                      - userId
+                      - createdAt
+                      - photo
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                        example: "b80e81a8-c290-4824-a212-32a829e1fa12"
+                      title:
+                        type: string
+                        example: "Recycling PET Plastic Bottles"
+                      description:
+                        type: string
+                        nullable: true
+                        example: "Collected 20 PET plastic bottles from the neighborhood park."
+                      categoryId:
+                        type: string
+                        format: uuid
+                        example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+                      activityDate:
+                        type: string
+                        format: date-time
+                        example: "2026-07-04T07:30:00.000Z"
+                      location:
+                        type: string
+                        nullable: true
+                        example: "Central Park Block B"
+                      status:
+                        type: string
+                        enum: [PENDING, APPROVED, REJECTED]
+                        example: "PENDING"
+                      userId:
+                        type: string
+                        format: uuid
+                        example: "a80b82f9-3dc8-4f24-91b7-d1587d558b8f"
+                      createdAt:
+                        type: string
+                        format: date-time
+                        example: "2026-07-04T12:00:00.000Z"
+                      photo:
+                        type: object
+                        required:
+                          - id
+                          - imageUrl
+                          - latitude
+                          - longitude
+                          - takenAt
+                          - hasExif
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            example: "c46d3e3a-e275-47e1-8896-1ab3dfa06fb1"
+                          imageUrl:
+                            type: string
+                            example: "/uploads/1720093845-photo.jpg"
+                          latitude:
+                            type: number
+                            nullable: true
+                            example: -6.2088
+                          longitude:
+                            type: number
+                            nullable: true
+                            example: 106.8456
+                          takenAt:
+                            type: string
+                            format: date-time
+                            nullable: true
+                            example: "2026-07-04T07:30:00.000Z"
+                          hasExif:
+                            type: boolean
+                            example: true
+        '400':
+          description: Validation error (e.g. invalid date, size exceeds limit, unsupported format)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized (Token missing or invalid)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Activity category not found or inactive
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '419':
+          description: Authentication token expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/activity/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The UUID of the activity
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: Get activity detail
+      description: Retrieve details of an activity by its ID. Users can only view their own activities unless they are an ADMIN.
+      tags:
+        - Activity
+      security:
+        - BearerJWT: []
+      responses:
+        '200':
+          description: Activity details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Activity'
+        '401':
+          description: Unauthorized (Token missing or invalid)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden (Not owner of the activity and not Admin)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Activity not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '419':
+          description: Authentication token expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      summary: Update activity
+      description: Update fields of an activity. Can only be done while status is PENDING.
+      tags:
+        - Activity
+      security:
+        - BearerJWT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  minLength: 3
+                  maxLength: 150
+                  example: "Morning Waste Sorting"
+                description:
+                  type: string
+                  example: "Sorting organic and inorganic trash."
+                categoryId:
+                  type: string
+                  format: uuid
+                  example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+                activityDate:
+                  type: string
+                  format: date-time
+                  example: "2026-07-04T09:00:00.000Z"
+                location:
+                  type: string
+                  maxLength: 255
+                  example: "Community Hub Center"
+      responses:
+        '200':
+          description: Activity updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Activity'
+        '400':
+          description: Validation error or activity is already verified (approved/rejected)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized (Token missing or invalid)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden (Not the owner of the activity)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Activity or Category not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '419':
+          description: Authentication token expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Delete activity
+      description: Delete an activity. Only allowed for PENDING status.
+      tags:
+        - Activity
+      security:
+        - BearerJWT: []
+      responses:
+        '200':
+          description: Activity deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Validation error or activity is already verified (approved/rejected)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized (Token missing or invalid)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden (Not the owner of the activity)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Activity not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '419':
+          description: Authentication token expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/activity/{id}/photo:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The UUID of the activity
+        schema:
+          type: string
+          format: uuid
+    post:
+      summary: Add photo to activity
+      description: Add an image URL to an existing PENDING activity.
+      tags:
+        - Activity
+      security:
+        - BearerJWT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - imageUrl
+              properties:
+                imageUrl:
+                  type: string
+                  example: "/uploads/1720093845-photo-2.jpg"
+      responses:
+        '201':
+          description: Photo added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    required:
+                      - id
+                      - activityId
+                      - imageUrl
+                      - latitude
+                      - longitude
+                      - takenAt
+                      - hasExif
+                      - uploadedAt
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                        example: "c46d3e3a-e275-47e1-8896-1ab3dfa06fb1"
+                      activityId:
+                        type: string
+                        format: uuid
+                        example: "b80e81a8-c290-4824-a212-32a829e1fa12"
+                      imageUrl:
+                        type: string
+                        example: "/uploads/1720093845-photo-2.jpg"
+                      latitude:
+                        type: number
+                        nullable: true
+                        example: null
+                      longitude:
+                        type: number
+                        nullable: true
+                        example: null
+                      takenAt:
+                        type: string
+                        format: date-time
+                        nullable: true
+                        example: null
+                      hasExif:
+                        type: boolean
+                        example: false
+                      uploadedAt:
+                        type: string
+                        format: date-time
+                        example: "2026-07-04T12:10:00.000Z"
+        '400':
+          description: Validation error or activity is already verified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized (Token missing or invalid)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden (Not the owner of the activity)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Activity not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '419':
+          description: Authentication token expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/activity/{id}/submit:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The UUID of the activity
+        schema:
+          type: string
+          format: uuid
+    post:
+      summary: Submit activity for verification
+      description: Submit the activity. Triggers automatic verification check by AI. Requires the activity to have at least one photo uploaded first.
+      tags:
+        - Activity
+      security:
+        - BearerJWT: []
+      responses:
+        '200':
+          description: Activity submitted and processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Activity'
+        '400':
+          description: Validation error (e.g. activity must have at least one photo)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized (Token missing or invalid)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden (Not the owner of the activity)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Activity not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '419':
+          description: Authentication token expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/activity/{id}/approve:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The UUID of the activity
+        schema:
+          type: string
+          format: uuid
+    post:
+      summary: Approve activity
+      description: |
+        Manually approve a PENDING activity. Points are awarded to the creator based on the category's reward.
+        Access is restricted to **ADMIN** role.
+      tags:
+        - Activity
+      security:
+        - BearerJWT: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                note:
+                  type: string
+                  description: Optional verification note
+                  example: "Approved after manual inspection of the image metadata."
+      responses:
+        '200':
+          description: Activity approved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Activity'
+        '400':
+          description: Validation error or activity already verified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized (Token missing or invalid)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden (Not an admin)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Activity not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '419':
+          description: Authentication token expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/activity/{id}/reject:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The UUID of the activity
+        schema:
+          type: string
+          format: uuid
+    post:
+      summary: Reject activity
+      description: |
+        Manually reject a PENDING activity. An adminNote stating the reason for rejection is required.
+        Access is restricted to **ADMIN** role.
+      tags:
+        - Activity
+      security:
+        - BearerJWT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - adminNote
+              properties:
+                adminNote:
+                  type: string
+                  description: Reason for rejection (required)
+                  example: "Image is too blurry to identify."
+                note:
+                  type: string
+                  description: Optional verification note
+                  example: "Rejected during manual review."
+      responses:
+        '200':
+          description: Activity rejected successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Activity'
+        '400':
+          description: Validation error (missing adminNote) or activity already verified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized (Token missing or invalid)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden (Not an admin)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Activity not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '419':
+          description: Authentication token expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    BearerJWT:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Enter the JWT access token in the format `Bearer <token>`.
+  schemas:
+    User:
+      type: object
+      required:
+        - id
+        - name
+        - username
+        - email
+        - role
+        - trustScore
+        - totalPoint
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "a80b82f9-3dc8-4f24-91b7-d1587d558b8f"
+        name:
+          type: string
+          example: "John Doe"
+        username:
+          type: string
+          example: "johndoe"
+        email:
+          type: string
+          format: email
+          example: "john@example.com"
+        role:
+          type: string
+          enum: [USER, UMKM, ADMIN]
+          example: "USER"
+        trustScore:
+          type: integer
+          example: 0
+        totalPoint:
+          type: integer
+          example: 0
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-07-04T12:00:00.000Z"
+
+    Login:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: "john@example.com"
+        password:
+          type: string
+          example: "mySecretPassword123"
+        deviceName:
+          type: string
+          example: "iPhone 15 Pro"
+
+    Register:
+      type: object
+      required:
+        - name
+        - username
+        - email
+        - password
+      properties:
+        name:
+          type: string
+          example: "John Doe"
+        username:
+          type: string
+          example: "johndoe"
+        email:
+          type: string
+          format: email
+          example: "john@example.com"
+        password:
+          type: string
+          example: "mySecretPassword123"
+        role:
+          type: string
+          enum: [USER, UMKM, ADMIN]
+          example: "USER"
+
+    Category:
+      type: object
+      required:
+        - id
+        - name
+        - pointReward
+        - isActive
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+        name:
+          type: string
+          example: "Recycling Plastic"
+        description:
+          type: string
+          nullable: true
+          example: "Collect and recycle plastic waste"
+        pointReward:
+          type: integer
+          example: 100
+        isActive:
+          type: boolean
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-07-04T12:00:00.000Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2026-07-04T12:00:00.000Z"
+
+    Activity:
+      type: object
+      required:
+        - id
+        - userId
+        - categoryId
+        - title
+        - activityDate
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "b80e81a8-c290-4824-a212-32a829e1fa12"
+        userId:
+          type: string
+          format: uuid
+          example: "a80b82f9-3dc8-4f24-91b7-d1587d558b8f"
+        categoryId:
+          type: string
+          format: uuid
+          example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+        title:
+          type: string
+          example: "Morning Clean Up"
+        description:
+          type: string
+          nullable: true
+          example: "Clean up activities in local park"
+        activityDate:
+          type: string
+          format: date-time
+          example: "2026-07-04T07:00:00.000Z"
+        status:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED]
+          example: "PENDING"
+        adminNote:
+          type: string
+          nullable: true
+          example: null
+        location:
+          type: string
+          nullable: true
+          example: "Grand Park Jakarta"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-07-04T12:00:00.000Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2026-07-04T12:00:00.000Z"
+        category:
+          $ref: '#/components/schemas/Category'
+        photos:
+          type: array
+          items:
+            type: object
+            required:
+              - id
+              - activityId
+              - imageUrl
+              - hasExif
+              - uploadedAt
+            properties:
+              id:
+                type: string
+                format: uuid
+                example: "c46d3e3a-e275-47e1-8896-1ab3dfa06fb1"
+              activityId:
+                type: string
+                format: uuid
+                example: "b80e81a8-c290-4824-a212-32a829e1fa12"
+              imageUrl:
+                type: string
+                example: "/uploads/1720093845-photo.jpg"
+              latitude:
+                type: number
+                nullable: true
+                example: -6.2088
+              longitude:
+                type: number
+                nullable: true
+                example: 106.8456
+              takenAt:
+                type: string
+                format: date-time
+                nullable: true
+                example: "2026-07-04T11:45:00.000Z"
+              hasExif:
+                type: boolean
+                example: true
+              uploadedAt:
+                type: string
+                format: date-time
+                example: "2026-07-04T12:00:00.000Z"
+        verification:
+          type: object
+          nullable: true
+          required:
+            - id
+            - activityId
+            - verifiedBy
+            - method
+            - verifiedAt
+          properties:
+            id:
+              type: string
+              format: uuid
+              example: "f290f1ee-6c54-4b01-90e6-d701748f0853"
+            activityId:
+              type: string
+              format: uuid
+              example: "b80e81a8-c290-4824-a212-32a829e1fa12"
+            verifiedBy:
+              type: string
+              format: uuid
+              example: "a80b82f9-3dc8-4f24-91b7-d1587d558b8f"
+            method:
+              type: string
+              enum: [MANUAL, AI]
+              example: "AI"
+            confidence:
+              type: number
+              nullable: true
+              example: 88.5
+            note:
+              type: string
+              nullable: true
+              example: "Auto verified by AI"
+            verifiedAt:
+              type: string
+              format: date-time
+              example: "2026-07-04T12:05:00.000Z"
+        pointHistory:
+          type: object
+          nullable: true
+          required:
+            - id
+            - userId
+            - type
+            - point
+            - createdAt
+          properties:
+            id:
+              type: string
+              format: uuid
+              example: "e290f1ee-6c54-4b01-90e6-d701748f0854"
+            userId:
+              type: string
+              format: uuid
+              example: "a80b82f9-3dc8-4f24-91b7-d1587d558b8f"
+            activityId:
+              type: string
+              format: uuid
+              nullable: true
+              example: "b80e81a8-c290-4824-a212-32a829e1fa12"
+            type:
+              type: string
+              enum: [EARN, REDEEM, BONUS, PENALTY]
+              example: "EARN"
+            point:
+              type: integer
+              example: 100
+            description:
+              type: string
+              nullable: true
+              example: "Point reward for activity: Recycling Plastic"
+            createdAt:
+              type: string
+              format: date-time
+              example: "2026-07-04T12:05:00.000Z"
+
+    SuccessResponse:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          additionalProperties: true
+
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - error
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              example: "UNAUTHORIZED"
+            message:
+              type: string
+              example: "Token missing or invalid"
+            details:
+              type: object
+              nullable: true
+              additionalProperties: true
+          required:
+            - code
+            - message
