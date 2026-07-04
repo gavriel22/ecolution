@@ -213,6 +213,17 @@ Rincian hasil pengujian manual API Backend menggunakan Postman:
 - [x] Delete Merchant (`DELETE /api/merchant/{id}`)
 - [x] Approve Merchant (`POST /api/merchant/{id}/approve`)
 
+## Frontend Progress (Landing Page)
+
+Status: 🟢 Selesai (Recreated based on new UI Design)
+- [x] Setup Folder Structure (`src/features/landing`)
+- [x] Navbar Component (Updated to new design)
+- [x] Hero Section Component (Updated to new design)
+- [x] Marketplace Preview Section (Updated to Bestsellers slider)
+- [x] Mission & Community Section (New)
+- [x] Footer Component (Cleaned up, 404 links removed)
+- [x] Dummy Pages Created (`/about`, `/marketplace`, `/login`, `/dashboard`)
+
 ## Next Sprint Recommendation
 
 Berikut adalah usulan prioritas pengerjaan modul berikutnya berdasarkan ketergantungan antar modul dalam codebase saat ini:
