@@ -69,6 +69,15 @@ export async function POST(req: NextRequest) {
       maxAge: 60 * 60 * 24 * 30, // 30 hari (sesuai expiry di DB)
     });
 
+    // Set accessToken cookie for middleware to read on page navigations
+    response.cookies.set("accessToken", result.accessToken, {
+      httpOnly: false, // Allow client to read if needed, or true if strict
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60, // 1 hour (sesuai expiry token)
+    });
+
     return response;
   } catch (error) {
     return errorResponse(error);

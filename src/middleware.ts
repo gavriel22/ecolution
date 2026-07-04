@@ -24,7 +24,18 @@ export async function middleware(req: NextRequest) {
     const parts = authHeader.split(" ");
     if (parts.length === 2 && parts[0].toLowerCase() === "bearer") {
       token = parts[1];
+    }
+  }
+
+  if (!token) {
+    token = req.cookies.get("accessToken")?.value || null;
+  }
+
+  if (token) {
+    try {
       payload = await verifyAccessToken(token);
+    } catch (e) {
+      console.error("Token verification failed:", e);
     }
   }
 
