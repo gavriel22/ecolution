@@ -375,6 +375,38 @@ export class ActivityRepository {
       return activity;
     });
   }
+
+  async createCategory(data: {
+    name: string;
+    description?: string | null;
+    pointReward: number;
+    imageUrl?: string | null;
+  }): Promise<ActivityCategory> {
+    return prisma.activityCategory.create({
+      data,
+    });
+  }
+
+  async updateCategory(
+    id: string,
+    data: {
+      name?: string;
+      description?: string | null;
+      pointReward?: number;
+      imageUrl?: string | null;
+    }
+  ): Promise<ActivityCategory> {
+    return prisma.activityCategory.update({
+      where: { id },
+      data,
+    });
+  }
+
+  async deleteCategory(id: string): Promise<ActivityCategory> {
+    return prisma.activityCategory.delete({
+      where: { id },
+    });
+  }
 }
 
 export const activityRepository = new ActivityRepository();

@@ -38,12 +38,30 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   if (!user) return null;
 
-  const menuItems = [
-    { label: "Dashboard", href: "/dashboard" },
-    { label: "Aktivitasku", href: "/activity" },
-    { label: "Lapor Aktivitas", href: "/activity/new" },
-    { label: "Profil", href: "/profile" },
-  ];
+  let menuItems: { label: string; href: string }[] = [];
+
+  if (user.role === "ADMIN") {
+    menuItems = [
+      { label: "Dashboard", href: "/dashboard" },
+      { label: "Verifikasi Aktivitas", href: "/admin/activity" },
+      { label: "Kelola Challenge", href: "/admin/challenge" },
+      { label: "Kelola Kategori", href: "/admin/category" },
+      { label: "Profil", href: "/profile" },
+    ];
+  } else if (user.role === "UMKM") {
+    menuItems = [
+      { label: "Dashboard", href: "/dashboard" },
+      { label: "Kelola Produk", href: "/merchant/products" },
+      { label: "Profil", href: "/profile" },
+    ];
+  } else {
+    menuItems = [
+      { label: "Dashboard", href: "/dashboard" },
+      { label: "Aktivitasku", href: "/activity" },
+      { label: "Lapor Aktivitas", href: "/activity/new" },
+      { label: "Profil", href: "/profile" },
+    ];
+  }
 
   const handleLogout = () => {
     logoutMutation.mutate();

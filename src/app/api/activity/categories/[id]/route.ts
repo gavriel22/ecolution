@@ -1,31 +1,6 @@
 import { NextRequest } from "next/server";
 import { activityService } from "@/services/activity.service";
 import { successResponse, errorResponse } from "@/utils/response";
-
-export async function GET(req: NextRequest) {
-  try {
-    const categories = await activityService.listCategories();
-    return successResponse(categories, 200);
-  } catch (error) {
-    return errorResponse(error);
-  }
-}
-
-/**
- * POST /api/activity/categories
- * Create new activity category (Admin only)
- */
-export async function POST(req: NextRequest) {
-  try {
-    const user = await getAuthContext(req);
-    const body = await req.json();
-    const result = await activityService.createCategory(user.role, body);
-    return successResponse(result, 201);
-  } catch (error) {
-    return errorResponse(error);
-  }
-}
-
 import { verifyAccessToken } from "@/lib/jwt";
 import { UnauthorizedError } from "@/utils/errors";
 import { UserRole } from "@prisma/client";
@@ -53,4 +28,41 @@ async function getAuthContext(req: NextRequest) {
     role: payload.role as UserRole,
     username: payload.username,
   };
+}
+
+/**
+ * PUT /api/activity/categories/[id]
+ * Update activity category (Admin only)
+ */
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const user = await getAuthContext(req);
+    const body = await req.json();
+    const result = await activityService.updateCategory(id, user.role, body);
+    return successResponse(result, 200);
+  } catch (error) {
+    return errorResponse(error);
+  }
+}
+
+/**
+ * DELETE /api/activity/categories/[id]
+ * Delete activity category (Admin only)
+ */
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const user = await getAuthContext(req);
+    const result = await activityService.deleteCategory(id, user.role);
+    return successResponse(result, 200);
+  } catch (error) {
+    return errorResponse(error);
+  }
 }

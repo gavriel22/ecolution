@@ -136,10 +136,15 @@ export class DashboardRepository {
 
   async getMerchantMetrics(merchantId: string): Promise<any> {
     const [
+      totalProducts,
       activeProducts,
       activeVouchers,
+      recentProducts,
       orderItems,
     ] = await Promise.all([
+      prisma.product.count({
+        where: { merchantId },
+      }),
       prisma.product.count({
         where: {
           merchantId,
@@ -151,6 +156,11 @@ export class DashboardRepository {
           merchantId,
           status: "AVAILABLE",
         },
+      }),
+      prisma.product.findMany({
+        where: { merchantId },
+        orderBy: { createdAt: "desc" },
+        take: 5,
       }),
       prisma.orderItem.findMany({
         where: {
@@ -171,6 +181,20 @@ export class DashboardRepository {
               name: true,
             },
           },
+          order: {
+            select: {
+              id: true,
+              orderNumber: true,
+              status: true,
+              createdAt: true,
+              user: {
+                select: {
+                  name: true,
+                  email: true,
+                },
+              },
+            },
+          },
         },
       }),
     ]);
@@ -180,6 +204,9 @@ export class DashboardRepository {
 
     // Product sales breakdown map
     const salesBreakdown: Record<string, { name: string; quantity: number; revenue: number }> = {};
+    
+    // Unique orders lookup
+    const uniqueOrdersMap = new Map<string, any>();
 
     orderItems.forEach((item) => {
       const price = Number(item.price);
@@ -199,15 +226,44 @@ export class DashboardRepository {
       }
       salesBreakdown[productName].quantity += quantity;
       salesBreakdown[productName].revenue += itemRevenue;
+
+      const ord = item.order;
+      if (ord) {
+        if (!uniqueOrdersMap.has(ord.id)) {
+          uniqueOrdersMap.set(ord.id, {
+            id: ord.id,
+            orderNumber: ord.orderNumber,
+            status: ord.status,
+            createdAt: ord.createdAt,
+            buyerName: ord.user?.name || "User",
+            buyerEmail: ord.user?.email || "",
+            totalPrice: 0,
+            itemsCount: 0,
+          });
+        }
+        const existing = uniqueOrdersMap.get(ord.id);
+        existing.totalPrice += itemRevenue;
+        existing.itemsCount += quantity;
+      }
     });
 
+    const uniqueOrders = Array.from(uniqueOrdersMap.values());
+    const totalOrders = uniqueOrders.length;
+    const recentOrders = uniqueOrders
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 5);
+
     return {
+      totalProducts,
       activeProducts,
       activeVouchers,
+      recentProducts,
       salesSummary: {
         totalRevenue,
         totalItemsSold,
+        totalOrders,
       },
+      recentOrders,
       topSellingProducts: Object.values(salesBreakdown)
         .sort((a, b) => b.revenue - a.revenue)
         .slice(0, 5),

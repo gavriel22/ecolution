@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { activityRepository } from "@/repositories/activity.repository";
 import { userRepository } from "@/repositories/user.repository";
-import { ActivityStatus, VerificationMethod } from "@prisma/client";
+import { ActivityStatus, VerificationMethod, UserRole } from "@prisma/client";
 import {
   ValidationError,
   UnauthorizedError,
@@ -263,6 +263,60 @@ export class ActivityService {
   async listCategories() {
     return activityRepository.findManyCategories();
   }
+
+  async createCategory(userRole: UserRole, data: unknown) {
+    if (userRole !== UserRole.ADMIN) {
+      throw new ForbiddenError("Only administrators can manage categories");
+    }
+
+    const parsed = createCategorySchema.safeParse(data);
+    if (!parsed.success) {
+      throw new ValidationError("Invalid category data", parsed.error.format() as any);
+    }
+
+    return activityRepository.createCategory(parsed.data);
+  }
+
+  async updateCategory(id: string, userRole: UserRole, data: unknown) {
+    if (userRole !== UserRole.ADMIN) {
+      throw new ForbiddenError("Only administrators can manage categories");
+    }
+
+    const parsed = updateCategorySchema.safeParse(data);
+    if (!parsed.success) {
+      throw new ValidationError("Invalid category data", parsed.error.format() as any);
+    }
+
+    return activityRepository.updateCategory(id, parsed.data);
+  }
+
+  async deleteCategory(id: string, userRole: UserRole) {
+    if (userRole !== UserRole.ADMIN) {
+      throw new ForbiddenError("Only administrators can manage categories");
+    }
+
+    // Check if category exists
+    const category = await activityRepository.findCategoryById(id);
+    if (!category) {
+      throw new NotFoundError("Category not found");
+    }
+
+    return activityRepository.deleteCategory(id);
+  }
 }
+
+const createCategorySchema = z.object({
+  name: z.string().min(3, "Category name must be at least 3 characters").max(100),
+  description: z.string().max(500).optional().nullable(),
+  pointReward: z.preprocess((val) => Number(val), z.number().int().positive("Reward points must be positive")),
+  imageUrl: z.string().max(255).url("Invalid image URL").optional().nullable(),
+});
+
+const updateCategorySchema = z.object({
+  name: z.string().min(3, "Category name must be at least 3 characters").max(100).optional(),
+  description: z.string().max(500).optional().nullable(),
+  pointReward: z.preprocess((val) => Number(val), z.number().int().positive("Reward points must be positive")).optional(),
+  imageUrl: z.string().max(255).url("Invalid image URL").optional().nullable(),
+});
 
 export const activityService = new ActivityService();

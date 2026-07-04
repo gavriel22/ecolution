@@ -136,6 +136,65 @@ export class ChallengeRepository {
       },
     });
   }
+
+  async createChallenge(data: {
+    categoryId: string;
+    title: string;
+    description?: string | null;
+    type: string;
+    target: number;
+    pointReward: number;
+    startDate: Date;
+    endDate: Date;
+    status: string;
+    imageUrl?: string | null;
+  }): Promise<Challenge> {
+    return prisma.challenge.create({
+      data: data as any,
+      include: {
+        category: true,
+      },
+    });
+  }
+
+  async updateChallenge(
+    id: string,
+    data: {
+      categoryId?: string;
+      title?: string;
+      description?: string | null;
+      type?: string;
+      target?: number;
+      pointReward?: number;
+      startDate?: Date;
+      endDate?: Date;
+      status?: string;
+      imageUrl?: string | null;
+    }
+  ): Promise<Challenge> {
+    return prisma.challenge.update({
+      where: { id },
+      data: data as any,
+      include: {
+        category: true,
+      },
+    });
+  }
+
+  async deleteChallenge(id: string): Promise<Challenge> {
+    return prisma.challenge.delete({
+      where: { id },
+      include: {
+        category: true,
+      },
+    });
+  }
+
+  async findManyCategories(): Promise<any[]> {
+    return prisma.challengeCategory.findMany({
+      orderBy: { name: "asc" },
+    });
+  }
 }
 
 export const challengeRepository = new ChallengeRepository();

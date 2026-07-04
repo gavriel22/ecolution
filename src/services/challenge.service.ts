@@ -138,6 +138,88 @@ export class ChallengeService {
 
     return mapped;
   }
+
+  async listAllChallengesAdmin(userRole: UserRole) {
+    if (userRole !== UserRole.ADMIN) {
+      throw new ForbiddenError("Only administrators can manage challenges");
+    }
+    const challenges = await challengeRepository.findAll({});
+    return challenges.map((c) => this.mapChallenge(c));
+  }
+
+  async createChallenge(userRole: UserRole, data: unknown) {
+    if (userRole !== UserRole.ADMIN) {
+      throw new ForbiddenError("Only administrators can manage challenges");
+    }
+
+    const parsed = createChallengeSchema.safeParse(data);
+    if (!parsed.success) {
+      throw new ValidationError("Invalid challenge data", parsed.error.format() as any);
+    }
+
+    const challenge = await challengeRepository.createChallenge(parsed.data);
+    return this.mapChallenge(challenge);
+  }
+
+  async updateChallenge(id: string, userRole: UserRole, data: unknown) {
+    if (userRole !== UserRole.ADMIN) {
+      throw new ForbiddenError("Only administrators can manage challenges");
+    }
+
+    const parsed = updateChallengeSchema.safeParse(data);
+    if (!parsed.success) {
+      throw new ValidationError("Invalid challenge data", parsed.error.format() as any);
+    }
+
+    const challenge = await challengeRepository.updateChallenge(id, parsed.data);
+    return this.mapChallenge(challenge);
+  }
+
+  async deleteChallenge(id: string, userRole: UserRole) {
+    if (userRole !== UserRole.ADMIN) {
+      throw new ForbiddenError("Only administrators can manage challenges");
+    }
+
+    const challenge = await challengeRepository.findById(id);
+    if (!challenge) {
+      throw new NotFoundError("Challenge not found");
+    }
+
+    await challengeRepository.deleteChallenge(id);
+  }
+
+  async listChallengeCategories() {
+    return challengeRepository.findManyCategories();
+  }
 }
+
+import { UserRole, ChallengeType } from "@prisma/client";
+import { ForbiddenError } from "@/utils/errors";
+
+const createChallengeSchema = z.object({
+  categoryId: z.string().uuid("Invalid category ID format"),
+  title: z.string().min(3, "Title must be at least 3 characters").max(150),
+  description: z.string().max(1000).optional().nullable(),
+  type: z.nativeEnum(ChallengeType),
+  target: z.preprocess((val) => Number(val), z.number().int().positive("Target must be at least 1")),
+  pointReward: z.preprocess((val) => Number(val), z.number().int().positive("Reward points must be positive")),
+  startDate: z.string().transform((val) => new Date(val)),
+  endDate: z.string().transform((val) => new Date(val)),
+  status: z.enum(["DRAFT", "ACTIVE", "COMPLETED", "ARCHIVED"]),
+  imageUrl: z.string().max(255).url("Invalid image URL").optional().nullable(),
+});
+
+const updateChallengeSchema = z.object({
+  categoryId: z.string().uuid("Invalid category ID format").optional(),
+  title: z.string().min(3, "Title must be at least 3 characters").max(150).optional(),
+  description: z.string().max(1000).optional().nullable(),
+  type: z.nativeEnum(ChallengeType).optional(),
+  target: z.preprocess((val) => Number(val), z.number().int().positive("Target must be at least 1")).optional(),
+  pointReward: z.preprocess((val) => Number(val), z.number().int().positive("Reward points must be positive")).optional(),
+  startDate: z.string().transform((val) => new Date(val)).optional(),
+  endDate: z.string().transform((val) => new Date(val)).optional(),
+  status: z.enum(["DRAFT", "ACTIVE", "COMPLETED", "ARCHIVED"]).optional(),
+  imageUrl: z.string().max(255).url("Invalid image URL").optional().nullable(),
+});
 
 export const challengeService = new ChallengeService();

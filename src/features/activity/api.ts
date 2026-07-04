@@ -67,3 +67,17 @@ export function submitActivity(id: string) {
     method: "POST",
   });
 }
+
+export function approveActivity(id: string, note?: string) {
+  return apiFetch<Activity>(`/api/activity/${id}/approve`, {
+    method: "POST",
+    body: { note },
+  });
+}
+
+export function rejectActivity(id: string, adminNote: string, note?: string) {
+  return apiFetch<Activity>(`/api/activity/${id}/reject`, {
+    method: "POST",
+    body: { adminNote, note },
+  });
+}

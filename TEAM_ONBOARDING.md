@@ -272,6 +272,8 @@ Berikut adalah rangkuman kesiapan project Ecolution saat ini:
   - **Reward Voucher (Backend)**: CRUD voucher, detail voucher, list voucher dengan filter, penukaran poin user menjadi kode voucher digital secara transaksional dengan safe decrement stock dan point history logging (Prisma transactions).
   - **Tantangan / Challenge (Backend)**: Join/leave tantangan, tracking progres tantangan secara transaksional, dan integrasi progress auto-increment/auto-completion saat status pelaporan aktivitas disetujui (APPROVED).
   - **Dashboard Analytics (Backend)**: Data agregasi yang dioptimalkan secara terpisah untuk peran Admin, User, dan UMKM/Merchant menggunakan operator aggregasi/groupby Prisma (Prisma aggregation).
+  - **Otorisasi & Pembagian Role (Frontend)**: Pembagian navigasi menu sidebar dan tampilan halaman dashboard secara terpisah dan dinamis berdasarkan role (USER, UMKM, ADMIN).
+  - **Halaman Operasional Admin (Frontend)**: Halaman Verifikasi Aktivitas (Approve/Reject), Kelola Challenge (CRUD), dan Kelola Kategori Master (CRUD).
   - **Skema Database Prisma & Seeder**: Lengkap dengan data awal.
 - **Fitur yang Sedang Dikerjakan**:
   - Integrasi UI Frontend untuk modul Merchant/UMKM (dashboard mitra, pendaftaran merchant).

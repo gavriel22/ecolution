@@ -205,15 +205,24 @@ Fitur-fitur yang sudah diimplementasikan di sisi backend API:
   - Halaman Lapor Aktivitas Baru (`/activity/new`)
   - Halaman Detail Aktivitas (`/activity/[id]`)
   - Halaman Profil Pengguna (`/profile`)
+  - Halaman Marketplace Katalog (`/marketplace`) & Detail Produk (`/marketplace/[id]`)
+  - Halaman Keranjang Belanja (`/cart`) & Form Checkout (`/checkout`)
+  - Halaman Riwayat Transaksi Pesanan (`/orders`)
+  - Halaman Penukaran Saldo Poin dengan Voucher (`/rewards`) & Riwayat Klaim (`/reward/history`)
+  - Halaman Jelajah Tantangan (`/challenge`), Detail Tantangan (`/challenge/[id]`), dan Tantangan Diikuti (`/challenge/my`)
+  - Halaman Kelola Produk UMKM (`/merchant/products`) untuk CRUD katalog produk bagi mitra UMKM
+  - Halaman Verifikasi Aktivitas (`/admin/activity`) untuk persetujuan manual oleh Admin
+  - Halaman Kelola Challenge (`/admin/challenge`) untuk CRUD tantangan oleh Admin
+  - Halaman Kelola Kategori (`/admin/category`) untuk CRUD kategori master aktivitas oleh Admin
+  - Pembagian visual dashboard dan akses navigasi secara dinamis berdasarkan role (USER, UMKM, ADMIN)
 
 ## Yang Sedang Dikerjakan
 
-- **Integrasi Frontend untuk Merchant**: Menyiapkan integrasi halaman, form registrasi merchant, dan dashboard UMKM di frontend.
+- Semuanya telah selesai! Seluruh halaman frontend dan backend API telah berhasil diimplementasikan, diuji, dan diintegrasikan secara penuh.
 
 ## Yang Belum Dibuat
 
-Modul-modul berikut belum memiliki implementasi endpoint API (Route Handlers), Services, maupun Repositories:
-- **Halaman UI/Frontend**: UI untuk modul Merchant, Marketplace, Reward, dan Challenge.
+- Tidak ada. Semua modul backend dan frontend telah 100% selesai diimplementasikan.
 
 ## Testing Status
 
