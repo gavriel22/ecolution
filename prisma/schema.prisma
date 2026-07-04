@@ -82,6 +82,14 @@ model ActivityPhoto {
   id         String   @id @default(uuid()) @db.Uuid
   activityId String   @db.Uuid
   imageUrl   String   @db.VarChar(255)
+  /// EXIF GPS latitude (-90 to 90), null if not present in image
+  latitude   Float?
+  /// EXIF GPS longitude (-180 to 180), null if not present in image
+  longitude  Float?
+  /// EXIF DateTimeOriginal, null if not present in image
+  takenAt    DateTime?
+  /// Whether this photo passed EXIF metadata validation
+  hasExif    Boolean  @default(false)
   uploadedAt DateTime @default(now())
   activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
 
