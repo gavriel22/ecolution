@@ -168,28 +168,6 @@ export class ActivityRepository {
     });
   }
 
-  async addPhotoWithExif(
-    activityId: string,
-    imageUrl: string,
-    exif: {
-      latitude?: number | null;
-      longitude?: number | null;
-      takenAt?: Date | null;
-      hasExif: boolean;
-    }
-  ): Promise<ActivityPhoto> {
-    return prisma.activityPhoto.create({
-      data: {
-        activityId,
-        imageUrl,
-        latitude: exif.latitude ?? null,
-        longitude: exif.longitude ?? null,
-        takenAt: exif.takenAt ?? null,
-        hasExif: exif.hasExif,
-      },
-    });
-  }
-
   async submitVerification(
     activityId: string,
     data: {
