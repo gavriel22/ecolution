@@ -31,8 +31,8 @@ Struktur folder penting di dalam `src/` memiliki fungsi sebagai berikut:
 - `src/repositories`: Lapisan akses database (Data Access Layer) yang berinteraksi langsung dengan database PostgreSQL melalui client Prisma.
 - `src/lib`: Menyimpan instansiasi dan konfigurasi library pihak ketiga maupun instansi singleton (seperti Prisma Client, Logger, EXIF helper, JWT helper, dan in-memory Rate Limiter).
 - `src/utils`: Menyimpan fungsi utilitas umum global seperti penanganan custom HTTP errors (`errors.ts`), paginasi standar (`pagination.ts`), dan format respon API terstandarisasi (`response.ts`).
-- `src/components`: Folder komponen React yang reusable (saat ini terbagi menjadi folder terstruktur seperti `common`, `forms`, `layout`, dan `ui` tetapi belum memiliki file implementasi).
-- `src/features`: Struktur modular untuk memisahkan logika UI, hooks, dan halaman berdasarkan modul bisnis (seperti `auth`, `activity`, `challenge`, `marketplace`, `profile`, dan `reward` yang saat ini folder-foldernya masih kosong).
+- `src/components`: Folder komponen React yang reusable, termasuk komponen tata letak utama (`layout/app-layout.tsx`) untuk sidebar navigasi dan autentikasi.
+- `src/features`: Struktur modular untuk memisahkan logika UI, hooks, tipe, dan komponen berdasarkan modul bisnis. Modul `auth` (login, register, logout hooks) dan `activity` (hooks, form, list, detail, status-badge, summary) saat ini telah diimplementasikan penuh.
 
 ## Database
 
@@ -172,11 +172,20 @@ Fitur-fitur yang sudah diimplementasikan di sisi backend API:
 - [x] Update profil Merchant (`PUT /api/merchant/{id}`) hanya oleh owner (dilarang merubah ownerId / status).
 - [x] Hapus merchant (`DELETE /api/merchant/{id}`) hanya oleh owner (dilarang jika sudah memiliki produk).
 - [x] Persetujuan Merchant oleh Admin (`POST /api/merchant/{id}/approve`) serta otomatis meng-upgrade role user terkait ke UMKM.
-
+- [x] Integrasi Frontend untuk Auth & Activity: registrasi, login, logout, pengenalan sesi otomatis (silent refresh), daftar aktivitas dengan filter status dan paginasi, pelaporan aktivitas baru, serta detail status aktivitas.
+- [x] Integrasi Halaman Dashboard dengan Modul Activity: visualisasi ringkasan kontribusi (Total Poin, Trust Score, status aktivitas PENDING/APPROVED/REJECTED) dan list aktivitas terbaru menggunakan hooks React Query.
+- [x] Halaman-halaman frontend berikut telah aktif dan diimplementasikan secara visual menggunakan Tailwind CSS dan font premium:
+  - Halaman Login (`/login`)
+  - Halaman Register (`/register`)
+  - Halaman Dashboard (`/dashboard`)
+  - Halaman Daftar Aktivitas (`/activity`)
+  - Halaman Lapor Aktivitas Baru (`/activity/new`)
+  - Halaman Detail Aktivitas (`/activity/[id]`)
+  - Halaman Profil Pengguna (`/profile`)
 
 ## Yang Sedang Dikerjakan
 
-- **Integrasi Frontend untuk Auth & Activity**: Menyiapkan struktur halaman dan hooks TanStack Query di folder `src/features/auth` dan `src/features/activity` untuk terhubung dengan API endpoint yang sudah selesai dibuat.
+- **Integrasi Frontend untuk Merchant**: Menyiapkan integrasi halaman, form registrasi merchant, dan dashboard UMKM di frontend.
 
 ## Yang Belum Dibuat
 
@@ -184,8 +193,8 @@ Modul-modul berikut belum memiliki implementasi endpoint API (Route Handlers), S
 - **Modul Marketplace**: Manajemen produk UMKM (CRUD produk, list produk, detail produk) dan transaksi pembelian produk (order & order items).
 - **Modul Reward**: Manajemen voucher belanja dari merchant (CRUD voucher) dan penukaran poin user untuk mendapatkan kode voucher belanja.
 - **Modul Challenge**: List tantangan aktif, bergabung ke tantangan, tracking progres tantangan secara berkala saat aktivitas disetujui.
-- **Modul Dashboard**: Perhitungan analitik dashboard (total aktivitas, poin beredar, total merchant, dll.) untuk user, UMKM, dan admin.
-- **Halaman UI/Frontend**: Seluruh UI di `src/features/` (termasuk modul Auth, Activity, dan Merchant yang masih berupa folder kosong).
+- **Modul Dashboard**: Perhitungan analitik dashboard tingkat lanjut (poin beredar, total merchant, dll.) di tingkat API.
+- **Halaman UI/Frontend**: UI untuk modul Merchant, Marketplace, Reward, dan Challenge.
 
 ## Testing Status
 
