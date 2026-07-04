@@ -244,6 +244,25 @@ Fitur-fitur yang sudah diimplementasikan di sisi backend API:
   - Admin management (challenge, approval, kategori)
 - Landing page menjadi pusat seluruh konten publik
 
+## 🚀 Vercel Deployment & Build Optimization Update
+
+### ✅ Completed
+
+- **Database Fallback Setup (`src/lib/env.ts`)**: Menambahkan default dummy URL ke skema `DATABASE_URL` menggunakan Zod. Hal ini menghindari kegagalan build Next.js saat proses pre-rendering static pages ketika database belum terkoneksi.
+- **Middleware Optimization (`src/middleware.ts`)**: Menghapus import `@prisma/client` dari Middleware Edge runtime. Perbandingan tipe role digantikan menggunakan string literals (`"ADMIN"`, `"UMKM"`). Hal ini mencegah build error akibat ketergantungan library Node.js (seperti `fs`, `path`) di lingkungan Vercel Edge.
+- **Build Scripts Setup (`package.json`)**: Memisahkan command Prisma Client generation ke dalam hook `"postinstall": "prisma generate"`. Ini memastikan Prisma Client selalu siap sebelum kompilasi Next.js dimulai pada platform deployment Vercel.
+- **Validation Build Check**: Berhasil menguji `npm run build` lokal dan lulus 100% tanpa error, menghasilkan optimasi halaman statis & dinamis dengan benar.
+
+### 🔑 Environment Variables Wajib untuk Vercel
+
+Berikut adalah daftar variabel lingkungan yang wajib dikonfigurasi di dashboard Vercel settings sebelum memicu deployment:
+
+| Nama Variabel | Tipe | Deskripsi |
+|---|---|---|
+| `DATABASE_URL` | String (URL) | Connection string PostgreSQL (contoh: `postgresql://username:password@host:port/database?sslmode=require`) |
+| `JWT_ACCESS_SECRET` | String | Secret key acak untuk menandatangani JWT Access Token (opsional, disiapkan default fallback) |
+| `JWT_REFRESH_SECRET` | String | Secret key acak untuk menandatangani JWT Refresh Token (opsional, disiapkan default fallback) |
+
 ## Yang Sedang Dikerjakan
 
 - Pemeliharaan rutin, monitoring performa query database, dan persiapan deployment.

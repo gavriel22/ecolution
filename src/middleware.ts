@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAccessToken } from "@/lib/jwt";
-import { UserRole } from "@prisma/client";
 
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
@@ -54,7 +53,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  if (path.startsWith("/admin") && payload.role !== UserRole.ADMIN) {
+  if (path.startsWith("/admin") && payload.role !== "ADMIN") {
     if (path.startsWith("/api/")) {
       return NextResponse.json(
         { success: false, error: { code: "FORBIDDEN", message: "Forbidden" } },
@@ -64,7 +63,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
-  if (path.startsWith("/merchant") && payload.role !== UserRole.UMKM && payload.role !== UserRole.ADMIN) {
+  if (path.startsWith("/merchant") && payload.role !== "UMKM" && payload.role !== "ADMIN") {
     if (path.startsWith("/api/")) {
       return NextResponse.json(
         { success: false, error: { code: "FORBIDDEN", message: "Forbidden" } },

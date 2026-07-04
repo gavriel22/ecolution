@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const envSchema = z.object({
-  DATABASE_URL: z.string().url("DATABASE_URL must be a valid connection URL"),
+  DATABASE_URL: z.string().url("DATABASE_URL must be a valid connection URL").default("postgresql://postgres:postgres@localhost:5432/ecolution"),
   ACCESS_TOKEN_SECRET: z.string().default(process.env.JWT_ACCESS_SECRET || "default_access_token_secret_ecolution_2026"),
   REFRESH_TOKEN_SECRET: z.string().default(process.env.JWT_REFRESH_SECRET || "default_refresh_token_secret_ecolution_2026"),
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
