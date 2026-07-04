@@ -203,30 +203,53 @@ export class ActivityService {
     const skip = (params.page - 1) * params.limit;
     const take = params.limit;
 
-    // Filter status
+    // Validate and clean status
     let statusFilter: ActivityStatus | undefined;
-    if (params.status) {
+    if (params.status && params.status.trim() !== "") {
+      if (!Object.values(ActivityStatus).includes(params.status as ActivityStatus)) {
+        throw new ValidationError(`Invalid status. Must be one of: ${Object.values(ActivityStatus).join(", ")}`);
+      }
       statusFilter = params.status as ActivityStatus;
     }
 
-    const finalUserId = params.userId;
+    // Validate and clean categoryId
+    let validCategoryId: string | undefined;
+    if (params.categoryId && params.categoryId.trim() !== "") {
+      const parsedCat = z.string().uuid().safeParse(params.categoryId);
+      if (!parsedCat.success) {
+        throw new ValidationError("Invalid categoryId format");
+      }
+      validCategoryId = parsedCat.data;
+    }
+
+    // Validate and clean userId
+    let validUserId: string | undefined;
+    if (params.userId && params.userId.trim() !== "") {
+      const parsedUser = z.string().uuid().safeParse(params.userId);
+      if (!parsedUser.success) {
+        throw new ValidationError("Invalid userId format");
+      }
+      validUserId = parsedUser.data;
+    }
+
+    const validSearch = params.search && params.search.trim() !== "" ? params.search : undefined;
 
     const activities = await activityRepository.findMany({
       skip,
       take,
-      search: params.search,
-      categoryId: params.categoryId,
+      search: validSearch,
+      categoryId: validCategoryId,
       status: statusFilter,
-      userId: finalUserId,
+      userId: validUserId,
       sortBy: params.sortBy,
       sortOrder: params.sortOrder,
     });
 
     const totalCount = await activityRepository.count({
-      search: params.search,
-      categoryId: params.categoryId,
+      search: validSearch,
+      categoryId: validCategoryId,
       status: statusFilter,
-      userId: finalUserId,
+      userId: validUserId,
     });
 
     const meta = getPaginationMetadata(totalCount, params.page, params.limit);
