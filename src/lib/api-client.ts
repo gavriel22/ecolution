@@ -25,7 +25,8 @@ export async function fetchClient<T>(endpoint: string, options: RequestInit = {}
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.message || "An error occurred while fetching the data.");
+    const errorMsg = data?.error?.message || data?.message || "An error occurred while fetching the data.";
+    throw new Error(errorMsg);
   }
 
   return data.data; // Assumes backend returns { data: ..., meta: ... } in successResponse
