@@ -127,9 +127,17 @@ Endpoint:
 ===================
 
 ### Merchant
-Status: 🔴 Belum Dibuat
+Status: ✅ Selesai
 Endpoint:
-- Belum ada API route handler yang diimplementasikan.
+- `GET /api/merchant` - Mendapatkan daftar merchant berdasarkan role (Admin melihat semua, user biasa melihat approved saja).
+- `POST /api/merchant` - Registrasi merchant baru untuk pengguna aktif (default status PENDING).
+- `GET /api/merchant/{id}` - Mendapatkan rincian profil merchant.
+- `PUT /api/merchant/{id}` - Mengupdate profil merchant (hanya owner).
+- `DELETE /api/merchant/{id}` - Menghapus merchant (hanya owner, dilarang jika sudah memiliki produk).
+- `POST /api/merchant/{id}/approve` - Menyetujui pendaftaran merchant dan mengubah role owner ke UMKM (Admin only).
+
+Testing:
+- ✅ Sudah lolos Postman (registrasi merchant, list, update, delete, dan approval admin).
 
 ===================
 
@@ -158,6 +166,13 @@ Fitur-fitur yang sudah diimplementasikan di sisi backend API:
 - [x] Mock AI Verification saat melakukan submit aktivitas (`POST /api/activity/{id}/submit`).
 - [x] Persetujuan aktivitas oleh Admin dan penambahan poin reward secara transaksional (`POST /api/activity/{id}/approve`).
 - [x] Penolakan aktivitas oleh Admin disertai input alasan penolakan (`POST /api/activity/{id}/reject`).
+- [x] Pendaftaran Merchant baru (`POST /api/merchant`) dengan validasi keunikan profil per user.
+- [x] Listing Merchant (`GET /api/merchant`) terproteksi role (Admin melihat semua, user biasa melihat approved saja).
+- [x] Detail profil Merchant (`GET /api/merchant/{id}`) untuk owner/admin/approved.
+- [x] Update profil Merchant (`PUT /api/merchant/{id}`) hanya oleh owner (dilarang merubah ownerId / status).
+- [x] Hapus merchant (`DELETE /api/merchant/{id}`) hanya oleh owner (dilarang jika sudah memiliki produk).
+- [x] Persetujuan Merchant oleh Admin (`POST /api/merchant/{id}/approve`) serta otomatis meng-upgrade role user terkait ke UMKM.
+
 
 ## Yang Sedang Dikerjakan
 
@@ -166,12 +181,11 @@ Fitur-fitur yang sudah diimplementasikan di sisi backend API:
 ## Yang Belum Dibuat
 
 Modul-modul berikut belum memiliki implementasi endpoint API (Route Handlers), Services, maupun Repositories:
-- **Modul Merchant**: Registrasi UMKM, persetujuan merchant baru oleh admin.
 - **Modul Marketplace**: Manajemen produk UMKM (CRUD produk, list produk, detail produk) dan transaksi pembelian produk (order & order items).
 - **Modul Reward**: Manajemen voucher belanja dari merchant (CRUD voucher) dan penukaran poin user untuk mendapatkan kode voucher belanja.
 - **Modul Challenge**: List tantangan aktif, bergabung ke tantangan, tracking progres tantangan secara berkala saat aktivitas disetujui.
 - **Modul Dashboard**: Perhitungan analitik dashboard (total aktivitas, poin beredar, total merchant, dll.) untuk user, UMKM, dan admin.
-- **Halaman UI/Frontend**: Seluruh UI di `src/features/` (masih berupa folder kosong).
+- **Halaman UI/Frontend**: Seluruh UI di `src/features/` (termasuk modul Auth, Activity, dan Merchant yang masih berupa folder kosong).
 
 ## Testing Status
 
@@ -192,21 +206,26 @@ Rincian hasil pengujian manual API Backend menggunakan Postman:
 - [x] Submit Activity (`POST /api/activity/{id}/submit`)
 - [x] Approve Activity (`POST /api/activity/{id}/approve`)
 - [x] Reject Activity (`POST /api/activity/{id}/reject`)
+- [x] Register Merchant (`POST /api/merchant`)
+- [x] Get Merchant List (`GET /api/merchant`)
+- [x] Get Merchant Detail (`GET /api/merchant/{id}`)
+- [x] Update Merchant Profile (`PUT /api/merchant/{id}`)
+- [x] Delete Merchant (`DELETE /api/merchant/{id}`)
+- [x] Approve Merchant (`POST /api/merchant/{id}/approve`)
 
 ## Next Sprint Recommendation
 
 Berikut adalah usulan prioritas pengerjaan modul berikutnya berdasarkan ketergantungan antar modul dalam codebase saat ini:
 
-### Sprint 1: Frontend Auth & Activity Integration
+### Sprint 1: Frontend Auth & Activity & Merchant Integration
 *Fokus pada penyelesaian visual agar API yang sudah selesai dapat langsung dicoba secara visual oleh pengguna.*
 - Membuat UI Register & Login di `src/features/auth`.
 - Membuat UI Dashboard Aktivitas Lingkungan, form upload, dan detail aktivitas di `src/features/activity`.
+- Membuat UI Profil Merchant & Dashboard Merchant di `src/features/merchant`.
 - Integrasi middleware autentikasi Next.js untuk proteksi rute halaman client.
 
-### Sprint 2: Merchant Module & Profiling UMKM
-*Merchant merupakan dasar kepemilikan voucher dan produk di marketplace.*
-- Membuat repository dan service untuk `Merchant` (CRUD merchant).
-- Membuat API route handler pendaftaran UMKM & validasi approval merchant oleh Admin.
+### Sprint 2: Merchant Module & Profiling UMKM (Selesai - Backend)
+*Pemberian verifikasi merchant oleh admin serta manajemen profil merchant sudah selesai diimplementasikan.*
 
 ### Sprint 3: Marketplace & Products Module
 *UMKM yang tervalidasi dapat menjual produk.*

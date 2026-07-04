@@ -193,6 +193,15 @@ Berikut adalah seluruh endpoint API Backend yang **benar-benar ada** dan aktif d
 ### Module: Category
 - `GET /api/activity/categories` - Mendapatkan semua kategori aktivitas aktif.
 
+### Module: Merchant
+- `GET /api/merchant` - List semua merchant (Admin melihat semua, user biasa melihat approved saja).
+- `POST /api/merchant` - Registrasi profil merchant baru untuk user terautentikasi (default status PENDING).
+- `GET /api/merchant/{id}` - Mendapatkan detail profil merchant.
+- `PUT /api/merchant/{id}` - Memperbarui detail profil merchant (hanya owner).
+- `DELETE /api/merchant/{id}` - Menghapus merchant (hanya owner, hanya jika belum memajang produk).
+- `POST /api/merchant/{id}/approve` - Menyetujui pendaftaran merchant dan secara otomatis meng-upgrade role user owner menjadi UMKM (Khusus Admin).
+
+
 ---
 
 ## 9. Cara Testing
@@ -258,15 +267,17 @@ Berikut adalah rangkuman kesiapan project Ecolution saat ini:
   - Autentikasi Pengguna lengkap (Register, Login, Rate Limiting Login, Logout, Refresh Token cookie, Get Profile).
   - Manajemen Aktivitas lingkungan (Create dengan EXIF extractor, Get detail, List dengan filter & paginasi, Update/Delete PENDING activity).
   - Verifikasi aktivitas (AI Mock verification, manual approval & rejection oleh Admin, serta penambahan poin reward).
+  - Manajemen Merchant lengkap (Register, Get detail, List dengan filter status & paginasi, Update/Delete merchant, serta admin approval untuk upgrade role owner).
   - Skema Relasi Database Prisma & Seeder lengkap.
 - **Fitur yang Sedang Dikerjakan**:
   - Persiapan UI/Frontend di dalam Next.js client-side untuk modul Autentikasi & Aktivitas.
 - **Fitur yang Belum Ada**:
-  - Backend API & UI Frontend untuk modul Merchant/UMKM.
+  - UI Frontend untuk modul Merchant/UMKM.
   - Backend API & UI Frontend untuk modul Marketplace Produk.
   - Backend API & UI Frontend untuk modul Rewards & Penukaran Voucher.
   - Backend API & UI Frontend untuk modul Tantangan (Challenge).
   - Visual dashboard analitik pengguna, UMKM, dan Admin.
+
 
 ---
 

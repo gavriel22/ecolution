@@ -17,6 +17,8 @@ tags:
     description: Authentication endpoints (Register, Login, Logout, Refresh, Profile)
   - name: Activity
     description: Eco-activity logging, uploads, submission, and verification
+  - name: Merchant
+    description: Merchant registration, profiling, and admin approvals
 paths:
   /api/auth/register:
     post:
@@ -1162,6 +1164,324 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /api/merchant:
+    get:
+      summary: List merchants
+      description: Retrieve a list of merchants. Admin users can view all merchants, whereas ordinary users can only view APPROVED merchants.
+      tags:
+        - Merchant
+      security:
+        - BearerJWT: []
+      responses:
+        '200':
+          description: List of merchants retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Merchant'
+        '401':
+          description: Unauthorized (Token missing or invalid)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      summary: Register as a merchant
+      description: Register the authenticated user as a merchant. A user can only have one merchant profile, and the user's role must be USER or UMKM. Default status is PENDING and isApproved is false.
+      tags:
+        - Merchant
+      security:
+        - BearerJWT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMerchant'
+      responses:
+        '201':
+          description: Merchant registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Merchant'
+        '400':
+          description: Validation error (e.g. user already has a merchant, invalid input)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized (Token missing or invalid)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden (role is not USER or UMKM)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/merchant/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The UUID of the merchant
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: Get merchant details
+      description: Retrieve details of a specific merchant by ID. Non-admin and non-owner users can only view APPROVED merchants.
+      tags:
+        - Merchant
+      security:
+        - BearerJWT: []
+      responses:
+        '200':
+          description: Merchant details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Merchant'
+        '401':
+          description: Unauthorized (Token missing or invalid)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden (Not authorized to view pending merchant)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Merchant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      summary: Update merchant profile
+      description: Update merchant profile fields. Only the merchant owner can update the profile. ownerId and approval status cannot be modified.
+      tags:
+        - Merchant
+      security:
+        - BearerJWT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMerchant'
+      responses:
+        '200':
+          description: Merchant updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Merchant'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden (Not the merchant owner)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Merchant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Delete merchant
+      description: Delete a merchant profile. Only the owner can delete, and only if the merchant does not have any listed products.
+      tags:
+        - Merchant
+      security:
+        - BearerJWT: []
+      responses:
+        '200':
+          description: Merchant deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Validation error (e.g. merchant has products)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden (Not the owner)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Merchant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/merchant/{id}/approve:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The UUID of the merchant to approve
+        schema:
+          type: string
+          format: uuid
+    post:
+      summary: Approve merchant registration
+      description: Approve a pending merchant registration. Sets isApproved to true and updates owner's role to UMKM if it was USER. Admin only.
+      tags:
+        - Merchant
+      security:
+        - BearerJWT: []
+      responses:
+        '200':
+          description: Merchant approved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Merchant'
+        '400':
+          description: Validation error (e.g. merchant is already approved)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden (Not an admin)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Merchant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
 components:
   securitySchemes:
     BearerJWT:
@@ -1504,4 +1824,166 @@ components:
               type: object
               nullable: true
               additionalProperties: true
+
+    Merchant:
+      type: object
+      required:
+        - id
+        - ownerId
+        - businessName
+        - status
+        - createdAt
+        - updatedAt
+        - isApproved
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "e80b82f9-3dc8-4f24-91b7-d1587d558b8a"
+        ownerId:
+          type: string
+          format: uuid
+          example: "a80b82f9-3dc8-4f24-91b7-d1587d558b8f"
+        businessName:
+          type: string
+          example: "Eco Store Indonesia"
+        description:
+          type: string
+          nullable: true
+          example: "Selling eco-friendly daily utilities."
+        logoUrl:
+          type: string
+          nullable: true
+          example: "/merchant/logo.png"
+        address:
+          type: string
+          nullable: true
+          example: "Jakarta Selatan"
+        phone:
+          type: string
+          nullable: true
+          example: "081234567890"
+        email:
+          type: string
+          format: email
+          nullable: true
+          example: "merchant@ecolution.id"
+        website:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://ecostore.id"
+        status:
+          type: string
+          enum: [PENDING, APPROVED, VERIFIED, SUSPENDED]
+          example: "PENDING"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-07-04T12:00:00.000Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2026-07-04T12:00:00.000Z"
+        isApproved:
+          type: boolean
+          example: false
+        approvedAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        approvedBy:
+          type: string
+          nullable: true
+          example: null
+        owner:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            name:
+              type: string
+            username:
+              type: string
+            email:
+              type: string
+              format: email
+            role:
+              type: string
+          required:
+            - id
+            - name
+            - username
+            - email
+            - role
+
+    CreateMerchant:
+      type: object
+      required:
+        - businessName
+      properties:
+        businessName:
+          type: string
+          minLength: 3
+          maxLength: 150
+          example: "Eco Store Indonesia"
+        description:
+          type: string
+          maxLength: 1000
+          example: "Selling eco-friendly daily utilities."
+        logoUrl:
+          type: string
+          maxLength: 255
+          example: "/merchant/logo.png"
+        address:
+          type: string
+          maxLength: 500
+          example: "Jakarta Selatan"
+        phone:
+          type: string
+          maxLength: 20
+          example: "081234567890"
+        email:
+          type: string
+          format: email
+          example: "merchant@ecolution.id"
+        website:
+          type: string
+          format: uri
+          example: "https://ecostore.id"
+
+    UpdateMerchant:
+      type: object
+      properties:
+        businessName:
+          type: string
+          minLength: 3
+          maxLength: 150
+          example: "Updated Eco Store"
+        description:
+          type: string
+          maxLength: 1000
+          example: "Updated description."
+        logoUrl:
+          type: string
+          maxLength: 255
+          example: "/merchant/new-logo.png"
+        address:
+          type: string
+          maxLength: 500
+          example: "Jakarta Barat"
+        phone:
+          type: string
+          maxLength: 20
+          example: "081298765432"
+        email:
+          type: string
+          format: email
+          example: "newmerchant@ecolution.id"
+        website:
+          type: string
+          format: uri
+          example: "https://newecostore.id"
 
