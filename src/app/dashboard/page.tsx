@@ -406,26 +406,28 @@ function AdminDashboard({ name }: { name: string }) {
             Belum ada data peringkat pengguna.
           </div>
         ) : (
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-paper-100 text-[10px] font-mono uppercase tracking-wider text-ink-400 font-semibold">
-                <th className="py-2">Rank</th>
-                <th className="py-2">Nama</th>
-                <th className="py-2">Username</th>
-                <th className="py-2 text-right">Poin</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-paper-100 text-sm text-ink-700">
-              {topUsers.map((usr: any, index: number) => (
-                <tr key={usr.id} className="hover:bg-paper-50/30">
-                  <td className="py-2.5 font-mono font-bold text-moss-700">#{index + 1}</td>
-                  <td className="py-2.5 font-semibold text-ink-900">{usr.name}</td>
-                  <td className="py-2.5 font-mono text-xs">@{usr.username}</td>
-                  <td className="py-2.5 font-mono font-bold text-right text-moss-700">{usr.totalPoint} Pts</td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-paper-100 text-[10px] font-mono uppercase tracking-wider text-ink-400 font-semibold">
+                  <th className="py-2">Rank</th>
+                  <th className="py-2">Nama</th>
+                  <th className="py-2">Username</th>
+                  <th className="py-2 text-right">Poin</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-paper-100 text-sm text-ink-700">
+                {topUsers.map((usr: any, index: number) => (
+                  <tr key={usr.id} className="hover:bg-paper-50/30">
+                    <td className="py-2.5 font-mono font-bold text-moss-700">#{index + 1}</td>
+                    <td className="py-2.5 font-semibold text-ink-900">{usr.name}</td>
+                    <td className="py-2.5 font-mono text-xs">@{usr.username}</td>
+                    <td className="py-2.5 font-mono font-bold text-right text-moss-700">{usr.totalPoint} Pts</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

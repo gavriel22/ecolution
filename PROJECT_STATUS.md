@@ -275,6 +275,10 @@ Fitur-fitur yang sudah diimplementasikan di sisi backend API:
   - Halaman Riwayat Publik (`/riwayat`): Membuat halaman riwayat aktivitas baru di area publik (memerlukan login). Dilengkapi dengan pencarian judul, filter status (Semua, Menunggu, Disetujui, Ditolak), filter tanggal, foto thumbnail, dan poin perolehan.
   - Shortcut Dashboard User: Memodifikasi navigasi di dalam Dashboard User (`AppLayout`) agar bertindak sebagai shortcut langsung menuju halaman `/rewards` dan `/riwayat` di Landing Page untuk mencegah duplikasi kode/halaman.
   - Perbaikan Alur Keluar (Logout) Terproteksi: Memperbarui hook `useLogout` dan handler Navbar untuk membersihkan status autentikasi klien, menghapus riwayat browser cache, dan mengarahkan pengguna secara paksa ke Landing Page utama (`/`) menggunakan `window.location.replace("/")`. Hal ini mencegah pengguna menekan tombol Back Browser untuk kembali ke dashboard setelah keluar.
+- **[BARU]** Audit Responsiveness & Penyesuaian Layout Multi-Screen:
+  - Mobile Navbar Hamburger Drawer: Memodifikasi `Navbar.tsx` dengan menambahkan state `isMobileMenuOpen` dan rendering tombol hamburger pada resolusi mobile/tablet. Saat diklik, laci navigasi (drawer) interaktif akan terbuka menampilkan link navigasi lengkap beserta opsi masuk/daftar khusus pengunjung tamu.
+  - Sidebar Dashboard Off-Canvas: Memperbarui sidebar `AppLayout` agar otomatis menyembunyikan drawer menu setelah pengguna mengeklik salah satu tautan di perangkat seluler demi kenyamanan navigasi satu sentuhan.
+  - Pencegahan Table Overflow: Membungkus tabel Eco Champions Leaderboard di halaman Dashboard utama (`/dashboard`) dalam kontainer `overflow-x-auto` agar tetap scrollable secara horizontal di perangkat beresolusi rendah (seperti 320px–480px) tanpa merusak keselarasan kolom visual.
 
 ### 🔄 In Progress
 
@@ -287,6 +291,7 @@ Fitur-fitur yang sudah diimplementasikan di sisi backend API:
   - UMKM product management
   - Admin management (challenge, approval, kategori)
 - Landing page menjadi pusat seluruh konten publik
+- **Panduan Pengujian User**: Telah dibuat panduan pengujian terperinci khusus untuk fungsionalitas dan antarmuka peran USER di [TESTING_USER_ROLE.md](file:///C:/Users/ASUS/Documents/ecolution/TESTING_USER_ROLE.md).
 
 ## 🚀 Vercel Deployment & Build Optimization Update
 

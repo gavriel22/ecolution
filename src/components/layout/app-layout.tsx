@@ -136,6 +136,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <nav className="flex flex-col gap-1">
             <Link
               href="/"
+              onClick={() => setIsMobileMenuOpen(false)}
               className="flex h-10 items-center rounded-md text-sm font-semibold text-moss-700 hover:bg-moss-50 pl-4 mb-1 transition-all duration-200"
             >
               <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -155,6 +156,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 <Link
                   key={`${item.label}-${item.href}`}
                   href={item.href}
+                  onClick={() => setIsMobileMenuOpen(false)}
                   className={`flex h-10 items-center rounded-md text-sm font-medium transition-all duration-200 ${
                     isActive
                       ? "bg-moss-50 text-moss-700 font-semibold border-l-4 border-moss-700 pl-3"

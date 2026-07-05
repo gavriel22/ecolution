@@ -12,6 +12,7 @@ export function Navbar() {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -70,12 +71,13 @@ export function Navbar() {
             <Image
               src="/logo-main.png"
               alt="Ecolution Logo"
-              width={180}
-              height={55}
+              width={140}
+              height={45}
               className="object-contain"
             />
           </Link>
 
+          {/* Desktop Navigation Links */}
           <div className="hidden md:flex items-center space-x-8">
             <Link href="/" className={linkClass}>Beranda</Link>
             <Link href="/marketplace" className={linkClass}>Marketplace</Link>
@@ -86,6 +88,7 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center space-x-4">
+            {/* Profile Dropdown */}
             {user ? (
               <div className="relative">
                 <button
@@ -179,7 +182,7 @@ export function Navbar() {
                 )}
               </div>
             ) : (
-              <>
+              <div className="hidden md:flex items-center gap-4">
                 <Link
                   href={pathname && pathname !== "/login" && pathname !== "/register" ? `/login?callbackUrl=${encodeURIComponent(pathname)}` : "/login"}
                   className={linkClass}
@@ -188,15 +191,64 @@ export function Navbar() {
                 </Link>
                 <Link
                   href="/register"
-                  className="px-6 py-2.5 bg-[#fbbc04] hover:bg-[#e3aa04] text-gray-900 rounded-full font-medium transition-colors text-lg shadow-sm"
+                  className="px-5 py-2.5 bg-[#fbbc04] hover:bg-[#e3aa04] text-gray-900 rounded-full font-medium transition shadow-sm text-sm"
                 >
                   Daftar
                 </Link>
-              </>
+              </div>
             )}
+
+            {/* Hamburger Button (Mobile Only) */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className={`md:hidden p-2 rounded-lg focus:outline-none transition ${
+                isTransparent ? "text-white hover:bg-white/10" : "text-ink-900 hover:bg-paper-100"
+              }`}
+            >
+              {isMobileMenuOpen ? (
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Mobile Drawer menu */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden bg-white border-t border-paper-200 shadow-lg px-6 py-5 space-y-4 absolute top-full left-0 w-full z-40 flex flex-col font-sans">
+          <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-semibold text-ink-800 hover:text-moss-700 py-1.5 border-b border-paper-100">Beranda</Link>
+          <Link href="/marketplace" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-semibold text-ink-800 hover:text-moss-700 py-1.5 border-b border-paper-100">Marketplace</Link>
+          <Link href="/challenge" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-semibold text-ink-800 hover:text-moss-700 py-1.5 border-b border-paper-100">Challenge</Link>
+          <Link href="/rewards" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-semibold text-ink-800 hover:text-moss-700 py-1.5 border-b border-paper-100">Reward</Link>
+          <Link href="/riwayat" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-semibold text-ink-800 hover:text-moss-700 py-1.5 border-b border-paper-100">Riwayat</Link>
+          <Link href="/about" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-semibold text-ink-800 hover:text-moss-700 py-1.5 border-b border-paper-100">Tentang Kami</Link>
+          
+          {!user && (
+            <div className="flex gap-4 pt-2">
+              <Link
+                href="/login"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex-1 text-center py-2.5 rounded-xl border border-paper-250 font-bold text-ink-700 hover:bg-paper-50 text-sm"
+              >
+                Masuk
+              </Link>
+              <Link
+                href="/register"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex-1 text-center py-2.5 rounded-xl bg-[#fbbc04] font-bold text-gray-900 hover:bg-[#e3aa04] text-sm"
+              >
+                Daftar
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
     </nav>
   );
 }
