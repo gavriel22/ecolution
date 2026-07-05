@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { userRepository } from "@/repositories/user.repository";
 import { UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";

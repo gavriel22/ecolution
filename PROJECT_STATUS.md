@@ -16,7 +16,7 @@ Teknologi dan library yang digunakan dalam project Ecolution saat ini adalah:
 - **PostgreSQL** - Database relasional untuk menyimpan seluruh data platform.
 - **Jose (v6.2.3)** - Pustaka penandatanganan dan verifikasi JSON Web Token (JWT).
 - **Jsonwebtoken (v9.0.3)** & **@types/jsonwebtoken** - Penanganan token JWT tambahan.
-- **Bcrypt (v6.0.0)** - Hashing password pengguna untuk keamanan database.
+- **Bcryptjs (v2.x)** - Hashing password pengguna untuk keamanan database *(pure-JavaScript, menggantikan native `bcrypt` C++ addon untuk kompatibilitas penuh dengan Next.js runtime & Vercel Edge)*.
 - **Exifr (v7.1.3)** - Ekstraksi metadata EXIF gambar (untuk data koordinat GPS dan tanggal asli foto).
 - **Zod (v4.4.3)** - Validasi skema input untuk data request body.
 - **TailwindCSS (v4)** - Framework CSS untuk styling antarmuka.
@@ -280,6 +280,11 @@ Fitur-fitur yang sudah diimplementasikan di sisi backend API:
   - Sidebar Dashboard Off-Canvas: Memperbarui sidebar `AppLayout` agar otomatis menyembunyikan drawer menu setelah pengguna mengeklik salah satu tautan di perangkat seluler demi kenyamanan navigasi satu sentuhan.
   - Pencegahan Table Overflow: Membungkus tabel Eco Champions Leaderboard di halaman Dashboard utama (`/dashboard`) dalam kontainer `overflow-x-auto` agar tetap scrollable secara horizontal di perangkat beresolusi rendah (seperti 320px–480px) tanpa merusak keselarasan kolom visual.
 
+- **[FIX KRITIS]** Bug HTTP 500 pada `/api/auth/register` dan `/api/auth/login` diselesaikan:
+  - **Penyebab Root Cause**: Library `bcrypt` (v6.0.0) menggunakan C++ native addon (`.node` binary) yang **gagal dimuat** oleh Next.js App Router runtime di lingkungan tertentu (termasuk Windows saat proses masih mengunci file `.bcrypt-*.node`).
+  - **Solusi**: Mengganti seluruh import `bcrypt` dengan `bcryptjs` (pure JavaScript, tanpa native binary) di `src/services/auth.service.ts` dan seluruh seed files (`prisma/seeds/admin.ts`, `merchant.ts`, `users.ts`).
+  - **Verifikasi**: HTTP test langsung ke `POST /api/auth/register` dan `POST /api/auth/login` kini mengembalikan status `201` dan `200` dengan payload data yang benar.
+
 ### 🔄 In Progress
 
 - Integrasi lanjutan untuk gamifikasi berskala besar
@@ -352,4 +357,5 @@ Berikut adalah pemetaan menyeluruh terhadap modul frontend yang sudah selesai di
 Rincian hasil kompilasi dan build produksi:
 - [x] TypeScript Type Check (`npx tsc --noEmit`) - Sukses, 0 Error.
 - [x] Next.js Production Build (`npx next build`) - Sukses, 43 Halaman Statis & 14 API Route Handler teroptimasi sempurna.
+- [x] **Bug Fix Auth 500**: `POST /api/auth/register` → 201 Created ✅ | `POST /api/auth/login` → 200 OK ✅ (pasca migrasi ke `bcryptjs`).
 

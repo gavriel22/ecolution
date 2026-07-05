@@ -9,8 +9,11 @@ Dokumen ini berisi panduan pengujian fungsionalitas dan antarmuka (UI/UX) khusus
 ### 1. Autentikasi Pengguna & Sesi (Single Login)
 Tujuan: Memastikan pengguna dapat mendaftar, masuk satu kali, dan sesi dipertahankan di seluruh aplikasi.
 
+> **Catatan Perbaikan [2026-07-05]**: Bug HTTP 500 pada endpoint `/api/auth/register` dan `/api/auth/login` telah diperbaiki. Root cause adalah native `bcrypt` C++ addon yang gagal dimuat di runtime Next.js. Solusi: migrasi ke `bcryptjs` (pure JS).
+
 | Langkah Pengujian | Skenario Uji | Hasil yang Diharapkan | Status |
 | :--- | :--- | :--- | :---: |
+| 1.0 | **Regression 500 Error** | Buka DevTools Network, lalu coba Register atau Login. Pastikan response **TIDAK** mengembalikan status `500 Internal Server Error`. Hanya boleh ada `201` (register) atau `200` (login). | [ ] |
 | 1.1 | Pendaftaran Akun Baru | Buka halaman `/register`, isi formulir dengan lengkap, lalu klik "Daftar". Akun berhasil dibuat dan otomatis diarahkan ke halaman `/login`. | [ ] |
 | 1.2 | Login Pertama Kali | Masuk menggunakan kredensial USER yang baru didaftarkan. Halaman dialihkan ke `/dashboard` dan Navbar Landing Page berubah menampilkan nama pengguna (misal: "Halo, [Nama]"). | [ ] |
 | 1.3 | Akses Berulang | Tanpa menutup browser, navigasikan kembali ke Landing Page (`/`), lalu klik "Dashboard User" di dropdown akun. Pengguna langsung masuk ke dashboard tanpa diminta login ulang. | [ ] |
@@ -82,10 +85,14 @@ Tujuan: Memastikan logout menghapus sesi secara permanen dan mencegah eksploitas
 
 1. **Jalankan server database & aplikasi**:
    ```bash
-   # Pastikan PostgreSQL berjalan, lalu jalankan dev server
+   # Pastikan dev server berjalan (bcryptjs sudah terpasang)
    npm run dev
    ```
 2. **Kredensial Akun Dummy Pengujian (USER)**:
-   - Email: `user@ecolution.com`
-   - Password: `password123`
+   - Email: `user@ecolution.id`
+   - Password: `User123!`
    *(Atau buat akun baru melalui antarmuka registrasi untuk menguji skenario 1.1)*
+
+3. **Kredensial Akun Demo Lain (jika seed dijalankan)**:
+   - **Admin** — Email: `admin@ecolution.id` | Password: `Admin123!`
+   - **UMKM/Merchant** — Email: `merchant@ecolution.id` | Password: `merchant123`

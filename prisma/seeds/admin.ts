@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { PrismaClient, UserRole } from "@prisma/client";
 
 export async function seedAdmin(prisma: PrismaClient) {
