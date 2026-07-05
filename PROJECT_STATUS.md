@@ -246,6 +246,7 @@ Fitur-fitur yang sudah diimplementasikan di sisi backend API:
 - **[BARU]** Manajemen Pesanan UMKM (`/merchant/orders`): Seller orders management dashboard untuk melihat daftar pesanan masuk dan mengubah status transaksi.
 - **[BARU]** Manajemen User oleh Admin (`/admin/users`): Halaman kontrol untuk admin memantau daftar pengguna, mengubah role akses (USER, UMKM, ADMIN), serta memblokir/mengaktifkan status akun.
 - **[BARU]** Restrukturisasi layout navigasi sidebar dan link dashboard multi-role secara dinamis, serta pelabelan tombol "Dashboard UMKM" pada Navbar utama jika pengguna ber-role UMKM.
+- **[BARU]** Pemisahan Layout Landing Page & Dashboard: Memperbaiki bug di mana Landing Navbar muncul di halaman dashboard (`/activity`, `/profile`, dan rute privat `/merchant/*`). Sekarang, Navbar hanya dirender pada halaman publik, sementara Dashboard fokus menggunakan tata letak `AppLayout` (Sidebar) tanpa kebocoran visual dari Landing Page.
 
 ### 🔄 In Progress
 

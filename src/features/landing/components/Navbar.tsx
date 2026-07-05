@@ -20,7 +20,12 @@ export function Navbar() {
     pathname === "/register" || 
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/admin") ||
-    pathname.startsWith("/merchant");
+    pathname.startsWith("/activity") ||
+    pathname.startsWith("/profile") ||
+    pathname.startsWith("/merchant/products") ||
+    pathname.startsWith("/merchant/orders") ||
+    pathname.startsWith("/merchant/statistics") ||
+    pathname.startsWith("/merchant/profile");
 
   useEffect(() => {
     const handleScroll = () => {
