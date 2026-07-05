@@ -19,3 +19,26 @@ export async function GET(req: NextRequest) {
     return errorResponse(error);
   }
 }
+
+export async function PUT(req: NextRequest) {
+  try {
+    const userId = req.headers.get("x-user-id");
+    if (!userId) {
+      throw new UnauthorizedError("User is not authenticated");
+    }
+
+    const body = await req.json();
+    const updatedUser = await authService.updateProfile(userId, {
+      name: body.name,
+      username: body.username,
+      email: body.email,
+      phone: body.phone,
+      profileImageUrl: body.profileImageUrl,
+      bio: body.bio,
+      address: body.address,
+    });
+    return successResponse(updatedUser, 200);
+  } catch (error) {
+    return errorResponse(error);
+  }
+}

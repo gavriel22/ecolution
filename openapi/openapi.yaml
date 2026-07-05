@@ -304,6 +304,82 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+    put:
+      summary: Update current user profile
+      description: Update the currently authenticated user's profile details.
+      tags:
+        - Auth
+      security:
+        - BearerJWT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "John Doe"
+                username:
+                  type: string
+                  example: "johndoe"
+                email:
+                  type: string
+                  example: "johndoe@example.com"
+                phone:
+                  type: string
+                  example: "081234567890"
+                profileImageUrl:
+                  type: string
+                  example: "https://example.com/avatar.jpg"
+                bio:
+                  type: string
+                  example: "Environmental advocate and nature lover."
+                address:
+                  type: string
+                  example: "123 Green Street, City"
+      responses:
+        '200':
+          description: User profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized (Token missing or invalid)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict (Email or Username already taken)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /api/users:
     get:
       summary: List all users
@@ -2181,6 +2257,22 @@ components:
           type: string
           format: date-time
           example: "2026-07-04T12:00:00.000Z"
+        phone:
+          type: string
+          nullable: true
+          example: "081234567890"
+        profileImageUrl:
+          type: string
+          nullable: true
+          example: "https://example.com/avatar.jpg"
+        bio:
+          type: string
+          nullable: true
+          example: "Environmental advocate."
+        address:
+          type: string
+          nullable: true
+          example: "123 Green Street, City"
 
     Login:
       type: object

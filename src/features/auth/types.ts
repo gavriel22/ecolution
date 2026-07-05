@@ -9,6 +9,10 @@ export interface User {
   trustScore: number;
   totalPoint: number;
   createdAt: string;
+  phone?: string | null;
+  profileImageUrl?: string | null;
+  bio?: string | null;
+  address?: string | null;
 }
 
 export interface RegisterPayload {

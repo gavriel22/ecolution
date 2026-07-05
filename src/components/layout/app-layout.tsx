@@ -55,8 +55,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       { label: "Dashboard", href: "/dashboard" },
       { label: "Kelola Produk", href: "/merchant/products" },
       { label: "Kelola Pesanan", href: "/merchant/orders" },
-      { label: "Statistik Penjualan", href: "/dashboard" },
-      { label: "Profil Toko", href: "/profile" },
+      { label: "Statistik Penjualan", href: "/merchant/statistics" },
+      { label: "Profil Toko", href: "/merchant/profile" },
       { label: "Profil", href: "/profile" },
     ];
   } else {
@@ -154,7 +154,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
               return (
                 <Link
-                  key={item.href}
+                  key={`${item.label}-${item.href}`}
                   href={item.href}
                   className={`flex h-10 items-center rounded-md text-sm font-medium transition-all duration-200 ${
                     isActive

@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import { userRepository } from "@/repositories/user.repository";
 import { UserRole } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import {
   ConflictError,
   UnauthorizedError,
@@ -23,6 +24,10 @@ export interface SafeUser {
   trustScore: number;
   totalPoint: number;
   createdAt: Date;
+  phone?: string | null;
+  profileImageUrl?: string | null;
+  bio?: string | null;
+  address?: string | null;
 }
 
 export class AuthService {
@@ -36,6 +41,10 @@ export class AuthService {
       trustScore: user.trustScore,
       totalPoint: user.totalPoint,
       createdAt: user.createdAt,
+      phone: user.phone,
+      profileImageUrl: user.profileImageUrl,
+      bio: user.bio,
+      address: user.address,
     };
   }
 
@@ -160,6 +169,75 @@ export class AuthService {
       throw new ValidationError("Refresh token is required to logout");
     }
     await userRepository.deleteRefreshToken(token);
+  }
+
+  async updateProfile(userId: string, data: {
+    name?: string;
+    username?: string;
+    email?: string;
+    phone?: string | null;
+    profileImageUrl?: string | null;
+    bio?: string | null;
+    address?: string | null;
+  }): Promise<SafeUser> {
+    const user = await userRepository.findById(userId);
+    if (!user || !user.isActive) {
+      throw new NotFoundError("User not found");
+    }
+
+    if (data.name !== undefined && !data.name.trim()) {
+      throw new ValidationError("Nama tidak boleh kosong");
+    }
+
+    if (data.email !== undefined) {
+      if (!data.email.trim()) {
+        throw new ValidationError("Email tidak boleh kosong");
+      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(data.email)) {
+        throw new ValidationError("Format email tidak valid");
+      }
+      if (data.email.toLowerCase() !== user.email.toLowerCase()) {
+        const existingEmail = await userRepository.findByEmail(data.email);
+        if (existingEmail) {
+          throw new ConflictError("Email sudah terdaftar pada akun lain");
+        }
+      }
+    }
+
+    if (data.username !== undefined) {
+      if (!data.username.trim()) {
+        throw new ValidationError("Username tidak boleh kosong");
+      }
+      if (data.username !== user.username) {
+        const existingUsername = await userRepository.findByUsername(data.username);
+        if (existingUsername) {
+          throw new ConflictError("Username sudah digunakan");
+        }
+      }
+    }
+
+    if (data.phone !== undefined && data.phone !== null && data.phone.trim() !== "") {
+      const phoneRegex = /^[0-9+\-\s]{8,20}$/;
+      if (!phoneRegex.test(data.phone)) {
+        throw new ValidationError("Format nomor telepon tidak valid");
+      }
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        name: data.name ?? undefined,
+        username: data.username ?? undefined,
+        email: data.email ? data.email.toLowerCase() : undefined,
+        phone: data.phone,
+        profileImageUrl: data.profileImageUrl,
+        bio: data.bio,
+        address: data.address,
+      },
+    });
+
+    return this.toSafeUser(updatedUser);
   }
 
   async me(userId: string): Promise<SafeUser> {

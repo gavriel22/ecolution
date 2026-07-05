@@ -214,6 +214,8 @@ Fitur-fitur yang sudah diimplementasikan di sisi backend API:
   - Halaman Kelola Pesanan UMKM (`/merchant/orders`) untuk melihat dan memperbarui status pesanan masuk bagi mitra UMKM
   - Halaman Pendaftaran Mitra UMKM (`/merchant/register`) untuk mendaftarkan profil toko bagi pengguna biasa
   - Halaman Profil Publik Toko (`/merchant/[merchantId]`) untuk menampilkan info toko dan daftar produknya
+  - Halaman Profil Toko Mitra (`/merchant/profile`) untuk detail usaha dan performa toko bagi mitra UMKM
+  - Halaman Analitik Statistik Penjualan (`/merchant/statistics`) untuk visualisasi keuangan dan pemeringkatan produk terlaris mitra UMKM
   - Halaman Verifikasi Aktivitas (`/admin/activity`) untuk persetujuan manual oleh Admin
   - Halaman Kelola Challenge (`/admin/challenge`) untuk CRUD tantangan oleh Admin
   - Halaman Kelola Kategori (`/admin/category`) untuk CRUD kategori master aktivitas oleh Admin
@@ -247,6 +249,11 @@ Fitur-fitur yang sudah diimplementasikan di sisi backend API:
 - **[BARU]** Manajemen User oleh Admin (`/admin/users`): Halaman kontrol untuk admin memantau daftar pengguna, mengubah role akses (USER, UMKM, ADMIN), serta memblokir/mengaktifkan status akun.
 - **[BARU]** Restrukturisasi layout navigasi sidebar dan link dashboard multi-role secara dinamis, serta pelabelan tombol "Dashboard UMKM" pada Navbar utama jika pengguna ber-role UMKM.
 - **[BARU]** Pemisahan Layout Landing Page & Dashboard: Memperbaiki bug di mana Landing Navbar muncul di halaman dashboard (`/activity`, `/profile`, dan rute privat `/merchant/*`). Sekarang, Navbar hanya dirender pada halaman publik, sementara Dashboard fokus menggunakan tata letak `AppLayout` (Sidebar) tanpa kebocoran visual dari Landing Page.
+- **[BARU]** Alur Autentikasi Terintegrasi & Auto-Redirect: Memodifikasi LoginForm agar mendeteksi session aktif pengguna. Jika token masih valid, pengguna otomatis dialihkan ke Dashboard tanpa perlu login ulang. Login tunggal kini mendukung auto-redirect tampilan dashboard secara dinamis berdasarkan peran (USER, UMKM, ADMIN).
+- **[BARU]** Perbaikan Approve & Reject Aktivitas Admin: Mengubah mekanisme ekstraksi data verifikator pada API `/approve` dan `/reject` untuk memverifikasi token JWT secara langsung (menggunakan `getAuthContext`), menghindari kegagalan penyimpanan akibat malformed UUID dari middleware header.
+- **[BARU]** Halaman Statistik Penjualan Toko (`/merchant/statistics`): Halaman khusus dan terpisah bagi Mitra UMKM untuk menganalisis omzet, unit terjual, pesanan masuk, dan pemeringkatan produk terlaris (Top Selling Products) secara real-time.
+- **[BARU]** Redesain & Diferensiasi Profil User (`/profile`) vs Profil Toko (`/merchant/profile`): Memisahkan halaman profil menjadi dua entitas yang berbeda. Profil User berfokus pada statistik kontribusi lingkungan, poin reward, dan biodata pribadi, sementara Profil Toko berfokus pada informasi operasional bisnis, kontak resmi, dan metrik penjualan toko.
+- **[BARU]** Fitur Edit Profil User & Integrasi API: Menambahkan dukungan database untuk kolom `bio` dan `address` pada model `User`, serta mengimplementasikan API endpoint `PUT /api/auth/me` untuk menyimpan perubahan data diri pengguna lengkap dengan validasi format, penanganan status loading/preview gambar, dan notifikasi toast sukses/gagal di UI.
 
 ### 🔄 In Progress
 

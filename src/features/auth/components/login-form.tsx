@@ -1,19 +1,32 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useLogin } from "../hooks/use-login";
 import { ApiError } from "@/lib/api-client";
+import { useAuth } from "@/context/auth-context";
 
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const login = useLogin();
+  const { user, isLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const callbackUrl = searchParams.get("callbackUrl");
+
+  // Redirect to dashboard if user is already logged in
+  useEffect(() => {
+    if (!isLoading && user) {
+      if (callbackUrl) {
+        router.push(callbackUrl);
+      } else {
+        router.push("/dashboard");
+      }
+    }
+  }, [user, isLoading, callbackUrl, router]);
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();

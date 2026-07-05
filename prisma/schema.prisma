@@ -21,6 +21,8 @@ model User {
   name                  String                 @db.VarChar(100)
   phone                 String?                @db.VarChar(20)
   profileImageUrl       String?                @db.VarChar(255)
+  bio                   String?                @db.VarChar(255)
+  address               String?                @db.VarChar(255)
   totalPoint            Int                    @default(0)
   id                    String                 @id @default(uuid()) @db.Uuid
   accounts              Account[]

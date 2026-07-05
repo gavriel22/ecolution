@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { listActivities, approveActivity, rejectActivity } from "@/features/activity/api";
 import { ApiError } from "@/lib/api-client";
@@ -325,4 +325,3 @@ export default function AdminActivityPage() {
     </div>
   );
 }
-import type { FormEvent } from "react";
