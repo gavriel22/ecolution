@@ -19,6 +19,14 @@ tags:
     description: Eco-activity logging, uploads, submission, and verification
   - name: Merchant
     description: Merchant registration, profiling, and admin approvals
+  - name: Marketplace
+    description: Products management, search, and order checkout
+  - name: Reward
+    description: Voucher management and point redemption
+  - name: Challenge
+    description: Gamified ecological challenges
+  - name: Dashboard
+    description: Aggregated analytical data for users, merchants, and admins
 paths:
   /api/auth/register:
     post:
@@ -295,6 +303,86 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
+  /api/users:
+    get:
+      summary: List all users
+      description: Retrieve a list of all users registered on the platform. Admin only.
+      tags:
+        - Admin
+      security:
+        - BearerJWT: []
+      responses:
+        '200':
+          description: Users retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      users:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (Not an admin)
+
+  /api/users/{id}:
+    put:
+      summary: Update user profile status/role
+      description: Update user role or active status. Admin only.
+      tags:
+        - Admin
+      security:
+        - BearerJWT: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the user to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role:
+                  type: string
+                  enum: [USER, UMKM, ADMIN]
+                isActive:
+                  type: boolean
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (Not an admin)
+        '404':
+          description: User not found
 
   /api/activity:
     get:
@@ -1482,6 +1570,569 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /api/merchant/{id}/reject:
+    post:
+      summary: Reject merchant registration
+      description: Reject a pending merchant registration. Sets the status to SUSPENDED. Admin only.
+      tags:
+        - Merchant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The UUID of the merchant to reject
+      responses:
+        '200':
+          description: Merchant rejected successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Merchant'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (Not an admin)
+        '404':
+          description: Merchant not found
+
+  /api/merchant/my:
+    get:
+      summary: Get active user's merchant profile
+      description: Retrieve the merchant registration profile for the authenticated active user.
+      tags:
+        - Merchant
+      responses:
+        '200':
+          description: Merchant profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      merchant:
+                        $ref: '#/components/schemas/Merchant'
+        '401':
+          description: Unauthorized
+
+  /api/merchant/orders:
+    get:
+      summary: Get incoming orders for merchant
+      description: Retrieve all customer orders containing products from the logged-in merchant's store. UMKM/Admin only.
+      tags:
+        - Merchant
+      responses:
+        '200':
+          description: Merchant orders retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      orders:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Order'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+
+  /api/activity/categories:
+    get:
+      summary: Get all active activity categories
+      description: Retrieve a list of all active activity categories.
+      tags:
+        - Activity
+      responses:
+        '200':
+          description: List of categories retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Category'
+
+  /api/product:
+    get:
+      summary: Get list of products
+      description: Retrieve products in the marketplace with optional search, sorting, and pagination.
+      tags:
+        - Marketplace
+      parameters:
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Products retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      products:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Product'
+                      meta:
+                        type: object
+    post:
+      summary: Create a new product
+      description: Add a new product to the merchant's catalog. UMKM/Admin only.
+      tags:
+        - Marketplace
+      security:
+        - BearerJWT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProduct'
+      responses:
+        '201':
+          description: Product created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Product'
+
+  /api/product/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: Get product detail
+      description: Retrieve details of a specific product.
+      tags:
+        - Marketplace
+      responses:
+        '200':
+          description: Product retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Product'
+    put:
+      summary: Update a product
+      description: Update details of an existing product. UMKM owner / Admin only.
+      tags:
+        - Marketplace
+      security:
+        - BearerJWT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProduct'
+      responses:
+        '200':
+          description: Product updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Product'
+    delete:
+      summary: Delete a product
+      description: Remove a product from the marketplace. UMKM owner / Admin only.
+      tags:
+        - Marketplace
+      security:
+        - BearerJWT: []
+      responses:
+        '200':
+          description: Product deleted successfully
+
+  /api/order:
+    get:
+      summary: Get order history
+      description: Retrieve transactional order history for the logged-in user.
+      tags:
+        - Marketplace
+      security:
+        - BearerJWT: []
+      responses:
+        '200':
+          description: Orders retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      orders:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Order'
+    post:
+      summary: Create an order (Checkout)
+      description: Perform transactional checkout with automated stock deduction.
+      tags:
+        - Marketplace
+      security:
+        - BearerJWT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrder'
+      responses:
+        '201':
+          description: Order placed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Order'
+
+  /api/order/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: Get order details
+      description: Retrieve details of a specific order transaction.
+      tags:
+        - Marketplace
+      security:
+        - BearerJWT: []
+      responses:
+        '200':
+          description: Order details retrieved successfully
+
+  /api/voucher:
+    get:
+      summary: Get list of active vouchers
+      description: Retrieve available vouchers.
+      tags:
+        - Reward
+      responses:
+        '200':
+          description: Vouchers retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Voucher'
+    post:
+      summary: Create a voucher
+      description: Create a new voucher for points redemption. UMKM/Admin only.
+      tags:
+        - Reward
+      security:
+        - BearerJWT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateVoucher'
+      responses:
+        '201':
+          description: Voucher created successfully
+
+  /api/voucher/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: Get voucher detail
+      description: Get details of a specific voucher.
+      tags:
+        - Reward
+      responses:
+        '200':
+          description: Voucher retrieved successfully
+    put:
+      summary: Update voucher
+      description: Update details of a voucher. UMKM/Admin only.
+      tags:
+        - Reward
+      security:
+        - BearerJWT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateVoucher'
+      responses:
+        '200':
+          description: Voucher updated successfully
+    delete:
+      summary: Delete voucher
+      description: Delete a voucher. UMKM/Admin only.
+      tags:
+        - Reward
+      security:
+        - BearerJWT: []
+      responses:
+        '200':
+          description: Voucher deleted successfully
+
+  /api/reward/redeem:
+    post:
+      summary: Redeem points for a voucher
+      description: Redeem points for a specific voucher code using Prisma transactions.
+      tags:
+        - Reward
+      security:
+        - BearerJWT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RedeemVoucher'
+      responses:
+        '200':
+          description: Point redeemed successfully
+
+  /api/reward/history:
+    get:
+      summary: Get redemption history
+      description: Retrieve list of vouchers redeemed by the user.
+      tags:
+        - Reward
+      security:
+        - BearerJWT: []
+      responses:
+        '200':
+          description: Redemption history retrieved successfully
+
+  /api/challenge:
+    get:
+      summary: Get active challenges
+      description: Retrieve a list of active eco-challenges.
+      tags:
+        - Challenge
+      responses:
+        '200':
+          description: Challenges retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Challenge'
+
+  /api/challenge/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: Get challenge details
+      description: Retrieve detail specifications of a challenge.
+      tags:
+        - Challenge
+      responses:
+        '200':
+          description: Challenge details retrieved successfully
+
+  /api/challenge/join:
+    post:
+      summary: Join a challenge
+      description: Enroll in a challenge. Creates participation and progress tracking.
+      tags:
+        - Challenge
+      security:
+        - BearerJWT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JoinChallenge'
+      responses:
+        '200':
+          description: Enrolled in challenge successfully
+
+  /api/challenge/my:
+    get:
+      summary: Get user challenges
+      description: Retrieve user-specific active challenge enrollments.
+      tags:
+        - Challenge
+      security:
+        - BearerJWT: []
+      responses:
+        '200':
+          description: User challenges retrieved successfully
+
+  /api/challenge/{id}/leave:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    post:
+      summary: Cancel challenge enrollment
+      description: Leave or cancel challenge participation.
+      tags:
+        - Challenge
+      security:
+        - BearerJWT: []
+      responses:
+        '200':
+          description: Unenrolled successfully
+
+  /api/dashboard/admin:
+    get:
+      summary: Get admin dashboard metrics
+      description: Aggregated admin metrics for ecosystem supervision. Admin only.
+      tags:
+        - Dashboard
+      security:
+        - BearerJWT: []
+      responses:
+        '200':
+          description: Admin dashboard metrics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardAdmin'
+
+  /api/dashboard/user:
+    get:
+      summary: Get user dashboard metrics
+      description: Aggregated individual metrics for point totals, trust score, and reports.
+      tags:
+        - Dashboard
+      security:
+        - BearerJWT: []
+      responses:
+        '200':
+          description: User dashboard metrics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardUser'
+
+  /api/dashboard/merchant:
+    get:
+      summary: Get merchant dashboard metrics
+      description: Aggregated merchant-specific analytics for revenue and product sales. UMKM/Admin only.
+      tags:
+        - Dashboard
+      security:
+        - BearerJWT: []
+      responses:
+        '200':
+          description: Merchant dashboard metrics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardMerchant'
+
 components:
   securitySchemes:
     BearerJWT:
@@ -1986,4 +2637,448 @@ components:
           type: string
           format: uri
           example: "https://newecostore.id"
+
+    Product:
+      type: object
+      required:
+        - id
+        - name
+        - price
+        - stock
+        - merchantId
+        - isActive
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "p80b82f9-3dc8-4f24-91b7-d1587d558b8b"
+        name:
+          type: string
+          example: "Tumbler Stainless Ramah Lingkungan"
+        description:
+          type: string
+          nullable: true
+          example: "Tumbler stainless steel tahan panas dan dingin 500ml."
+        price:
+          type: integer
+          example: 85000
+        stock:
+          type: integer
+          example: 50
+        merchantId:
+          type: string
+          format: uuid
+          example: "e80b82f9-3dc8-4f24-91b7-d1587d558b8a"
+        imageThumbnail:
+          type: string
+          nullable: true
+          example: "/products/tumbler-thumb.jpg"
+        isActive:
+          type: boolean
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        merchant:
+          type: object
+          properties:
+            businessName:
+              type: string
+              example: "Eco Store Indonesia"
+
+    CreateProduct:
+      type: object
+      required:
+        - name
+        - price
+        - stock
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 150
+          example: "Tumbler Stainless Ramah Lingkungan"
+        description:
+          type: string
+          maxLength: 1000
+          example: "Tumbler stainless steel tahan panas."
+        price:
+          type: integer
+          minimum: 100
+          example: 85000
+        stock:
+          type: integer
+          minimum: 0
+          example: 50
+        imageThumbnail:
+          type: string
+          example: "/products/tumbler-thumb.jpg"
+
+    UpdateProduct:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 150
+          example: "Tumbler Stainless Premium"
+        description:
+          type: string
+          maxLength: 1000
+          example: "Tahan karat 18/8 steel."
+        price:
+          type: integer
+          example: 95000
+        stock:
+          type: integer
+          example: 40
+        imageThumbnail:
+          type: string
+          example: "/products/tumbler-thumb-new.jpg"
+        isActive:
+          type: boolean
+          example: true
+
+    Order:
+      type: object
+      required:
+        - id
+        - orderNumber
+        - userId
+        - status
+        - totalPrice
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "o80b82f9-3dc8-4f24-91b7-d1587d558b8c"
+        orderNumber:
+          type: string
+          example: "ORD-20260705-0001"
+        userId:
+          type: string
+          format: uuid
+          example: "a80b82f9-3dc8-4f24-91b7-d1587d558b8f"
+        status:
+          type: string
+          enum: [PENDING, PAID, PROCESSING, COMPLETED, CANCELLED]
+          example: "PENDING"
+        totalPrice:
+          type: integer
+          example: 85000
+        note:
+          type: string
+          nullable: true
+          example: "Alamat: Jl. Sudirman No 10 | Catatan: Ketuk pintu sebelum masuk"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              productId:
+                type: string
+                format: uuid
+              quantity:
+                type: integer
+              price:
+                type: integer
+              product:
+                $ref: '#/components/schemas/Product'
+
+    CreateOrder:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required:
+              - productId
+              - quantity
+            properties:
+              productId:
+                type: string
+                format: uuid
+                example: "p80b82f9-3dc8-4f24-91b7-d1587d558b8b"
+              quantity:
+                type: integer
+                minimum: 1
+                example: 1
+        note:
+          type: string
+          example: "Alamat: Jl. Sudirman No 10"
+
+    Voucher:
+      type: object
+      required:
+        - id
+        - title
+        - pointsRequired
+        - stock
+        - merchantId
+        - isActive
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "v80b82f9-3dc8-4f24-91b7-d1587d558b8d"
+        title:
+          type: string
+          example: "Diskon Belanja Rp 10.000"
+        description:
+          type: string
+          nullable: true
+          example: "Voucher potongan harga belanja minimal Rp 50.000."
+        pointsRequired:
+          type: integer
+          example: 100
+        stock:
+          type: integer
+          example: 20
+        merchantId:
+          type: string
+          format: uuid
+          example: "e80b82f9-3dc8-4f24-91b7-d1587d558b8a"
+        code:
+          type: string
+          example: "ECO10K"
+        isActive:
+          type: boolean
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        merchant:
+          type: object
+          properties:
+            businessName:
+              type: string
+              example: "Eco Store Indonesia"
+
+    CreateVoucher:
+      type: object
+      required:
+        - title
+        - pointsRequired
+        - stock
+        - code
+      properties:
+        title:
+          type: string
+          minLength: 3
+          example: "Diskon Belanja Rp 10.000"
+        description:
+          type: string
+          example: "Voucher potongan harga."
+        pointsRequired:
+          type: integer
+          minimum: 10
+          example: 100
+        stock:
+          type: integer
+          minimum: 0
+          example: 20
+        code:
+          type: string
+          minLength: 3
+          example: "ECO10K"
+
+    UpdateVoucher:
+      type: object
+      properties:
+        title:
+          type: string
+          example: "Diskon Belanja Rp 15.000"
+        description:
+          type: string
+          example: "Voucher diskon 15k."
+        pointsRequired:
+          type: integer
+          example: 150
+        stock:
+          type: integer
+          example: 15
+        code:
+          type: string
+          example: "ECO15K"
+        isActive:
+          type: boolean
+          example: true
+
+    RedeemVoucher:
+      type: object
+      required:
+        - voucherId
+      properties:
+        voucherId:
+          type: string
+          format: uuid
+          example: "v80b82f9-3dc8-4f24-91b7-d1587d558b8d"
+
+    Challenge:
+      type: object
+      required:
+        - id
+        - title
+        - targetValue
+        - pointReward
+        - startDate
+        - endDate
+        - status
+        - categoryId
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "c80b82f9-3dc8-4f24-91b7-d1587d558b8e"
+        title:
+          type: string
+          example: "Tantangan Daur Ulang 10 Plastik"
+        description:
+          type: string
+          nullable: true
+          example: "Kumpulkan dan laporkan daur ulang botol plastik 10 kali."
+        targetValue:
+          type: integer
+          example: 10
+        pointReward:
+          type: integer
+          example: 500
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [DRAFT, ACTIVE, COMPLETED]
+          example: "ACTIVE"
+        categoryId:
+          type: string
+          format: uuid
+          example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        category:
+          $ref: '#/components/schemas/Category'
+
+    JoinChallenge:
+      type: object
+      required:
+        - challengeId
+      properties:
+        challengeId:
+          type: string
+          format: uuid
+          example: "c80b82f9-3dc8-4f24-91b7-d1587d558b8e"
+
+    DashboardAdmin:
+      type: object
+      properties:
+        totalUsers:
+          type: integer
+          example: 150
+        totalMerchants:
+          type: integer
+          example: 12
+        totalPointsCirculation:
+          type: integer
+          example: 25000
+        activitiesCount:
+          type: object
+          properties:
+            PENDING:
+              type: integer
+              example: 5
+            APPROVED:
+              type: integer
+              example: 45
+            REJECTED:
+              type: integer
+              example: 2
+            TOTAL:
+              type: integer
+              example: 52
+        topUsers:
+          type: array
+          items:
+            type: object
+
+    DashboardUser:
+      type: object
+      properties:
+        totalPoint:
+          type: integer
+          example: 1200
+        trustScore:
+          type: integer
+          example: 95
+        activitiesCount:
+          type: object
+          properties:
+            PENDING:
+              type: integer
+              example: 1
+            APPROVED:
+              type: integer
+              example: 12
+            REJECTED:
+              type: integer
+              example: 0
+            TOTAL:
+              type: integer
+              example: 13
+
+    DashboardMerchant:
+      type: object
+      properties:
+        totalProducts:
+          type: integer
+          example: 8
+        activeProducts:
+          type: integer
+          example: 6
+        salesSummary:
+          type: object
+          properties:
+            totalRevenue:
+              type: integer
+              example: 340000
+            totalItemsSold:
+              type: integer
+              example: 4
+            totalOrders:
+              type: integer
+              example: 3
 

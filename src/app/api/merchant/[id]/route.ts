@@ -40,8 +40,24 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const user = await getAuthContext(req);
-    const result = await merchantService.getMerchant(id, user.id, user.role);
+    
+    // Optional auth: parse token if present, but don't fail if guest user
+    let userId = "";
+    let userRole: UserRole = UserRole.USER;
+    
+    const authHeader = req.headers.get("authorization");
+    if (authHeader) {
+      const parts = authHeader.split(" ");
+      if (parts.length === 2 && parts[0].toLowerCase() === "bearer") {
+        const payload = await verifyAccessToken(parts[1]);
+        if (payload) {
+          userId = payload.id;
+          userRole = payload.role as UserRole;
+        }
+      }
+    }
+    
+    const result = await merchantService.getMerchant(id, userId, userRole);
     return successResponse(result, 200);
   } catch (error) {
     return errorResponse(error);

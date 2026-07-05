@@ -75,7 +75,7 @@ export function Navbar() {
                   href="/dashboard"
                   className="px-6 py-2.5 bg-moss-700 hover:bg-moss-900 border border-moss-600 text-paper-50 rounded-full font-medium transition-colors text-sm"
                 >
-                  Dashboard
+                  {user.role === "UMKM" ? "Dashboard UMKM" : "Dashboard"}
                 </Link>
               </div>
             ) : (

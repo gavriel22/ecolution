@@ -211,9 +211,14 @@ Fitur-fitur yang sudah diimplementasikan di sisi backend API:
   - Halaman Penukaran Saldo Poin dengan Voucher (`/rewards`) & Riwayat Klaim (`/reward/history`)
   - Halaman Jelajah Tantangan (`/challenge`), Detail Tantangan (`/challenge/[id]`), dan Tantangan Diikuti (`/challenge/my`)
   - Halaman Kelola Produk UMKM (`/merchant/products`) untuk CRUD katalog produk bagi mitra UMKM
+  - Halaman Kelola Pesanan UMKM (`/merchant/orders`) untuk melihat dan memperbarui status pesanan masuk bagi mitra UMKM
+  - Halaman Pendaftaran Mitra UMKM (`/merchant/register`) untuk mendaftarkan profil toko bagi pengguna biasa
+  - Halaman Profil Publik Toko (`/merchant/[merchantId]`) untuk menampilkan info toko dan daftar produknya
   - Halaman Verifikasi Aktivitas (`/admin/activity`) untuk persetujuan manual oleh Admin
   - Halaman Kelola Challenge (`/admin/challenge`) untuk CRUD tantangan oleh Admin
   - Halaman Kelola Kategori (`/admin/category`) untuk CRUD kategori master aktivitas oleh Admin
+  - Halaman Persetujuan Pendaftaran UMKM (`/admin/merchant`) untuk admin menyetujui/menolak mitra baru
+  - Halaman Kelola User (`/admin/users`) untuk admin mengelola role dan status aktif pengguna
   - Pembagian visual dashboard dan akses navigasi secara dinamis berdasarkan role (USER, UMKM, ADMIN)
 
 ## 🚧 Frontend Update (Landing Page Integration & Routing Fix)
@@ -235,6 +240,12 @@ Fitur-fitur yang sudah diimplementasikan di sisi backend API:
 - **[BARU]** Memperbaiki alur login (`LoginForm`) agar memprioritaskan parameter `callbackUrl` jika tersedia, sehingga pengguna kembali ke alur transaksi sebelumnya (bukan dipaksa ke dashboard).
 - **[BARU]** Menambahkan tombol `← Kembali ke Landing Page` pada Sidebar Dashboard (`AppLayout`) untuk memudahkan seluruh role (USER, UMKM, ADMIN) berpindah ke halaman publik utama.
 - **[BARU]** Menyinkronkan tombol login/masuk di Navbar dan Footer untuk menyertakan callback URL berdasarkan halaman aktif saat itu.
+- **[BARU]** Sistem Akun UMKM: Alur pendaftaran mandiri UMKM (`/merchant/register`) dari halaman Profil dengan validasi status pendaftaran (`PENDING`, `APPROVED`, `SUSPENDED`).
+- **[BARU]** Admin Approval Flow: Halaman persetujuan pendaftaran UMKM (`/admin/merchant`) terintegrasi penuh dengan backend untuk menyetujui (approve) atau menolak (reject) pendaftaran toko baru.
+- **[BARU]** Halaman Toko UMKM (`/merchant/[merchantId]`): Halaman profil publik toko yang memuat logo, deskripsi, kontak, dan katalog produk dinamis milik mitra terkait, dapat diakses oleh tamu (guest).
+- **[BARU]** Manajemen Pesanan UMKM (`/merchant/orders`): Seller orders management dashboard untuk melihat daftar pesanan masuk dan mengubah status transaksi.
+- **[BARU]** Manajemen User oleh Admin (`/admin/users`): Halaman kontrol untuk admin memantau daftar pengguna, mengubah role akses (USER, UMKM, ADMIN), serta memblokir/mengaktifkan status akun.
+- **[BARU]** Restrukturisasi layout navigasi sidebar dan link dashboard multi-role secara dinamis, serta pelabelan tombol "Dashboard UMKM" pada Navbar utama jika pengguna ber-role UMKM.
 
 ### 🔄 In Progress
 

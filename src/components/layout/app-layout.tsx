@@ -46,12 +46,17 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       { label: "Verifikasi Aktivitas", href: "/admin/activity" },
       { label: "Kelola Challenge", href: "/admin/challenge" },
       { label: "Kelola Kategori", href: "/admin/category" },
+      { label: "Persetujuan UMKM", href: "/admin/merchant" },
+      { label: "Kelola User", href: "/admin/users" },
       { label: "Profil", href: "/profile" },
     ];
   } else if (user.role === "UMKM") {
     menuItems = [
       { label: "Dashboard", href: "/dashboard" },
       { label: "Kelola Produk", href: "/merchant/products" },
+      { label: "Kelola Pesanan", href: "/merchant/orders" },
+      { label: "Statistik Penjualan", href: "/dashboard" },
+      { label: "Profil Toko", href: "/profile" },
       { label: "Profil", href: "/profile" },
     ];
   } else {

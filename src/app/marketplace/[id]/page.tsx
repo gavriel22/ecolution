@@ -153,9 +153,18 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             {/* Merchant */}
             <div className="flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-moss-500" />
-              <p className="font-mono text-xs uppercase tracking-wider text-ink-700 font-semibold">
-                {product.merchant?.businessName || "Mitra UMKM"}
-              </p>
+              {product.merchantId ? (
+                <Link
+                  href={`/merchant/${product.merchantId}`}
+                  className="font-mono text-xs uppercase tracking-wider text-moss-700 font-semibold hover:underline"
+                >
+                  {product.merchant?.businessName || "Mitra UMKM"}
+                </Link>
+              ) : (
+                <p className="font-mono text-xs uppercase tracking-wider text-ink-700 font-semibold">
+                  {product.merchant?.businessName || "Mitra UMKM"}
+                </p>
+              )}
             </div>
 
             {/* Title */}

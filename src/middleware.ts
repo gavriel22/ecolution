@@ -6,10 +6,14 @@ export async function middleware(req: NextRequest) {
 
   const isProtected =
     path.startsWith("/admin") ||
-    path.startsWith("/merchant") ||
     path.startsWith("/dashboard") ||
     path.startsWith("/api/auth/me") ||
-    path.startsWith("/api/activity");
+    path.startsWith("/api/activity") ||
+    path.startsWith("/merchant/products") ||
+    path.startsWith("/merchant/orders") ||
+    path.startsWith("/merchant/statistics") ||
+    path.startsWith("/merchant/profile") ||
+    path.startsWith("/merchant/register");
 
   if (!isProtected) {
     return NextResponse.next();
@@ -66,7 +70,13 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
-  if (path.startsWith("/merchant") && payload.role !== "UMKM" && payload.role !== "ADMIN") {
+  const isMerchantDashboardPath =
+    path.startsWith("/merchant/products") ||
+    path.startsWith("/merchant/orders") ||
+    path.startsWith("/merchant/statistics") ||
+    path.startsWith("/merchant/profile");
+
+  if (isMerchantDashboardPath && payload.role !== "UMKM" && payload.role !== "ADMIN") {
     if (path.startsWith("/api/")) {
       return NextResponse.json(
         { success: false, error: { code: "FORBIDDEN", message: "Forbidden" } },
