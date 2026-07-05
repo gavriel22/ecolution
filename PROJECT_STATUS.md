@@ -256,11 +256,19 @@ Fitur-fitur yang sudah diimplementasikan di sisi backend API:
 - **[BARU]** Fitur Edit Profil User & Integrasi API: Menambahkan dukungan database untuk kolom `bio` dan `address` pada model `User`, serta mengimplementasikan API endpoint `PUT /api/auth/me` untuk menyimpan perubahan data diri pengguna lengkap dengan validasi format, penanganan status loading/preview gambar, dan notifikasi toast sukses/gagal di UI.
 - **[BARU]** Fitur CRUD Lengkap Profil Toko (`/merchant/profile`): Mengimplementasikan dukungan penuh CRUD untuk Profil Toko UMKM. Merchant dapat membuat toko baru (Create), melihat rincian toko (Read), memodifikasi info seperti logo, nama, kategori, telepon, email, website, alamat, dan jam operasional (Update), serta menghapus profil toko jika tidak ada produk (Delete) dengan konfirmasi dialog dan update real-time di UI.
 - **[BARU]** Mode Login Dual-Dashboard (USER & UMKM): Menambahkan tab pilihan "Masuk Sebagai User" atau "Masuk Sebagai UMKM" pada halaman login. Alur login memvalidasi role backend dan menerbitkan token JWT dengan session role yang sesuai, sehingga user dengan status UMKM tetap dapat mengakses Dashboard User tanpa menghapus dashboard user miliknya.
+- **[BARU]** Revamp Landing Page & Penyempurnaan Visi Gamifikasi:
+  - Hero Section: Update headline & subheadline bernilai ekonomi sirkular dan gamifikasi, ditunjang 3 CTA utama yang jelas ("Mulai Berkontribusi", "Upload Aktivitas", "Jelajahi Marketplace").
+  - Card Hero Mockup: Mengisi card kosong dengan visualisasi interaktif mobile dashboard mockup HTML/CSS statis yang memuat Poin, Trust Score, progres misi mingguan, dan tombol lapor aksi.
+  - Dampak Nyata PlatformStats: Menambahkan statistik kontribusi platform (User Aktif, Mitra UMKM, Aksi Terverifikasi, Sampah Terdaur Ulang, Reward Ditukar) dengan fallback data yang mulus.
+  - Eco Champions Leaderboard: Menambahkan endpoint `GET /api/leaderboard` untuk mengambil data top 3 user secara live dari database, serta mengkalkulasi posisi peringkat spesifik user yang sedang login saat itu (misal: #17).
+  - Weekly Challenge: Menampilkan misi mingguan dinamis dengan progres misi saat ini, indikator progress bar, detail reward poin, dan integrasi tombol aksi.
+  - Marketplace Catalog: Mendesain ulang kartu produk agar memuat detail visual terperinci (Nama, Toko Merchant, Rating Bintang, Harga dalam Poin, dan Badge status: Baru/Terlaris/Diskon) lengkap dengan fallback penanganan error pemuatan gambar.
+  - Informasi Footer Lengkap: Menyediakan tautan navigasi dan kontak lengkap, termasuk Contact WhatsApp, Email, Instagram, FAQ/Bantuan, Syarat & Ketentuan, Kebijakan Privasi, dan info Hak Cipta dinamis.
+  - Dropdown Akun Navbar Sesuai Role: Menambahkan dropdown menu akun pada Navbar Landing Page yang secara adaptif menampilkan link menu berdasarkan mode session role aktif pengguna (USER, UMKM, ADMIN) serta opsi Keluar/Logout yang aman.
 
 ### 🔄 In Progress
 
-- Penyempurnaan UI/UX landing page
-- Integrasi data real dari backend ke landing page
+- Integrasi lanjutan untuk gamifikasi berskala besar
 
 ### 🧠 Notes
 

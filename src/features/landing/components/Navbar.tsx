@@ -5,11 +5,24 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
+import { logoutUser } from "@/features/auth/api";
 
 export function Navbar() {
-  const { user } = useAuth();
+  const { user, logoutLocally } = useAuth();
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      logoutLocally();
+      window.location.href = "/";
+    }
+  };
 
   // Determine if we're on the landing page
   const isLandingPage = pathname === "/";
@@ -72,16 +85,107 @@ export function Navbar() {
 
           <div className="flex items-center space-x-4">
             {user ? (
-              <div className="flex items-center gap-3">
-                <span className={`hidden sm:inline font-medium text-sm font-mono ${isTransparent ? 'text-white' : 'text-ink-900'}`}>
-                  Halo, {user.name}
-                </span>
-                <Link
-                  href="/dashboard"
-                  className="px-6 py-2.5 bg-moss-700 hover:bg-moss-900 border border-moss-600 text-paper-50 rounded-full font-medium transition-colors text-sm"
+              <div className="relative">
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className={`font-semibold text-sm font-mono flex items-center gap-1.5 focus:outline-none hover:opacity-80 transition ${
+                    isTransparent ? "text-white" : "text-ink-900"
+                  }`}
                 >
-                  {user.role === "UMKM" ? "Dashboard UMKM" : "Dashboard"}
-                </Link>
+                  Halo, {user.name}
+                  <svg
+                    className={`w-4 h-4 transition-transform duration-200 ${
+                      isDropdownOpen ? "rotate-180" : ""
+                    }`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-3 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50 py-1 divide-y divide-gray-150">
+                    <div className="px-4 py-2">
+                      <p className="text-[10px] text-ink-400 font-mono">Masuk sebagai:</p>
+                      <p className="text-sm font-bold text-ink-900 truncate">{user.name}</p>
+                    </div>
+
+                    <div className="py-1">
+                      {user.role === "USER" && (
+                        <>
+                          <Link
+                            href="/dashboard"
+                            onClick={() => setIsDropdownOpen(false)}
+                            className="block px-4 py-2 text-sm text-ink-700 hover:bg-paper-50 hover:text-moss-700"
+                          >
+                            Dashboard User
+                          </Link>
+                          <Link
+                            href="/profile"
+                            onClick={() => setIsDropdownOpen(false)}
+                            className="block px-4 py-2 text-sm text-ink-700 hover:bg-paper-50 hover:text-moss-700"
+                          >
+                            Profil
+                          </Link>
+                        </>
+                      )}
+
+                      {user.role === "UMKM" && (
+                        <>
+                          <Link
+                            href="/dashboard"
+                            onClick={() => setIsDropdownOpen(false)}
+                            className="block px-4 py-2 text-sm text-ink-700 hover:bg-paper-50 hover:text-moss-700 font-medium"
+                          >
+                            Dashboard UMKM
+                          </Link>
+                          <Link
+                            href="/login?callbackUrl=%2Fdashboard&loginMode=USER"
+                            onClick={() => setIsDropdownOpen(false)}
+                            className="block px-4 py-2 text-sm text-ink-700 hover:bg-paper-50 hover:text-moss-700"
+                          >
+                            Dashboard User (Mode User)
+                          </Link>
+                          <Link
+                            href="/profile"
+                            onClick={() => setIsDropdownOpen(false)}
+                            className="block px-4 py-2 text-sm text-ink-700 hover:bg-paper-50 hover:text-moss-700"
+                          >
+                            Profil User
+                          </Link>
+                          <Link
+                            href="/merchant/profile"
+                            onClick={() => setIsDropdownOpen(false)}
+                            className="block px-4 py-2 text-sm text-ink-700 hover:bg-paper-50 hover:text-moss-700"
+                          >
+                            Profil Toko
+                          </Link>
+                        </>
+                      )}
+
+                      {user.role === "ADMIN" && (
+                        <Link
+                          href="/dashboard"
+                          onClick={() => setIsDropdownOpen(false)}
+                          className="block px-4 py-2 text-sm text-ink-700 hover:bg-paper-50 hover:text-moss-700 font-semibold"
+                        >
+                          Dashboard Admin
+                        </Link>
+                      )}
+                    </div>
+
+                    <div className="py-1">
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left block px-4 py-2 text-sm text-rust-600 hover:bg-rust-50 hover:text-rust-700 font-medium"
+                      >
+                        Keluar
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <>
