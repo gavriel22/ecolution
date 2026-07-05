@@ -1,22 +1,33 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useLogin } from "../hooks/use-login";
 import { ApiError } from "@/lib/api-client";
 
 export function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const login = useLogin();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const callbackUrl = searchParams.get("callbackUrl");
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     login.mutate(
       { email, password },
-      { onSuccess: () => router.push("/activity") }
+      {
+        onSuccess: () => {
+          if (callbackUrl) {
+            router.push(callbackUrl);
+          } else {
+            router.push("/dashboard");
+          }
+        },
+      }
     );
   }
 

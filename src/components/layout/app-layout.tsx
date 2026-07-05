@@ -130,6 +130,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
           {/* Navigation Links */}
           <nav className="flex flex-col gap-1">
+            <Link
+              href="/"
+              className="flex h-10 items-center rounded-md text-sm font-semibold text-moss-700 hover:bg-moss-50 pl-4 mb-1 transition-all duration-200"
+            >
+              <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Kembali ke Landing Page
+            </Link>
+            <div className="border-b border-paper-100 mb-2"></div>
             {menuItems.map((item) => {
               // Exact match or prefix match for subpaths (e.g. /activity/new starts with /activity)
               const isActive =

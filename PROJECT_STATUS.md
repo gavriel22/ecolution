@@ -220,7 +220,7 @@ Fitur-fitur yang sudah diimplementasikan di sisi backend API:
 
 ### ✅ Completed
 
-- Fixed routing pada landing page agar tidak redirect ke dashboard
+- Fixed routing pada landing page agar tidak redirect ke dashboard secara default
 - Memastikan seluruh konten publik (marketplace, challenge, dll) tetap di landing page
 - Mengubah konsep landing page menjadi seperti e-commerce (Shopee-style)
 - Memisahkan fungsi dashboard sebagai halaman khusus CRUD & management
@@ -230,6 +230,11 @@ Fitur-fitur yang sudah diimplementasikan di sisi backend API:
 - Membersihkan hasil merge conflict
 - Menghapus redirect yang tidak sesuai
 - Merapikan struktur UI tanpa mengubah arsitektur
+- **[BARU]** Memisahkan layout Halaman Checkout (`/checkout`) dan Riwayat Pesanan (`/orders`) dari layout Dashboard ke layout Landing Page (Navbar & Footer publik) demi menjaga konsistensi area marketplace.
+- **[BARU]** Mengimplementasikan pengecekan otorisasi pada Checkout & Pesanan dengan redirect callback (`/login?callbackUrl=...`) sehingga alur pembelian berjalan mulus setelah login.
+- **[BARU]** Memperbaiki alur login (`LoginForm`) agar memprioritaskan parameter `callbackUrl` jika tersedia, sehingga pengguna kembali ke alur transaksi sebelumnya (bukan dipaksa ke dashboard).
+- **[BARU]** Menambahkan tombol `← Kembali ke Landing Page` pada Sidebar Dashboard (`AppLayout`) untuk memudahkan seluruh role (USER, UMKM, ADMIN) berpindah ke halaman publik utama.
+- **[BARU]** Menyinkronkan tombol login/masuk di Navbar dan Footer untuk menyertakan callback URL berdasarkan halaman aktif saat itu.
 
 ### 🔄 In Progress
 

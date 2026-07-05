@@ -1,9 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { FaTwitter, FaInstagram, FaFacebook } from "react-icons/fa";
 
 export function Footer() {
+  const pathname = usePathname();
+  const loginHref = pathname && pathname !== "/login" && pathname !== "/register"
+    ? `/login?callbackUrl=${encodeURIComponent(pathname)}`
+    : "/login";
   return (
     <footer className="bg-white pt-20 pb-10 border-t border-[#e6e8e0]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -40,7 +45,7 @@ export function Footer() {
           <div>
             <h4 className="font-bold text-[#2c3d25] mb-6 text-lg">Akun</h4>
             <ul className="space-y-4 text-gray-600">
-              <li><Link href="/login" className="hover:text-[#fbbc04] transition-colors">Masuk</Link></li>
+              <li><Link href={loginHref} className="hover:text-[#fbbc04] transition-colors">Masuk</Link></li>
               <li><Link href="/register" className="hover:text-[#fbbc04] transition-colors">Daftar</Link></li>
               <li><Link href="/dashboard" className="hover:text-[#fbbc04] transition-colors">Dashboard</Link></li>
             </ul>

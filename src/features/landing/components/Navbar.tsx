@@ -81,7 +81,7 @@ export function Navbar() {
             ) : (
               <>
                 <Link
-                  href="/login"
+                  href={pathname && pathname !== "/login" && pathname !== "/register" ? `/login?callbackUrl=${encodeURIComponent(pathname)}` : "/login"}
                   className={linkClass}
                 >
                   Masuk

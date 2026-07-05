@@ -50,7 +50,10 @@ export async function middleware(req: NextRequest) {
         { status: 401 }
       );
     }
-    return NextResponse.redirect(new URL("/login", req.url));
+    const callbackUrl = req.nextUrl.pathname + req.nextUrl.search;
+    const loginUrl = new URL("/login", req.url);
+    loginUrl.searchParams.set("callbackUrl", callbackUrl);
+    return NextResponse.redirect(loginUrl);
   }
 
   if (path.startsWith("/admin") && payload.role !== "ADMIN") {
