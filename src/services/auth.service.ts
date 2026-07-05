@@ -83,7 +83,7 @@ export class AuthService {
   }
 
   async login(
-    credentials: { email: string; password?: string },
+    credentials: { email: string; password?: string; loginMode?: string },
     context: { deviceName?: string; ipAddress?: string; userAgent?: string }
   ): Promise<{ user: SafeUser; accessToken: string; refreshToken: string }> {
     if (!credentials.email || !credentials.password) {
@@ -104,10 +104,24 @@ export class AuthService {
       throw new UnauthorizedError("Invalid email or password");
     }
 
+    const dbUserRole = user.role;
+    let sessionRole: UserRole = "USER";
+
+    if (dbUserRole === "ADMIN") {
+      sessionRole = "ADMIN";
+    } else if (dbUserRole === "UMKM") {
+      sessionRole = credentials.loginMode === "UMKM" ? "UMKM" : "USER";
+    } else {
+      if (credentials.loginMode === "UMKM") {
+        throw new ValidationError("Akun Anda belum terdaftar/disetujui sebagai Mitra UMKM.");
+      }
+      sessionRole = "USER";
+    }
+
     const payload: JWTPayload = {
       id: user.id,
       email: user.email,
-      role: user.role,
+      role: sessionRole,
       username: user.username,
     };
 
@@ -127,8 +141,11 @@ export class AuthService {
       userAgent: context.userAgent,
     });
 
+    const safeUser = this.toSafeUser(user);
+    safeUser.role = sessionRole;
+
     return {
-      user: this.toSafeUser(user),
+      user: safeUser,
       accessToken,
       refreshToken,
     };
@@ -157,7 +174,7 @@ export class AuthService {
     const newAccessToken = await generateAccessToken({
       id: user.id,
       email: user.email,
-      role: user.role,
+      role: payload.role || user.role,
       username: user.username,
     });
 

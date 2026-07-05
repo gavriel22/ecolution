@@ -16,6 +16,8 @@ const createMerchantSchema = z.object({
   phone: z.string().max(20).optional().nullable(),
   email: z.preprocess((val) => (val === "" ? undefined : val), z.string().email("Invalid email format").optional().nullable()),
   website: z.preprocess((val) => (val === "" ? undefined : val), z.string().url("Invalid website URL format").optional().nullable()),
+  category: z.string().max(100).optional().nullable(),
+  operasionalHours: z.string().max(100).optional().nullable(),
 });
 
 const updateMerchantSchema = z.object({
@@ -26,6 +28,8 @@ const updateMerchantSchema = z.object({
   phone: z.string().max(20).optional().nullable(),
   email: z.preprocess((val) => (val === "" ? undefined : val), z.string().email("Invalid email format").optional().nullable()),
   website: z.preprocess((val) => (val === "" ? undefined : val), z.string().url("Invalid website URL format").optional().nullable()),
+  category: z.string().max(100).optional().nullable(),
+  operasionalHours: z.string().max(100).optional().nullable(),
 });
 
 export class MerchantService {
@@ -40,6 +44,8 @@ export class MerchantService {
       phone: merchant.phone,
       email: merchant.email,
       website: merchant.website,
+      category: merchant.category,
+      operasionalHours: merchant.operasionalHours,
       status: merchant.status,
       createdAt: merchant.createdAt,
       updatedAt: merchant.updatedAt,
@@ -57,8 +63,8 @@ export class MerchantService {
   }
 
   async createMerchant(userId: string, userRole: UserRole, data: unknown) {
-    // 1. Role harus USER atau UMKM
-    if (userRole !== UserRole.USER && userRole !== UserRole.UMKM) {
+    // 1. Role harus USER atau UMKM atau ADMIN (jika mendaftar mode admin)
+    if (userRole !== UserRole.USER && userRole !== UserRole.UMKM && userRole !== UserRole.ADMIN) {
       throw new ForbiddenError("Only users with role USER or UMKM can register as a merchant");
     }
 
@@ -83,6 +89,8 @@ export class MerchantService {
       phone: parsed.data.phone ?? undefined,
       email: parsed.data.email ?? undefined,
       website: parsed.data.website ?? undefined,
+      category: parsed.data.category ?? undefined,
+      operasionalHours: parsed.data.operasionalHours ?? undefined,
     });
 
     return this.mapMerchant(merchant);
@@ -126,8 +134,8 @@ export class MerchantService {
       throw new NotFoundError("Merchant not found");
     }
 
-    // Hanya owner merchant yang boleh mengubah data
-    if (merchant.ownerId !== userId) {
+    // Hanya owner merchant atau admin yang boleh mengubah data
+    if (merchant.ownerId !== userId && userRole !== UserRole.ADMIN) {
       throw new ForbiddenError("Only the merchant owner can update this profile");
     }
 
@@ -139,6 +147,8 @@ export class MerchantService {
       phone: parsed.data.phone ?? undefined,
       email: parsed.data.email ?? undefined,
       website: parsed.data.website ?? undefined,
+      category: parsed.data.category ?? undefined,
+      operasionalHours: parsed.data.operasionalHours ?? undefined,
     });
 
     return this.mapMerchant(updated);

@@ -14,6 +14,7 @@ export function LoginForm() {
   const { user, isLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loginMode, setLoginMode] = useState<"USER" | "UMKM">("USER");
 
   const callbackUrl = searchParams.get("callbackUrl");
 
@@ -31,7 +32,7 @@ export function LoginForm() {
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     login.mutate(
-      { email, password },
+      { email, password, loginMode },
       {
         onSuccess: () => {
           if (callbackUrl) {
@@ -52,6 +53,24 @@ export function LoginForm() {
       <div className="space-y-1">
         <h1 className="font-display text-3xl font-semibold text-ink-900">Masuk</h1>
         <p className="text-sm text-ink-400">Lanjutkan aksi lingkunganmu di Ecolution.</p>
+      </div>
+
+      {/* Login Mode Tabs */}
+      <div className="flex border-b border-paper-200 gap-6 text-sm font-semibold">
+        {(["USER", "UMKM"] as const).map((mode) => (
+          <button
+            key={mode}
+            type="button"
+            onClick={() => setLoginMode(mode)}
+            className={`flex-1 pb-2 border-b-2 text-center transition ${
+              loginMode === mode
+                ? "border-moss-700 text-moss-700 font-bold"
+                : "border-transparent text-ink-400 hover:text-ink-900"
+            }`}
+          >
+            {mode === "USER" ? "Masuk Sebagai User" : "Masuk Sebagai UMKM"}
+          </button>
+        ))}
       </div>
 
       {errorMessage && (

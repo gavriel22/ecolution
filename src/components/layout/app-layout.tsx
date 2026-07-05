@@ -57,7 +57,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       { label: "Kelola Pesanan", href: "/merchant/orders" },
       { label: "Statistik Penjualan", href: "/merchant/statistics" },
       { label: "Profil Toko", href: "/merchant/profile" },
-      { label: "Profil", href: "/profile" },
     ];
   } else {
     menuItems = [

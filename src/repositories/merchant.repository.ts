@@ -27,6 +27,8 @@ export class MerchantRepository {
     phone?: string;
     email?: string;
     website?: string;
+    category?: string;
+    operasionalHours?: string;
   }): Promise<Merchant> {
     return prisma.merchant.create({
       data: {
@@ -38,6 +40,8 @@ export class MerchantRepository {
         phone: data.phone || null,
         email: data.email || null,
         website: data.website || null,
+        category: data.category || null,
+        operasionalHours: data.operasionalHours || null,
         status: MerchantStatus.PENDING,
       },
     });
@@ -53,6 +57,8 @@ export class MerchantRepository {
       phone?: string;
       email?: string;
       website?: string;
+      category?: string;
+      operasionalHours?: string;
     }
   ): Promise<Merchant> {
     return prisma.merchant.update({

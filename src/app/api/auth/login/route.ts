@@ -50,6 +50,7 @@ export async function POST(req: NextRequest) {
       {
         email: body.email,
         password: body.password,
+        loginMode: body.loginMode,
       },
       {
         deviceName: body.deviceName,

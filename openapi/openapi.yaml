@@ -2616,6 +2616,14 @@ components:
           format: uri
           nullable: true
           example: "https://ecostore.id"
+        category:
+          type: string
+          nullable: true
+          example: "Kerajinan Tangan"
+        operasionalHours:
+          type: string
+          nullable: true
+          example: "Senin - Jumat, 08:00 - 17:00 WIB"
         status:
           type: string
           enum: [PENDING, APPROVED, VERIFIED, SUSPENDED]

@@ -27,6 +27,7 @@ export interface LoginPayload {
   email: string;
   password: string;
   deviceName?: string;
+  loginMode?: string;
 }
 
 export interface LoginResponseData {
