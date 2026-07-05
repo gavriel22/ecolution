@@ -6,8 +6,10 @@ import { useRouter } from "next/navigation";
 import { useVouchers, useRedeemReward, useRedemptionHistory } from "@/features/reward/hooks/use-rewards";
 import { ApiError } from "@/lib/api-client";
 import type { Voucher } from "@/features/reward/types";
+import { useConfirm } from "@/providers/confirm-provider";
 
 export default function RewardsPage() {
+  const confirmDialog = useConfirm();
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
   const { data: vouchersData, isLoading: vouchersLoading, isError: vouchersError } = useVouchers({ status: "AVAILABLE" });
@@ -40,16 +42,17 @@ export default function RewardsPage() {
 
   // Point metrics calculation
   const totalPoint = user?.totalPoint ?? 0;
-  const level = Math.floor(totalPoint / 1000) + 1;
-  const currentLevelPoints = totalPoint % 1000;
+  const accumulatedPoint = user?.accumulatedPoint ?? totalPoint;
+  const level = Math.floor(accumulatedPoint / 1000) + 1;
+  const currentLevelPoints = accumulatedPoint % 1000;
   const pointsToNextLevel = 1000 - currentLevelPoints;
   const progressPercent = Math.min(100, Math.round((currentLevelPoints / 1000) * 100));
 
-  const handleRedeem = (voucher: Voucher) => {
+  const handleRedeem = async (voucher: Voucher) => {
     setErrorMsg(null);
     if (user.totalPoint < voucher.pointCost) return;
 
-    if (confirm(`Apakah Anda yakin ingin menukarkan ${voucher.pointCost} Poin untuk voucher "${voucher.title}"?`)) {
+    if (await confirmDialog(`Apakah Anda yakin ingin menukarkan ${voucher.pointCost} Poin untuk voucher "${voucher.title}"?`)) {
       redeemReward.mutate(voucher.id, {
         onSuccess: (res) => {
           setRedeemedCode(res.data.voucherCode);
@@ -193,11 +196,7 @@ export default function RewardsPage() {
                   >
                     {/* Thumbnail Image */}
                     <div className="relative h-44 w-full bg-paper-50 flex items-center justify-center overflow-hidden border-b border-paper-100">
-                      {voucher.imageUrl ? (
-                        <img src={voucher.imageUrl} alt={voucher.title} className="h-full w-full object-cover" />
-                      ) : (
-                        <span className="text-4xl">🎁</span>
-                      )}
+                      <span className="text-4xl">🎁</span>
                       {isOutOfStock && (
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                           <span className="rounded bg-rust-600 px-3 py-1 font-mono text-[10px] font-bold text-white uppercase tracking-wider">
@@ -211,7 +210,7 @@ export default function RewardsPage() {
                     <div className="p-5 flex flex-col justify-between flex-1 space-y-4">
                       <div>
                         <div className="flex justify-between items-center text-[10px] text-ink-400 font-mono">
-                          <span>🏪 {voucher.merchant?.businessName || "Mitra UMKM"}</span>
+                          <span>🎁 Admin Ecolution</span>
                           <span>Stok: {voucher.stock}</span>
                         </div>
                         <h3 className="text-sm font-bold text-ink-900 mt-1.5 leading-snug line-clamp-2">{voucher.title}</h3>
@@ -222,6 +221,11 @@ export default function RewardsPage() {
                         <div className="font-mono">
                           <p className="text-[9px] uppercase tracking-wider text-ink-400 font-bold">Biaya Poin</p>
                           <p className="text-lg font-black text-moss-700">{voucher.pointCost} Pts</p>
+                          {voucher.discountAmount > 0 && (
+                            <p className="text-[10px] text-amber-600 font-bold mt-0.5">
+                              = Diskon Rp {new Intl.NumberFormat("id-ID").format(voucher.discountAmount)}
+                            </p>
+                          )}
                         </div>
                         <button
                           disabled={isOutOfStock || !hasEnoughPoints || redeemReward.isPending}

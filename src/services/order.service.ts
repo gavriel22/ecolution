@@ -17,7 +17,9 @@ const checkoutSchema = z.object({
     )
     .nonempty("Order must contain at least one item"),
   note: z.string().max(500).optional().nullable(),
+  voucherRedemptionId: z.string().uuid("Invalid voucher redemption ID format").optional().nullable(),
 });
+
 
 export class OrderService {
   private mapOrder(order: any) {
@@ -25,6 +27,8 @@ export class OrderService {
       id: order.id,
       userId: order.userId,
       totalPrice: Number(order.totalPrice),
+      discountAmount: Number(order.discountAmount),
+      finalPrice: Number(order.finalPrice),
       status: order.status,
       note: order.note,
       orderNumber: order.orderNumber,
@@ -73,7 +77,8 @@ export class OrderService {
       const order = await orderRepository.createCheckoutTransaction(
         userId,
         parsed.data.items,
-        parsed.data.note || undefined
+        parsed.data.note || undefined,
+        parsed.data.voucherRedemptionId || undefined
       );
 
       return this.mapOrder(order);
@@ -90,6 +95,9 @@ export class OrderService {
       if (message.startsWith("INSUFFICIENT_STOCK:")) {
         const detail = message.split(":")[1];
         throw new ValidationError(`Insufficient stock: ${detail}`);
+      }
+      if (message.startsWith("VOUCHER_REDEMPTION_NOT_FOUND")) {
+        throw new NotFoundError("Voucher redemption not found or already used");
       }
       throw e;
     }

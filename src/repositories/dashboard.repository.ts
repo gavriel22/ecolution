@@ -74,6 +74,7 @@ export class DashboardRepository {
       activitiesGrouped,
       activeChallengesCount,
       recentPoints,
+      topUsers,
     ] = await Promise.all([
       prisma.user.findUnique({
         where: { id: userId },
@@ -99,6 +100,23 @@ export class DashboardRepository {
         where: { userId },
         orderBy: { createdAt: "desc" },
         take: 5,
+      }),
+      prisma.user.findMany({
+        where: {
+          deletedAt: null,
+          role: "USER",
+        },
+        orderBy: {
+          totalPoint: "desc",
+        },
+        take: 5,
+        select: {
+          id: true,
+          name: true,
+          username: true,
+          totalPoint: true,
+          trustScore: true,
+        },
       }),
     ]);
 
@@ -131,6 +149,7 @@ export class DashboardRepository {
         description: item.description,
         createdAt: item.createdAt,
       })),
+      topUsers,
     };
   }
 
@@ -138,7 +157,6 @@ export class DashboardRepository {
     const [
       totalProducts,
       activeProducts,
-      activeVouchers,
       recentProducts,
       orderItems,
     ] = await Promise.all([
@@ -146,12 +164,6 @@ export class DashboardRepository {
         where: { merchantId },
       }),
       prisma.product.count({
-        where: {
-          merchantId,
-          status: "AVAILABLE",
-        },
-      }),
-      prisma.voucher.count({
         where: {
           merchantId,
           status: "AVAILABLE",
@@ -256,7 +268,6 @@ export class DashboardRepository {
     return {
       totalProducts,
       activeProducts,
-      activeVouchers,
       recentProducts,
       salesSummary: {
         totalRevenue,

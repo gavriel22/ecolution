@@ -1,47 +1,31 @@
 import { prisma } from "@/lib/prisma";
-import { Voucher, VoucherStatus, Prisma } from "@prisma/client";
+import { VoucherStatus, Prisma } from "@prisma/client";
 
 export class VoucherRepository {
   async findById(id: string): Promise<any | null> {
     return prisma.voucher.findUnique({
       where: { id },
-      include: {
-        category: true,
-        merchant: {
-          include: {
-            owner: true,
-          },
-        },
-      },
     });
   }
 
   async create(data: {
-    merchantId: string;
-    categoryId: string;
     title: string;
     description?: string | null;
     pointCost: number;
+    discountAmount: number;
     stock: number;
-    imageUrl?: string | null;
     expiredAt?: Date | null;
     status?: VoucherStatus;
   }): Promise<any> {
     return prisma.voucher.create({
       data: {
-        merchantId: data.merchantId,
-        categoryId: data.categoryId,
         title: data.title,
         description: data.description,
         pointCost: data.pointCost,
+        discountAmount: data.discountAmount,
         stock: data.stock,
-        imageUrl: data.imageUrl,
         expiredAt: data.expiredAt,
         status: data.status || VoucherStatus.AVAILABLE,
-      },
-      include: {
-        category: true,
-        merchant: true,
       },
     });
   }
@@ -49,12 +33,11 @@ export class VoucherRepository {
   async update(
     id: string,
     data: {
-      categoryId?: string;
       title?: string;
       description?: string | null;
       pointCost?: number;
+      discountAmount?: number;
       stock?: number;
-      imageUrl?: string | null;
       expiredAt?: Date | null;
       status?: VoucherStatus;
     }
@@ -62,10 +45,6 @@ export class VoucherRepository {
     return prisma.voucher.update({
       where: { id },
       data,
-      include: {
-        category: true,
-        merchant: true,
-      },
     });
   }
 
@@ -81,7 +60,6 @@ export class VoucherRepository {
     skip: number;
     search?: string;
     categoryId?: string;
-    merchantId?: string;
     status?: VoucherStatus;
     minPointCost?: number;
     maxPointCost?: number;
@@ -95,14 +73,6 @@ export class VoucherRepository {
         { title: { contains: params.search, mode: "insensitive" } },
         { description: { contains: params.search, mode: "insensitive" } },
       ];
-    }
-
-    if (params.categoryId) {
-      where.categoryId = params.categoryId;
-    }
-
-    if (params.merchantId) {
-      where.merchantId = params.merchantId;
     }
 
     if (params.status) {
@@ -129,11 +99,7 @@ export class VoucherRepository {
     const [vouchers, totalCount] = await Promise.all([
       prisma.voucher.findMany({
         where,
-        include: {
-          category: true,
-          merchant: true,
-        },
-        orderBy,
+        orderBy: { [params.sortBy || "createdAt"]: params.sortOrder || "desc" },
         skip: params.skip,
         take: params.limit,
       }),

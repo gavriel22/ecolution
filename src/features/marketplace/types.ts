@@ -50,6 +50,8 @@ export interface Order {
   id: string;
   userId: string;
   totalPrice: number;
+  discountAmount: number;
+  finalPrice: number;
   status: OrderStatus;
   note: string | null;
   orderNumber: string;
@@ -95,4 +97,5 @@ export interface CheckoutPayload {
     quantity: number;
   }[];
   note?: string | null;
+  voucherRedemptionId?: string | null;
 }

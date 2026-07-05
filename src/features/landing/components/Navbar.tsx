@@ -88,6 +88,17 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center space-x-4">
+            {/* Cart Icon */}
+            <Link
+              href={user ? "/cart" : "/login?callbackUrl=/cart"}
+              className={`p-2 rounded-full transition flex items-center justify-center ${isTransparent ? "text-white hover:bg-white/10 hover:text-[#fbbc04]" : "text-ink-900 hover:bg-paper-100 hover:text-[#fbbc04]"}`}
+              title="Keranjang Belanja"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </Link>
+
             {/* Profile Dropdown */}
             {user ? (
               <div className="relative">
@@ -228,6 +239,16 @@ export function Navbar() {
           <Link href="/rewards" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-semibold text-ink-800 hover:text-moss-700 py-1.5 border-b border-paper-100">Reward</Link>
           <Link href="/riwayat" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-semibold text-ink-800 hover:text-moss-700 py-1.5 border-b border-paper-100">Riwayat</Link>
           <Link href="/about" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-semibold text-ink-800 hover:text-moss-700 py-1.5 border-b border-paper-100">Tentang Kami</Link>
+          <Link 
+            href={user ? "/cart" : "/login?callbackUrl=/cart"} 
+            onClick={() => setIsMobileMenuOpen(false)} 
+            className="flex items-center gap-2 text-sm font-semibold text-ink-800 hover:text-moss-700 py-1.5 border-b border-paper-100"
+          >
+            Keranjang Belanja
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          </Link>
           
           {!user && (
             <div className="flex gap-4 pt-2">

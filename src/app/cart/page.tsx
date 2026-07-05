@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/auth-context";
 
 interface CartItem {
   id: string;
@@ -16,20 +17,24 @@ interface CartItem {
 
 export default function CartPage() {
   const router = useRouter();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isClient, setIsClient] = useState(false);
+  const cartKey = user ? `ecolution_cart_${user.id}` : "ecolution_cart_guest";
 
-  // Read cart from localStorage on mount
+  // Read cart from localStorage on mount or when user changes
   useEffect(() => {
-    setCart(JSON.parse(localStorage.getItem("ecolution_cart") || "[]"));
-    setIsClient(true);
-  }, []);
+    if (!isAuthLoading) {
+      setCart(JSON.parse(localStorage.getItem(cartKey) || "[]"));
+      setIsClient(true);
+    }
+  }, [isAuthLoading, cartKey]);
 
   if (!isClient) return null;
 
   const saveCart = (newCart: CartItem[]) => {
     setCart(newCart);
-    localStorage.setItem("ecolution_cart", JSON.stringify(newCart));
+    localStorage.setItem(cartKey, JSON.stringify(newCart));
   };
 
   const handleUpdateQty = (id: string, delta: number) => {

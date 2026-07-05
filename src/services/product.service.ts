@@ -188,7 +188,14 @@ export class ProductService {
       throw new ForbiddenError("Only the product merchant owner can delete this product");
     }
 
-    await productRepository.delete(id);
+    try {
+      await productRepository.delete(id);
+    } catch (error: any) {
+      if (error?.code === "P2003") {
+        throw new ValidationError("Cannot delete product because it has associated orders or dependencies");
+      }
+      throw error;
+    }
   }
 }
 

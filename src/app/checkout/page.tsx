@@ -4,7 +4,10 @@ import { useState, useEffect, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCreateOrder } from "@/features/marketplace/hooks/use-marketplace-mutations";
+import { useRedemptionHistory } from "@/features/reward/hooks/use-rewards";
 import { ApiError } from "@/lib/api-client";
+import type { VoucherRedemption } from "@/features/reward/types";
+import { useAuth } from "@/context/auth-context";
 
 interface CartItem {
   id: string;
@@ -19,23 +22,35 @@ interface CartItem {
 export default function CheckoutPage() {
   const router = useRouter();
   const createOrder = useCreateOrder();
+  const { user, isLoading: isAuthLoading } = useAuth();
+  const cartKey = user ? `ecolution_cart_${user.id}` : "ecolution_cart_guest";
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [address, setAddress] = useState("");
   const [note, setNote] = useState("");
   const [isClient, setIsClient] = useState(false);
+  const [selectedRedemption, setSelectedRedemption] = useState<VoucherRedemption | null>(null);
+  const [showVoucherList, setShowVoucherList] = useState(false);
+
+  // Fetch user's available (unused) voucher redemptions
+  const { data: redemptionData } = useRedemptionHistory({ page: 1, limit: 100 });
+  const availableRedemptions = (redemptionData?.redemptions || []).filter(
+    (r: VoucherRedemption) => r.status === "COMPLETED" && !r.usedAt
+  );
 
   // Read cart on mount
   useEffect(() => {
-    const savedCart = JSON.parse(localStorage.getItem("ecolution_cart") || "[]");
-    setCart(savedCart);
-    setIsClient(true);
+    if (!isAuthLoading) {
+      const savedCart = JSON.parse(localStorage.getItem(cartKey) || "[]");
+      setCart(savedCart);
+      setIsClient(true);
 
-    // If cart is empty, redirect back to marketplace
-    if (savedCart.length === 0) {
-      router.push("/marketplace");
+      // If cart is empty, redirect back to marketplace
+      if (savedCart.length === 0) {
+        router.push("/marketplace");
+      }
     }
-  }, [router]);
+  }, [router, isAuthLoading, cartKey]);
 
   if (!isClient || cart.length === 0) return null;
 
@@ -48,6 +63,8 @@ export default function CheckoutPage() {
   };
 
   const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const discountAmount = selectedRedemption?.voucher?.discountAmount ?? 0;
+  const finalPrice = Math.max(0, totalPrice - discountAmount);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -63,11 +80,12 @@ export default function CheckoutPage() {
           quantity: item.quantity,
         })),
         note: mergedNote,
+        voucherRedemptionId: selectedRedemption?.id || undefined,
       },
       {
         onSuccess: () => {
           // Clear cart
-          localStorage.removeItem("ecolution_cart");
+          localStorage.removeItem(cartKey);
           // Redirect to orders
           router.push("/orders");
         },
@@ -95,7 +113,7 @@ export default function CheckoutPage() {
       </div>
 
       {errorMessage && (
-        <div className="rounded-md border border-rust-500/30 bg-rust-500/5 px-4 py-3 text-sm text-rust-600">
+        <div className="rounded-md border border-rust-500/30 bg-rust-500/5 px-4 py-3 text-sm text-rust-600 font-body">
           {errorMessage}
         </div>
       )}
@@ -103,7 +121,7 @@ export default function CheckoutPage() {
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Shipping Form details */}
         <div className="lg:col-span-2 space-y-4">
-          <div className="rounded-lg border border-paper-200 bg-white p-5 shadow-xs space-y-5">
+          <div className="rounded-lg border border-paper-200 bg-white p-5 shadow-xs space-y-5 font-body">
             <h2 className="font-display text-lg font-bold text-ink-900 border-b border-paper-200 pb-2">
               Informasi Pengiriman
             </h2>
@@ -139,11 +157,77 @@ export default function CheckoutPage() {
               />
             </div>
           </div>
+
+          {/* Voucher Section */}
+          <div className="rounded-lg border border-paper-200 bg-white p-5 shadow-xs space-y-4 font-body">
+            <h2 className="font-display text-lg font-bold text-ink-900 border-b border-paper-200 pb-2">
+              Gunakan Voucher Reward
+            </h2>
+
+            {availableRedemptions.length === 0 ? (
+              <div className="rounded-md bg-paper-50 border border-paper-200 p-4 text-sm text-ink-400 text-center">
+                <p>Anda tidak memiliki voucher yang bisa digunakan.</p>
+                <Link href="/rewards" className="mt-1 inline-block text-moss-700 hover:text-moss-900 font-semibold text-xs">
+                  Tukar Poin dengan Voucher →
+                </Link>
+              </div>
+            ) : selectedRedemption ? (
+              <div className="flex items-center justify-between rounded-md border border-moss-300 bg-moss-50 px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🎁</span>
+                  <div>
+                    <p className="text-sm font-bold text-moss-900">{selectedRedemption.voucher?.title}</p>
+                    <p className="text-xs text-moss-700 font-mono">
+                      Diskon: {formatPrice(selectedRedemption.voucher?.discountAmount ?? 0)}
+                    </p>
+                    <p className="text-xs text-ink-400 font-mono mt-0.5">Kode: {selectedRedemption.voucherCode}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedRedemption(null)}
+                  className="text-xs font-semibold text-rust-600 hover:text-rust-900"
+                >
+                  Hapus
+                </button>
+              </div>
+            ) : (
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setShowVoucherList(!showVoucherList)}
+                  className="w-full flex items-center justify-between rounded-md border border-dashed border-paper-300 bg-paper-50 px-4 py-3 text-sm text-ink-700 hover:border-moss-400 hover:bg-moss-50/30 transition"
+                >
+                  <span className="font-semibold">Pilih voucher ({availableRedemptions.length} tersedia)</span>
+                  <span className="text-ink-400">{showVoucherList ? "▲" : "▼"}</span>
+                </button>
+                {showVoucherList && (
+                  <div className="mt-2 space-y-2 max-h-60 overflow-y-auto">
+                    {availableRedemptions.map((red: VoucherRedemption) => (
+                      <button
+                        key={red.id}
+                        type="button"
+                        onClick={() => { setSelectedRedemption(red); setShowVoucherList(false); }}
+                        className="w-full flex items-center justify-between rounded-md border border-paper-200 bg-white px-4 py-3 hover:border-moss-400 hover:bg-moss-50/30 transition text-left"
+                      >
+                        <div>
+                          <p className="text-sm font-bold text-ink-900">{red.voucher?.title}</p>
+                          <p className="text-xs text-moss-700 font-mono">Diskon {formatPrice(red.voucher?.discountAmount ?? 0)}</p>
+                          <p className="text-xs text-ink-400 font-mono">Kode: {red.voucherCode}</p>
+                        </div>
+                        <span className="text-xs font-semibold text-moss-700">Pakai →</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Order Summary */}
         <div className="space-y-4">
-          <div className="rounded-lg border border-paper-200 bg-white p-5 shadow-xs space-y-4">
+          <div className="rounded-lg border border-paper-200 bg-white p-5 shadow-xs space-y-4 font-body">
             <h2 className="font-display text-lg font-bold text-ink-900 border-b border-paper-200 pb-2">
               Ringkasan Pesanan
             </h2>
@@ -165,12 +249,22 @@ export default function CheckoutPage() {
               ))}
             </div>
 
-            {/* Total Price */}
-            <div className="border-t border-paper-200 pt-3 flex justify-between items-center text-sm">
-              <span className="font-semibold text-ink-900">Total Pembayaran</span>
-              <span className="font-display font-bold text-moss-700 text-lg">
-                {formatPrice(totalPrice)}
-              </span>
+            {/* Price Breakdown */}
+            <div className="space-y-2 border-t border-paper-200 pt-3">
+              <div className="flex justify-between items-center text-sm text-ink-600">
+                <span>Subtotal</span>
+                <span className="font-mono">{formatPrice(totalPrice)}</span>
+              </div>
+              {discountAmount > 0 && (
+                <div className="flex justify-between items-center text-sm text-moss-700">
+                  <span className="font-semibold">Diskon Voucher 🎁</span>
+                  <span className="font-mono font-bold">- {formatPrice(discountAmount)}</span>
+                </div>
+              )}
+              <div className="flex justify-between items-center text-sm border-t border-paper-200 pt-2">
+                <span className="font-bold text-ink-900">Total Pembayaran</span>
+                <span className="font-display font-bold text-moss-700 text-lg">{formatPrice(finalPrice)}</span>
+              </div>
             </div>
 
             {/* Submit */}

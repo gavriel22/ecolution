@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { listActivities, approveActivity, rejectActivity } from "@/features/activity/api";
 import { ApiError } from "@/lib/api-client";
 import type { ActivityStatus } from "@/features/activity/types";
+import { toast } from "sonner";
 
 export default function AdminActivityPage() {
   const queryClient = useQueryClient();
@@ -39,7 +40,7 @@ export default function AdminActivityPage() {
       setVerifyingId(null);
       setVerifyType(null);
       setActionNote("");
-      alert("Aktivitas berhasil disetujui!");
+      toast.success("Aktivitas berhasil disetujui!");
     },
     onError: (err) => {
       setErrorMsg(err instanceof ApiError ? err.message : "Gagal menyetujui aktivitas.");
@@ -56,7 +57,7 @@ export default function AdminActivityPage() {
       setVerifyType(null);
       setAdminNote("");
       setActionNote("");
-      alert("Aktivitas berhasil ditolak.");
+      toast.success("Aktivitas berhasil ditolak.");
     },
     onError: (err) => {
       setErrorMsg(err instanceof ApiError ? err.message : "Gagal menolak aktivitas.");

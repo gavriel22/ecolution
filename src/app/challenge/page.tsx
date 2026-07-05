@@ -8,19 +8,22 @@ import {
   useMyChallenges,
   useJoinChallenge,
 } from "@/features/challenge/hooks/use-challenges";
+import { toast } from "sonner";
+import { useConfirm } from "@/providers/confirm-provider";
 
 export default function ChallengesPage() {
+  const confirm = useConfirm();
   const router = useRouter();
   const [search, setSearch] = useState("");
   const { data: challenges = [], isLoading: isLoadingList } = useChallenges({ search: search || undefined });
   const { data: myChallenges = [], isLoading: isLoadingMy } = useMyChallenges();
   const joinMutation = useJoinChallenge();
 
-  const handleJoin = (challengeId: string) => {
-    if (confirm("Apakah Anda yakin ingin bergabung dalam tantangan ini?")) {
+  const handleJoin = async (challengeId: string) => {
+    if (await confirm("Apakah Anda yakin ingin bergabung dalam tantangan ini?")) {
       joinMutation.mutate(challengeId, {
         onSuccess: () => {
-          alert("Berhasil bergabung! Selesaikan aksi lingkungan untuk meningkatkan progres Anda.");
+          toast.success("Berhasil bergabung! Selesaikan aksi lingkungan untuk meningkatkan progres Anda.");
         },
       });
     }

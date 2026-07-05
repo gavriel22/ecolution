@@ -9,8 +9,11 @@ import {
   useLeaveChallenge,
 } from "@/features/challenge/hooks/use-challenges";
 import { ApiError } from "@/lib/api-client";
+import { toast } from "sonner";
+import { useConfirm } from "@/providers/confirm-provider";
 
 export default function ChallengeDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const confirm = useConfirm();
   const { id } = use(params);
   const router = useRouter();
 
@@ -51,7 +54,7 @@ export default function ChallengeDetailPage({ params }: { params: Promise<{ id: 
     setErrorMsg(null);
     joinMutation.mutate(challenge.id, {
       onSuccess: () => {
-        alert("Berhasil bergabung ke tantangan!");
+        toast.success("Berhasil bergabung ke tantangan!");
       },
       onError: (err) => {
         setErrorMsg(err instanceof ApiError ? err.message : "Gagal bergabung ke tantangan.");
@@ -59,12 +62,12 @@ export default function ChallengeDetailPage({ params }: { params: Promise<{ id: 
     });
   };
 
-  const handleLeave = () => {
+  const handleLeave = async () => {
     setErrorMsg(null);
-    if (confirm("Apakah Anda yakin ingin keluar dari tantangan ini? Seluruh progres Anda untuk tantangan ini akan dihapus.")) {
+    if (await confirm("Apakah Anda yakin ingin keluar dari tantangan ini? Seluruh progres Anda untuk tantangan ini akan dihapus.")) {
       leaveMutation.mutate(challenge.id, {
         onSuccess: () => {
-          alert("Anda telah keluar dari tantangan.");
+          toast.success("Anda telah keluar dari tantangan.");
         },
         onError: (err) => {
           setErrorMsg(err instanceof ApiError ? err.message : "Gagal keluar dari tantangan.");

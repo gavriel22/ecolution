@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { Order, OrderStatus } from "@prisma/client";
+import { OrderStatus } from "@prisma/client";
 
 export class OrderRepository {
   async findById(id: string): Promise<any | null> {
@@ -16,6 +16,11 @@ export class OrderRepository {
           },
         },
         user: true,
+        voucherRedemption: {
+          include: {
+            voucher: true,
+          },
+        },
       },
     });
   }
@@ -37,6 +42,11 @@ export class OrderRepository {
               },
             },
           },
+          voucherRedemption: {
+            include: {
+              voucher: true,
+            },
+          },
         },
         orderBy: { createdAt: "desc" },
         skip: params.skip,
@@ -50,7 +60,8 @@ export class OrderRepository {
   async createCheckoutTransaction(
     userId: string,
     itemsInput: { productId: string; quantity: number }[],
-    note?: string
+    note?: string,
+    voucherRedemptionId?: string
   ): Promise<any> {
     return prisma.$transaction(async (tx) => {
       const productIds = itemsInput.map((item) => item.productId);
@@ -97,16 +108,41 @@ export class OrderRepository {
         });
       }
 
+      // Handle voucher discount
+      let discountAmount = 0;
+      let finalPrice = totalPrice;
+
+      if (voucherRedemptionId) {
+        // Fetch and validate the voucher redemption
+        const redemption = await tx.voucherRedemption.findUnique({
+          where: { id: voucherRedemptionId },
+          include: { voucher: true },
+        });
+
+        if (!redemption || redemption.userId !== userId) {
+          throw new Error("VOUCHER_REDEMPTION_NOT_FOUND");
+        }
+
+        if (redemption.status !== "COMPLETED" || redemption.usedAt !== null) {
+          throw new Error("VOUCHER_REDEMPTION_NOT_FOUND");
+        }
+
+        discountAmount = redemption.voucher.discountAmount;
+        finalPrice = Math.max(0, totalPrice - discountAmount);
+      }
+
       // Generate order number ECO-YYYYMMDD-XXXXXX
       const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
       const randomStr = Math.floor(100000 + Math.random() * 900000);
       const orderNumber = `ECO-${dateStr}-${randomStr}`;
 
       // Create Order and nested OrderItems
-      return tx.order.create({
+      const order = await tx.order.create({
         data: {
           userId,
           totalPrice,
+          discountAmount,
+          finalPrice,
           orderNumber,
           note: note || null,
           status: OrderStatus.PENDING,
@@ -124,8 +160,25 @@ export class OrderRepository {
               },
             },
           },
+          voucherRedemption: {
+            include: { voucher: true },
+          },
         },
       });
+
+      // If voucher was used, mark it as USED and link to the order
+      if (voucherRedemptionId) {
+        await tx.voucherRedemption.update({
+          where: { id: voucherRedemptionId },
+          data: {
+            status: "USED",
+            usedAt: new Date(),
+            usedInOrderId: order.id,
+          },
+        });
+      }
+
+      return order;
     });
   }
 }

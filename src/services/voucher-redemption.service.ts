@@ -24,13 +24,7 @@ export class VoucherRedemptionService {
             id: redemption.voucher.id,
             title: redemption.voucher.title,
             pointCost: redemption.voucher.pointCost,
-            imageUrl: redemption.voucher.imageUrl,
-            merchant: redemption.voucher.merchant
-              ? {
-                  id: redemption.voucher.merchant.id,
-                  businessName: redemption.voucher.merchant.businessName,
-                }
-              : undefined,
+            discountAmount: redemption.voucher.discountAmount,
           }
         : undefined,
     };

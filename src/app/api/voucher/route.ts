@@ -41,8 +41,6 @@ export async function GET(req: NextRequest) {
     const page = searchParams.get("page") ? parseInt(searchParams.get("page")!, 10) : undefined;
     const limit = searchParams.get("limit") ? parseInt(searchParams.get("limit")!, 10) : undefined;
     const search = searchParams.get("search") || undefined;
-    const categoryId = searchParams.get("categoryId") || undefined;
-    const merchantId = searchParams.get("merchantId") || undefined;
 
     const statusParam = searchParams.get("status");
     const status =
@@ -62,8 +60,6 @@ export async function GET(req: NextRequest) {
       page,
       limit,
       search,
-      categoryId,
-      merchantId,
       status,
       minPointCost,
       maxPointCost,

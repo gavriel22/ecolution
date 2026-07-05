@@ -37,6 +37,8 @@ export default function DashboardPage() {
 function UserDashboard({ name }: { name: string }) {
   const { data, isLoading } = useActivities({ limit: 5 });
   const recentActivities = data?.activities || [];
+  const { data: metrics, isLoading: isLoadingMetrics } = useUserDashboardMetrics();
+  const topUsers = metrics?.topUsers || [];
 
   return (
     <div className="space-y-8">
@@ -50,12 +52,15 @@ function UserDashboard({ name }: { name: string }) {
             Selamat datang kembali, <span className="font-semibold text-moss-700">{name}</span>! Pantau kontribusi lingkunganmu di sini.
           </p>
         </div>
-        <Link
-          href="/activity/new"
-          className="inline-flex items-center justify-center rounded-md bg-moss-700 px-4 py-2 text-sm font-medium text-paper-50 transition-all hover:bg-moss-900 shadow-sm self-start sm:self-auto"
-        >
-          + Lapor Aktivitas Baru
-        </Link>
+        <div className="flex flex-wrap gap-2">
+
+          <Link
+            href="/activity/new"
+            className="inline-flex items-center justify-center rounded-md bg-moss-700 px-4 py-2 text-sm font-medium text-paper-50 transition-all hover:bg-moss-900 shadow-sm self-start sm:self-auto"
+          >
+            + Lapor Aktivitas Baru
+          </Link>
+        </div>
       </div>
 
       {/* Summary Statistics Section */}
@@ -99,9 +104,52 @@ function UserDashboard({ name }: { name: string }) {
           </div>
         )}
       </div>
+
+      {/* Leaderboard user list */}
+      <div className="space-y-4">
+        <h2 className="font-display text-xl font-semibold text-ink-900 border-b border-paper-200 pb-2">
+          Peringkat Pengguna Teraktif (Top Points)
+        </h2>
+        <div className="rounded-lg border border-paper-200 bg-white p-5 shadow-xs">
+          {isLoadingMetrics ? (
+            <div className="space-y-2 animate-pulse">
+              <div className="h-6 bg-paper-50 rounded" />
+              <div className="h-6 bg-paper-50 rounded" />
+            </div>
+          ) : topUsers.length === 0 ? (
+            <div className="py-6 text-center text-ink-400 text-sm font-body">
+              Belum ada data peringkat pengguna.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse font-body">
+                <thead>
+                  <tr className="border-b border-paper-100 text-[10px] font-mono uppercase tracking-wider text-ink-400 font-semibold">
+                    <th className="py-2">Rank</th>
+                    <th className="py-2">Nama</th>
+                    <th className="py-2">Username</th>
+                    <th className="py-2 text-right">Poin</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-paper-100 text-sm text-ink-700">
+                  {topUsers.map((usr: any, index: number) => (
+                    <tr key={usr.id} className="hover:bg-paper-50/30">
+                      <td className="py-2.5 font-mono font-bold text-moss-700">#{index + 1}</td>
+                      <td className="py-2.5 font-semibold text-ink-900">{usr.name}</td>
+                      <td className="py-2.5 font-mono text-xs">@{usr.username}</td>
+                      <td className="py-2.5 font-mono font-bold text-right text-moss-700">{usr.totalPoint} Pts</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
+
 
 // ----------------------------------------------------
 // 2. MERCHANT (UMKM) DASHBOARD VIEW

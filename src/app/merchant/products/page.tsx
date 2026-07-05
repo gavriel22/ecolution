@@ -12,9 +12,12 @@ import {
 } from "@/features/marketplace/hooks/use-marketplace-mutations";
 import { ApiError } from "@/lib/api-client";
 import type { Product, ProductStatus } from "@/features/marketplace/types";
+import { toast } from "sonner";
+import { useConfirm } from "@/providers/confirm-provider";
 
 export default function MerchantProductsPage() {
   const { user } = useAuth();
+  const confirm = useConfirm();
 
   // 1. Fetch all merchants to find the logged-in user's merchant profile
   const { data: merchants = [], isLoading: isLoadingMerchants } = useQuery({
@@ -86,15 +89,15 @@ export default function MerchantProductsPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm("Apakah Anda yakin ingin menghapus produk ini secara permanen?")) {
+  const handleDelete = async (id: string) => {
+    if (await confirm("Apakah Anda yakin ingin menghapus produk ini secara permanen?")) {
       deleteProductMutation.mutate(id, {
         onSuccess: () => {
           refetch();
-          alert("Produk berhasil dihapus!");
+          toast.success("Produk berhasil dihapus!");
         },
         onError: (err) => {
-          alert(err instanceof ApiError ? err.message : "Gagal menghapus produk.");
+          toast.error(err instanceof ApiError ? err.message : "Gagal menghapus produk.");
         },
       });
     }
@@ -137,7 +140,7 @@ export default function MerchantProductsPage() {
           onSuccess: () => {
             setIsModalOpen(false);
             refetch();
-            alert("Produk berhasil diperbarui!");
+            toast.success("Produk berhasil diperbarui!");
           },
           onError: (err) => {
             setErrorMsg(err instanceof ApiError ? err.message : "Gagal memperbarui produk.");
@@ -149,7 +152,7 @@ export default function MerchantProductsPage() {
         onSuccess: () => {
           setIsModalOpen(false);
           refetch();
-          alert("Produk berhasil ditambahkan!");
+          toast.success("Produk berhasil ditambahkan!");
         },
         onError: (err) => {
           setErrorMsg(err instanceof ApiError ? err.message : "Gagal membuat produk baru.");

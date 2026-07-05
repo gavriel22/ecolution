@@ -23,6 +23,7 @@ export interface SafeUser {
   role: UserRole;
   trustScore: number;
   totalPoint: number;
+  accumulatedPoint?: number;
   createdAt: Date;
   phone?: string | null;
   profileImageUrl?: string | null;
@@ -31,7 +32,13 @@ export interface SafeUser {
 }
 
 export class AuthService {
-  private toSafeUser(user: any): SafeUser {
+  private async toSafeUser(user: any): Promise<SafeUser> {
+    const accumulated = await prisma.pointHistory.aggregate({
+      where: { userId: user.id, type: "EARN" },
+      _sum: { point: true },
+    });
+    const accumulatedPoint = accumulated._sum.point || user.totalPoint;
+
     return {
       id: user.id,
       name: user.name,
@@ -45,6 +52,7 @@ export class AuthService {
       profileImageUrl: user.profileImageUrl,
       bio: user.bio,
       address: user.address,
+      accumulatedPoint,
     };
   }
 
@@ -79,7 +87,7 @@ export class AuthService {
       role: data.role,
     });
 
-    return this.toSafeUser(user);
+    return await this.toSafeUser(user);
   }
 
   async login(
@@ -138,7 +146,7 @@ export class AuthService {
       userAgent: context.userAgent,
     });
 
-    const safeUser = this.toSafeUser(user);
+    const safeUser = await this.toSafeUser(user);
     safeUser.role = sessionRole;
 
     return {
@@ -251,7 +259,7 @@ export class AuthService {
       },
     });
 
-    return this.toSafeUser(updatedUser);
+    return await this.toSafeUser(updatedUser);
   }
 
   async me(userId: string): Promise<SafeUser> {
@@ -259,7 +267,7 @@ export class AuthService {
     if (!user || !user.isActive) {
       throw new NotFoundError("User not found or inactive");
     }
-    return this.toSafeUser(user);
+    return await this.toSafeUser(user);
   }
 }
 

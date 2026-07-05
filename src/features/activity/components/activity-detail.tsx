@@ -5,8 +5,10 @@ import { useActivity } from "../hooks/use-activity";
 import { useDeleteActivity } from "../hooks/use-delete-activity";
 import { useSubmitActivity } from "../hooks/use-submit-activity";
 import { StatusBadge } from "./status-badge";
+import { useConfirm } from "@/providers/confirm-provider";
 
 export function ActivityDetail({ id }: { id: string }) {
+  const confirm = useConfirm();
   const router = useRouter();
   const { data: activity, isLoading, isError } = useActivity(id);
   const deleteActivity = useDeleteActivity();
@@ -69,8 +71,8 @@ export function ActivityDetail({ id }: { id: string }) {
             {submitActivity.isPending ? "Memproses..." : "Kirim untuk Verifikasi"}
           </button>
           <button
-            onClick={() => {
-              if (confirm("Hapus aktivitas ini?")) {
+            onClick={async () => {
+              if (await confirm("Hapus aktivitas ini?")) {
                 deleteActivity.mutate(id, { onSuccess: () => router.push("/activity") });
               }
             }}

@@ -7,12 +7,7 @@ export class VoucherRedemptionRepository {
       where: { id },
       include: {
         user: true,
-        voucher: {
-          include: {
-            merchant: true,
-            category: true,
-          },
-        },
+        voucher: true,
       },
     });
   }
@@ -25,12 +20,7 @@ export class VoucherRedemptionRepository {
       prisma.voucherRedemption.findMany({
         where: { userId },
         include: {
-          voucher: {
-            include: {
-              merchant: true,
-              category: true,
-            },
-          },
+          voucher: true,
         },
         orderBy: { redeemedAt: "desc" },
         skip: params.skip,
@@ -135,12 +125,7 @@ export class VoucherRedemptionRepository {
           completedAt: new Date(),
         },
         include: {
-          voucher: {
-            include: {
-              merchant: true,
-              category: true,
-            },
-          },
+          voucher: true,
         },
       });
     });

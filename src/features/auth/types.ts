@@ -8,6 +8,7 @@ export interface User {
   role: UserRole;
   trustScore: number;
   totalPoint: number;
+  accumulatedPoint?: number;
   createdAt: string;
   phone?: string | null;
   profileImageUrl?: string | null;

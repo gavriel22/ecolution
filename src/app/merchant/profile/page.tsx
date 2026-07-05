@@ -2,8 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { apiFetch } from "@/lib/api-client";
+import { toast } from "sonner";
+import { useConfirm } from "@/providers/confirm-provider";
 
 export default function MerchantProfilePage() {
+  const confirmDialog = useConfirm();
   const [merchant, setMerchant] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -23,15 +26,6 @@ export default function MerchantProfilePage() {
   // UI States
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
-
-  // Auto-clear toast
-  useEffect(() => {
-    if (toast) {
-      const timer = setTimeout(() => setToast(null), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [toast]);
 
   const loadData = () => {
     setLoading(true);
@@ -109,7 +103,7 @@ export default function MerchantProfilePage() {
           body: bodyData,
         });
         setMerchant(res.data.data || res.data);
-        setToast({ message: "Profil toko berhasil diperbarui!", type: "success" });
+        toast.success("Profil toko berhasil diperbarui!");
       } else {
         // Create
         const res = await apiFetch<any>("/api/merchant", {
@@ -117,14 +111,14 @@ export default function MerchantProfilePage() {
           body: bodyData,
         });
         setMerchant(res.data.data || res.data);
-        setToast({ message: "Profil toko berhasil dibuat!", type: "success" });
+        toast.success("Profil toko berhasil dibuat!");
       }
       setIsEditing(false);
       loadData();
     } catch (err: any) {
       console.error(err);
       setErrorMsg(err.message || "Gagal menyimpan data toko.");
-      setToast({ message: err.message || "Gagal menyimpan data toko.", type: "error" });
+      toast.error(err.message || "Gagal menyimpan data toko.");
     } finally {
       setIsSubmitting(false);
     }
@@ -132,7 +126,7 @@ export default function MerchantProfilePage() {
 
   const handleDelete = async () => {
     if (!merchant) return;
-    const confirmDelete = window.confirm(
+    const confirmDelete = await confirmDialog(
       "Apakah Anda yakin ingin menghapus profil toko Anda? Semua produk yang terdaftar akan dihapus jika tidak ada transaksi."
     );
     if (!confirmDelete) return;
@@ -144,10 +138,10 @@ export default function MerchantProfilePage() {
       });
       setMerchant(null);
       setIsEditing(false);
-      setToast({ message: "Profil toko berhasil dihapus.", type: "success" });
+      toast.success("Profil toko berhasil dihapus.");
     } catch (err: any) {
       console.error(err);
-      alert(err.message || "Gagal menghapus profil toko. Pastikan toko tidak memiliki produk aktif.");
+      toast.error(err.message || "Gagal menghapus profil toko. Pastikan toko tidak memiliki produk aktif.");
     } finally {
       setLoading(false);
     }
@@ -197,15 +191,6 @@ export default function MerchantProfilePage() {
 
   return (
     <div className="space-y-8 font-body">
-      {/* Toast Alert */}
-      {toast && (
-        <div className={`fixed bottom-5 right-5 z-50 rounded-lg border p-4 shadow-lg flex items-center gap-3 transition-all duration-300 animate-slide-up ${
-          toast.type === "success" ? "bg-moss-50 border-moss-200 text-moss-800" : "bg-rust-50 border-rust-200 text-rust-850"
-        }`}>
-          <span className="text-sm font-semibold">{toast.message}</span>
-        </div>
-      )}
-
       {/* Mode Read (Melihat Toko) */}
       {!isEditing && merchant && (
         <>

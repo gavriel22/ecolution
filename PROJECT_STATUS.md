@@ -48,8 +48,7 @@ Berikut adalah seluruh model Prisma yang terdefinisi di dalam `prisma/schema.pri
 - **Challenge**: Menyimpan daftar tantangan berhadiah poin dengan status `DRAFT`/`ACTIVE`/`COMPLETED` dan periode waktu tertentu.
 - **ChallengeParticipant**: Menyimpan data partisipasi pengguna dalam suatu tantangan serta status penyelesaiannya (`JOINED`/`COMPLETED`/`FAILED`).
 - **ChallengeProgress**: Melacak progres nilai aksi pengguna terhadap target dari tantangan yang diikuti.
-- **VoucherCategory**: Kategori untuk mengelompokkan jenis voucher belanja.
-- **Voucher**: Voucher belanja yang disediakan oleh Merchant yang dapat ditukar dengan poin pengguna.
+- **Voucher**: Voucher belanja yang dapat ditukar dengan poin pengguna, dikelola terpusat oleh Admin.
 - **VoucherRedemption**: Catatan penukaran poin pengguna menjadi voucher belanja.
 - **Merchant**: Profil bisnis/UMKM yang dimiliki oleh pengguna dengan role `UMKM` atau `ADMIN`.
 - **Product**: Produk jualan yang didaftarkan oleh Merchant di marketplace Ecolution.
@@ -123,10 +122,10 @@ Endpoint:
 Status: ✅ Selesai
 Endpoint:
 - `GET /api/voucher` - Mendapatkan daftar semua voucher belanja yang tersedia dengan filter.
-- `POST /api/voucher` - Membuat voucher belanja baru (khusus UMKM/Mitra yang disetujui).
+- `POST /api/voucher` - Membuat voucher belanja baru (khusus Admin).
 - `GET /api/voucher/{id}` - Mendapatkan detail lengkap voucher belanja.
-- `PUT /api/voucher/{id}` - Memperbarui detail voucher belanja (khusus pemilik/owner).
-- `DELETE /api/voucher/{id}` - Menghapus voucher belanja (khusus pemilik/owner).
+- `PUT /api/voucher/{id}` - Memperbarui detail voucher belanja (khusus Admin).
+- `DELETE /api/voucher/{id}` - Menghapus voucher belanja (khusus Admin).
 - `POST /api/reward/redeem` - Menukar poin user dengan kode voucher digital secara transaksional (Prisma transaction) dengan pengurangan poin user, stock voucher, dan pencatatan riwayat poin.
 - `GET /api/reward/history` - Mendapatkan daftar riwayat penukaran voucher milik user.
 
@@ -248,6 +247,11 @@ Fitur-fitur yang sudah diimplementasikan di sisi backend API:
 - **[BARU]** Manajemen Pesanan UMKM (`/merchant/orders`): Seller orders management dashboard untuk melihat daftar pesanan masuk dan mengubah status transaksi.
 - **[BARU]** Manajemen User oleh Admin (`/admin/users`): Halaman kontrol untuk admin memantau daftar pengguna, mengubah role akses (USER, UMKM, ADMIN), serta memblokir/mengaktifkan status akun.
 - **[BARU]** Restrukturisasi layout navigasi sidebar dan link dashboard multi-role secara dinamis, serta pelabelan tombol "Dashboard UMKM" pada Navbar utama jika pengguna ber-role UMKM.
+- **[BARU]** Pemisahan Keranjang Belanja per-User (Cart Isolation): Mengaitkan keranjang belanja di Local Storage dengan ID pengguna masing-masing, memastikan keranjang belanja antar pengguna yang menggunakan perangkat/browser yang sama tidak saling tercampur.
+- **[BARU]** Ikon Akses Cepat Keranjang Belanja: Menambahkan ikon keranjang belanja pada Navbar Utama (desktop & mobile) yang akan otomatis mengarahkan ke halaman login bagi pengguna tamu, atau ke halaman keranjang bagi pengguna terautentikasi.
+- **[BARU]** Penyederhanaan Mekanisme Reward Voucher: Menghapus kategori voucher dan peran UMKM pada voucher. Seluruh mekanisme hadiah/voucher kini dikelola secara terpusat oleh Admin.
+- **[BARU]** Perhitungan Level Pengguna via Poin Akumulasi: Level pengguna pada Dashboard Reward kini dihitung menggunakan poin historis terakumulasi (`accumulatedPoint`) hasil gabungan transaksi riwayat bertipe `EARN`, mencegah turunnya level pengguna saat poin ditukarkan.
+- **[BARU]** Integrasi Diskon Checkout Real-Time: Tagihan akhir saat checkout otomatis terpotong (dikalkulasi secara akurat dan dikirimkan ke backend) berdasarkan nominal diskon dari voucher yang diaplikasikan pengguna.
 - **[BARU]** Pemisahan Layout Landing Page & Dashboard: Memperbaiki bug di mana Landing Navbar muncul di halaman dashboard (`/activity`, `/profile`, dan rute privat `/merchant/*`). Sekarang, Navbar hanya dirender pada halaman publik, sementara Dashboard fokus menggunakan tata letak `AppLayout` (Sidebar) tanpa kebocoran visual dari Landing Page.
 - **[BARU]** Alur Autentikasi Terintegrasi & Auto-Redirect: Memodifikasi LoginForm agar mendeteksi session aktif pengguna. Jika token masih valid, pengguna otomatis dialihkan ke Dashboard tanpa perlu login ulang. Login tunggal kini mendukung auto-redirect tampilan dashboard secara dinamis berdasarkan peran (USER, UMKM, ADMIN).
 - **[BARU]** Perbaikan Approve & Reject Aktivitas Admin: Mengubah mekanisme ekstraksi data verifikator pada API `/approve` dan `/reject` untuk memverifikasi token JWT secara langsung (menggunakan `getAuthContext`), menghindari kegagalan penyimpanan akibat malformed UUID dari middleware header.
@@ -279,6 +283,9 @@ Fitur-fitur yang sudah diimplementasikan di sisi backend API:
   - Mobile Navbar Hamburger Drawer: Memodifikasi `Navbar.tsx` dengan menambahkan state `isMobileMenuOpen` dan rendering tombol hamburger pada resolusi mobile/tablet. Saat diklik, laci navigasi (drawer) interaktif akan terbuka menampilkan link navigasi lengkap beserta opsi masuk/daftar khusus pengunjung tamu.
   - Sidebar Dashboard Off-Canvas: Memperbarui sidebar `AppLayout` agar otomatis menyembunyikan drawer menu setelah pengguna mengeklik salah satu tautan di perangkat seluler demi kenyamanan navigasi satu sentuhan.
   - Pencegahan Table Overflow: Membungkus tabel Eco Champions Leaderboard di halaman Dashboard utama (`/dashboard`) dalam kontainer `overflow-x-auto` agar tetap scrollable secara horizontal di perangkat beresolusi rendah (seperti 320px–480px) tanpa merusak keselarasan kolom visual.
+- **[BARU]** Refaktor Pop-up Native ke Custom UI: Menghilangkan seluruh `window.alert()` dan `window.confirm()` bawaan browser yang memunculkan "localhost says..." dengan menggunakan komponen Toast kustom (`sonner`) dan *Global Confirm Dialog Modal*. Seluruh *event handler* yang memanggil tombol konfirmasi telah direfaktor menjadi asinkronus (`await confirm()`).
+
+- **[FIX KRITIS]** Perbaikan Skema Pembuatan Kategori Aktivitas: Menambahkan kolom tipe data Text `imageUrl` pada entitas `ActivityCategory` di Prisma Schema dan menyesuaikan skema validasi Zod agar mendukung pengunggahan URL gambar panjang (tanpa batas *VarChar* 255 karakter), memperbaiki isu HTTP 500 saat membuat kategori dari panel Admin.
 
 - **[FIX KRITIS]** Bug HTTP 500 pada `/api/auth/register` dan `/api/auth/login` diselesaikan:
   - **Penyebab Root Cause**: Library `bcrypt` (v6.0.0) menggunakan C++ native addon (`.node` binary) yang **gagal dimuat** oleh Next.js App Router runtime di lingkungan tertentu (termasuk Windows saat proses masih mengunci file `.bcrypt-*.node`).

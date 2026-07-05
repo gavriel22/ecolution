@@ -4,6 +4,7 @@ import { useState, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useProduct } from "@/features/marketplace/hooks/use-product";
+import { useAuth } from "@/context/auth-context";
 
 interface CartItem {
   id: string;
@@ -19,9 +20,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const { id } = use(params);
   const router = useRouter();
   const { data: product, isLoading, isError } = useProduct(id);
+  const { user } = useAuth();
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState("");
+  const cartKey = user ? `ecolution_cart_${user.id}` : "ecolution_cart_guest";
 
   if (isError) {
     return (
@@ -70,7 +73,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const handleAddToCart = (redirect: boolean) => {
     if (isOutOfStock) return;
 
-    const cart: CartItem[] = JSON.parse(localStorage.getItem("ecolution_cart") || "[]");
+    const cart: CartItem[] = JSON.parse(localStorage.getItem(cartKey) || "[]");
     const existingIndex = cart.findIndex((item) => item.id === product.id);
 
     if (existingIndex > -1) {
@@ -88,7 +91,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       });
     }
 
-    localStorage.setItem("ecolution_cart", JSON.stringify(cart));
+    localStorage.setItem(cartKey, JSON.stringify(cart));
 
     if (redirect) {
       router.push("/cart");

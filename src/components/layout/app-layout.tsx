@@ -47,6 +47,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       { label: "Verifikasi Aktivitas", href: "/admin/activity" },
       { label: "Kelola Challenge", href: "/admin/challenge" },
       { label: "Kelola Kategori", href: "/admin/category" },
+      { label: "Kelola Voucher", href: "/admin/voucher" },
       { label: "Persetujuan UMKM", href: "/admin/merchant" },
       { label: "Kelola User", href: "/admin/users" },
       { label: "Profil", href: "/profile" },
@@ -62,6 +63,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   } else {
     menuItems = [
       { label: "Dashboard", href: "/dashboard" },
+      { label: "Pesanan", href: "/orders" },
       { label: "Upload Aktivitas", href: "/activity/new" },
       { label: "Profil", href: "/profile" },
     ];

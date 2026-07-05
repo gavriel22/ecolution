@@ -47,6 +47,7 @@ model ActivityCategory {
   name        String     @unique @db.VarChar(100)
   description String?
   pointReward Int
+  imageUrl    String?    @db.VarChar(255)
   isActive    Boolean    @default(true)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
@@ -81,9 +82,9 @@ model Activity {
 }
 
 model ActivityPhoto {
-  id         String   @id @default(uuid()) @db.Uuid
-  activityId String   @db.Uuid
-  imageUrl   String   @db.VarChar(255)
+  id         String    @id @default(uuid()) @db.Uuid
+  activityId String    @db.Uuid
+  imageUrl   String    @db.VarChar(255)
   /// EXIF GPS latitude (-90 to 90), null if not present in image
   latitude   Float?
   /// EXIF GPS longitude (-180 to 180), null if not present in image
@@ -91,9 +92,9 @@ model ActivityPhoto {
   /// EXIF DateTimeOriginal, null if not present in image
   takenAt    DateTime?
   /// Whether this photo passed EXIF metadata validation
-  hasExif    Boolean  @default(false)
-  uploadedAt DateTime @default(now())
-  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  hasExif    Boolean   @default(false)
+  uploadedAt DateTime  @default(now())
+  activity   Activity  @relation(fields: [activityId], references: [id], onDelete: Cascade)
 
   @@index([activityId])
   @@map("activity_photos")
@@ -201,52 +202,37 @@ model ChallengeProgress {
   @@map("challenge_progresses")
 }
 
-model VoucherCategory {
-  id          String    @id @default(uuid()) @db.Uuid
-  name        String    @unique @db.VarChar(100)
-  description String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  vouchers    Voucher[]
-
-  @@index([name])
-  @@map("voucher_categories")
-}
-
 model Voucher {
-  id          String              @id @default(uuid()) @db.Uuid
-  merchantId  String              @db.Uuid
-  categoryId  String              @db.Uuid
-  title       String              @db.VarChar(150)
-  description String?
-  pointCost   Int
-  stock       Int
-  imageUrl    String?             @db.VarChar(255)
-  expiredAt   DateTime?
-  status      VoucherStatus       @default(AVAILABLE)
-  createdAt   DateTime            @default(now())
-  updatedAt   DateTime            @updatedAt
-  redemptions VoucherRedemption[]
-  category    VoucherCategory     @relation(fields: [categoryId], references: [id])
-  merchant    Merchant            @relation(fields: [merchantId], references: [id])
+  id             String              @id @default(uuid()) @db.Uuid
+  title          String              @db.VarChar(150)
+  description    String?
+  pointCost      Int
+  discountAmount Int                 @default(0)
+  stock          Int
+  expiredAt      DateTime?
+  status         VoucherStatus       @default(AVAILABLE)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  redemptions    VoucherRedemption[]
 
-  @@index([merchantId])
-  @@index([categoryId])
   @@index([status])
   @@index([expiredAt])
   @@map("vouchers")
 }
 
 model VoucherRedemption {
-  id          String           @id @default(uuid()) @db.Uuid
-  voucherId   String           @db.Uuid
-  userId      String           @db.Uuid
-  voucherCode String           @unique @db.VarChar(100)
-  status      RedemptionStatus @default(PENDING)
-  redeemedAt  DateTime         @default(now())
-  completedAt DateTime?
-  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  voucher     Voucher          @relation(fields: [voucherId], references: [id], onDelete: Cascade)
+  id            String           @id @default(uuid()) @db.Uuid
+  voucherId     String           @db.Uuid
+  userId        String           @db.Uuid
+  voucherCode   String           @unique @db.VarChar(100)
+  status        RedemptionStatus @default(PENDING)
+  redeemedAt    DateTime         @default(now())
+  completedAt   DateTime?
+  usedInOrderId String?          @unique @db.Uuid
+  usedAt        DateTime?
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  voucher       Voucher          @relation(fields: [voucherId], references: [id], onDelete: Cascade)
+  order         Order?           @relation(fields: [usedInOrderId], references: [id])
 
   @@unique([voucherId, userId])
   @@index([userId])
@@ -256,23 +242,22 @@ model VoucherRedemption {
 }
 
 model Merchant {
-  id           String         @id @default(uuid()) @db.Uuid
-  ownerId      String         @unique  @db.Uuid
-  businessName String         @db.VarChar(150)
-  description  String?
-  logoUrl      String?        @db.VarChar(255)
-  address      String?
-  phone        String?        @db.VarChar(20)
-  status       MerchantStatus @default(PENDING)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  email        String?        @db.VarChar(255)
-  website      String?        @db.VarChar(255)
-  category     String?        @db.VarChar(100)
-  operasionalHours String?    @db.VarChar(100)
-  owner        User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  products     Product[]
-  vouchers     Voucher[]
+  id               String         @id @default(uuid()) @db.Uuid
+  ownerId          String         @unique @db.Uuid
+  businessName     String         @db.VarChar(150)
+  description      String?
+  logoUrl          String?        @db.VarChar(255)
+  address          String?
+  phone            String?        @db.VarChar(20)
+  status           MerchantStatus @default(PENDING)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  email            String?        @db.VarChar(255)
+  website          String?        @db.VarChar(255)
+  category         String?        @db.VarChar(100)
+  operasionalHours String?        @db.VarChar(100)
+  owner            User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  products         Product[]
 
   @@index([ownerId])
   @@index([status])
@@ -295,11 +280,9 @@ model Product {
   images         ProductImage[]
   merchant       Merchant       @relation(fields: [merchantId], references: [id], onDelete: Cascade)
 
+  @@unique([merchantId, name])
   @@index([merchantId])
   @@index([status])
-
-  @@unique([merchantId, name])
-
   @@index([price])
   @@map("products")
 }
@@ -316,16 +299,19 @@ model ProductImage {
 }
 
 model Order {
-  id          String      @id @default(uuid()) @db.Uuid
-  userId      String      @db.Uuid
-  totalPrice  Decimal     @db.Decimal(12, 2)
-  status      OrderStatus @default(PENDING)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  note        String?
-  orderNumber String      @unique @db.VarChar(30)
-  items       OrderItem[]
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String             @id @default(uuid()) @db.Uuid
+  userId            String             @db.Uuid
+  totalPrice        Decimal            @db.Decimal(12, 2)
+  discountAmount    Decimal            @default(0) @db.Decimal(12, 2)
+  finalPrice        Decimal            @db.Decimal(12, 2)
+  status            OrderStatus        @default(PENDING)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  note              String?
+  orderNumber       String             @unique @db.VarChar(30)
+  items             OrderItem[]
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  voucherRedemption VoucherRedemption?
 
   @@index([userId])
   @@index([status])
@@ -460,6 +446,7 @@ enum RedemptionStatus {
   REJECTED
   COMPLETED
   CANCELLED
+  USED
 }
 
 enum MerchantStatus {

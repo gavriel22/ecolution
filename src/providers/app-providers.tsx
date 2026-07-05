@@ -3,6 +3,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
 import { AuthProvider } from "@/context/auth-context";
+import { Toaster } from "sonner";
+import { ConfirmProvider } from "./confirm-provider";
 
 /**
  * Wrap your root layout with this:
@@ -36,7 +38,12 @@ export function AppProviders({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>{children}</AuthProvider>
+      <AuthProvider>
+        <ConfirmProvider>
+          {children}
+          <Toaster position="bottom-right" richColors />
+        </ConfirmProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

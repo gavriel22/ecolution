@@ -2,8 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { apiFetch } from "@/lib/api-client";
+import { toast } from "sonner";
+import { useConfirm } from "@/providers/confirm-provider";
 
 export default function AdminMerchantApprovalPage() {
+  const confirm = useConfirm();
   const [merchants, setMerchants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -29,7 +32,7 @@ export default function AdminMerchantApprovalPage() {
   }
 
   async function handleApprove(id: string) {
-    if (!confirm("Apakah Anda yakin ingin menyetujui pendaftaran UMKM ini?")) return;
+    if (!(await confirm("Apakah Anda yakin ingin menyetujui pendaftaran UMKM ini?"))) return;
     setActionId(id);
     try {
       await apiFetch(`/api/merchant/${id}/approve`, { method: "POST" });
@@ -40,16 +43,17 @@ export default function AdminMerchantApprovalPage() {
         return m;
       });
       setMerchants(updated);
+      toast.success("Pendaftaran UMKM disetujui.");
     } catch (err) {
       console.error("Approve failed", err);
-      alert("Gagal menyetujui pendaftaran.");
+      toast.error("Gagal menyetujui pendaftaran.");
     } finally {
       setActionId(null);
     }
   }
 
   async function handleReject(id: string) {
-    if (!confirm("Apakah Anda yakin ingin menolak pendaftaran UMKM ini?")) return;
+    if (!(await confirm("Apakah Anda yakin ingin menolak pendaftaran UMKM ini?"))) return;
     setActionId(id);
     try {
       await apiFetch(`/api/merchant/${id}/reject`, { method: "POST" });
@@ -60,9 +64,10 @@ export default function AdminMerchantApprovalPage() {
         return m;
       });
       setMerchants(updated);
+      toast.success("Pendaftaran UMKM ditolak.");
     } catch (err) {
       console.error("Reject failed", err);
-      alert("Gagal menolak pendaftaran.");
+      toast.error("Gagal menolak pendaftaran.");
     } finally {
       setActionId(null);
     }

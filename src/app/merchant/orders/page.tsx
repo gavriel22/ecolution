@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { apiFetch } from "@/lib/api-client";
+import { toast } from "sonner";
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING: "Menunggu Pembayaran",
@@ -60,7 +61,7 @@ export default function MerchantOrdersPage() {
       setOrders(updated);
     } catch (err) {
       console.error("Failed to update status", err);
-      alert("Gagal mengubah status pesanan.");
+      toast.error("Gagal mengubah status pesanan.");
     } finally {
       setUpdatingId(null);
     }

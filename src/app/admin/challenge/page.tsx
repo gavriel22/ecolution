@@ -4,6 +4,8 @@ import { useState, type FormEvent } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api-client";
 import { ApiError } from "@/lib/api-client";
+import { toast } from "sonner";
+import { useConfirm } from "@/providers/confirm-provider";
 
 // Form local helper
 function toLocalDateTimeInput(dateStr?: string) {
@@ -16,6 +18,7 @@ function toLocalDateTimeInput(dateStr?: string) {
 }
 
 export default function AdminChallengePage() {
+  const confirm = useConfirm();
   const queryClient = useQueryClient();
 
   // Fetch Challenges
@@ -46,7 +49,7 @@ export default function AdminChallengePage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-challenges-list"] });
       setIsModalOpen(false);
-      alert("Tantangan berhasil dibuat!");
+      toast.success("Tantangan berhasil dibuat!");
     },
     onError: (err) => {
       setErrorMsg(err instanceof ApiError ? err.message : "Gagal membuat tantangan.");
@@ -62,7 +65,7 @@ export default function AdminChallengePage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-challenges-list"] });
       setIsModalOpen(false);
-      alert("Tantangan berhasil diperbarui!");
+      toast.success("Tantangan berhasil diperbarui!");
     },
     onError: (err) => {
       setErrorMsg(err instanceof ApiError ? err.message : "Gagal memperbarui tantangan.");
@@ -76,10 +79,10 @@ export default function AdminChallengePage() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-challenges-list"] });
-      alert("Tantangan berhasil dihapus!");
+      toast.success("Tantangan berhasil dihapus!");
     },
     onError: (err) => {
-      alert(err instanceof ApiError ? err.message : "Gagal menghapus tantangan.");
+      toast.error(err instanceof ApiError ? err.message : "Gagal menghapus tantangan.");
     },
   });
 
@@ -132,8 +135,8 @@ export default function AdminChallengePage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm("Apakah Anda yakin ingin menghapus tantangan ini? Seluruh partisipasi dan progres user terkait akan ikut terhapus.")) {
+  const handleDelete = async (id: string) => {
+    if (await confirm("Apakah Anda yakin ingin menghapus tantangan ini? Seluruh partisipasi dan progres user terkait akan ikut terhapus.")) {
       deleteMutation.mutate(id);
     }
   };

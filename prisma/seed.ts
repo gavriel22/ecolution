@@ -4,7 +4,6 @@ import { seedAdmin } from "./seeds/admin";
 import { seedUsers } from "./seeds/users";
 import { seedActivityCategories } from "./seeds/activity-category";
 import { seedChallengeCategories } from "./seeds/challenge-category";
-import { seedVoucherCategories } from "./seeds/voucher-category";
 import { seedMerchants } from "./seeds/merchant";
 import { seedProducts } from "./seeds/product";
 
@@ -18,7 +17,6 @@ async function main() {
 
   await seedActivityCategories(prisma);
   await seedChallengeCategories(prisma);
-  await seedVoucherCategories(prisma);
   
   await seedMerchants(prisma);
   await seedProducts(prisma);

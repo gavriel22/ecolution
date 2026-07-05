@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { productService } from "@/services/product.service";
 import { successResponse, errorResponse } from "@/utils/response";
 import { verifyAccessToken } from "@/lib/jwt";
-import { UnauthorizedError } from "@/utils/errors";
+import { UnauthorizedError, ValidationError } from "@/utils/errors";
 import { UserRole } from "@prisma/client";
 
 async function getAuthContext(req: NextRequest) {
@@ -40,6 +40,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    if (!id || id.length !== 36) {
+       throw new ValidationError("Invalid product ID format");
+    }
     const result = await productService.getProduct(id);
     return successResponse(result, 200);
   } catch (error) {
@@ -57,6 +60,9 @@ export async function PUT(
 ) {
   try {
     const { id } = await params;
+    if (!id || id.length !== 36) {
+       throw new ValidationError("Invalid product ID format");
+    }
     const user = await getAuthContext(req);
     const body = await req.json();
     const result = await productService.updateProduct(id, user.id, user.role, body);
@@ -76,6 +82,9 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
+    if (!id || id.length !== 36) {
+       throw new ValidationError("Invalid product ID format");
+    }
     const user = await getAuthContext(req);
     await productService.deleteProduct(id, user.id, user.role);
     return successResponse({ message: "Product deleted successfully" }, 200);

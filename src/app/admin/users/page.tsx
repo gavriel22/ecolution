@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { apiFetch } from "@/lib/api-client";
+import { toast } from "sonner";
 
 export default function AdminUsersManagementPage() {
   const [users, setUsers] = useState<any[]>([]);
@@ -44,7 +45,7 @@ export default function AdminUsersManagementPage() {
       setUsers(updated);
     } catch (err) {
       console.error("Failed to update role", err);
-      alert("Gagal mengubah role pengguna.");
+      toast.error("Gagal mengubah role pengguna.");
     } finally {
       setUpdatingId(null);
     }
@@ -67,7 +68,7 @@ export default function AdminUsersManagementPage() {
       setUsers(updated);
     } catch (err) {
       console.error("Failed to toggle active state", err);
-      alert("Gagal memperbarui status aktif pengguna.");
+      toast.error("Gagal memperbarui status aktif pengguna.");
     } finally {
       setUpdatingId(null);
     }

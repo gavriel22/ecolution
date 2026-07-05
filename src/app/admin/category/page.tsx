@@ -4,8 +4,11 @@ import { useState, type FormEvent } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api-client";
 import { ApiError } from "@/lib/api-client";
+import { toast } from "sonner";
+import { useConfirm } from "@/providers/confirm-provider";
 
 export default function AdminCategoryPage() {
+  const confirm = useConfirm();
   const queryClient = useQueryClient();
 
   // Fetch Categories
@@ -27,7 +30,7 @@ export default function AdminCategoryPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-activity-categories"] });
       setIsModalOpen(false);
-      alert("Kategori berhasil ditambahkan!");
+      toast.success("Kategori berhasil ditambahkan!");
     },
     onError: (err) => {
       setErrorMsg(err instanceof ApiError ? err.message : "Gagal menambahkan kategori.");
@@ -43,7 +46,7 @@ export default function AdminCategoryPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-activity-categories"] });
       setIsModalOpen(false);
-      alert("Kategori berhasil diperbarui!");
+      toast.success("Kategori berhasil diperbarui!");
     },
     onError: (err) => {
       setErrorMsg(err instanceof ApiError ? err.message : "Gagal memperbarui kategori.");
@@ -57,10 +60,10 @@ export default function AdminCategoryPage() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-activity-categories"] });
-      alert("Kategori berhasil dihapus!");
+      toast.success("Kategori berhasil dihapus!");
     },
     onError: (err) => {
-      alert(err instanceof ApiError ? err.message : "Gagal menghapus kategori.");
+      toast.error(err instanceof ApiError ? err.message : "Gagal menghapus kategori.");
     },
   });
 
@@ -95,8 +98,8 @@ export default function AdminCategoryPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm("Apakah Anda yakin ingin menghapus kategori ini? Seluruh aktivitas yang terikat dengan kategori ini mungkin akan terdampak.")) {
+  const handleDelete = async (id: string) => {
+    if (await confirm("Apakah Anda yakin ingin menghapus kategori ini? Seluruh aktivitas yang terikat dengan kategori ini mungkin akan terdampak.")) {
       deleteMutation.mutate(id);
     }
   };
