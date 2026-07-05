@@ -13,15 +13,17 @@ import {
 import type { Activity } from "@/features/activity/types";
 
 export default function DashboardPage() {
-  const { user } = useAuth();
+  const { user, activeRole } = useAuth();
 
   if (!user) return null;
 
-  if (user.role === "ADMIN") {
+  const currentRole = activeRole || user.role;
+
+  if (currentRole === "ADMIN") {
     return <AdminDashboard name={user.name} />;
   }
 
-  if (user.role === "UMKM") {
+  if (currentRole === "UMKM") {
     return <MerchantDashboard name={user.name} />;
   }
 

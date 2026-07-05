@@ -9,10 +9,9 @@ export function useLogout() {
   return useMutation({
     mutationFn: () => logoutUser(),
     onSettled: () => {
-      // Clear local session regardless of whether the server call succeeded —
-      // the cookie may already be gone/expired.
       logoutLocally();
       queryClient.clear();
+      window.location.replace("/");
     },
   });
 }

@@ -265,6 +265,16 @@ Fitur-fitur yang sudah diimplementasikan di sisi backend API:
   - Marketplace Catalog: Mendesain ulang kartu produk agar memuat detail visual terperinci (Nama, Toko Merchant, Rating Bintang, Harga dalam Poin, dan Badge status: Baru/Terlaris/Diskon) lengkap dengan fallback penanganan error pemuatan gambar.
   - Informasi Footer Lengkap: Menyediakan tautan navigasi dan kontak lengkap, termasuk Contact WhatsApp, Email, Instagram, FAQ/Bantuan, Syarat & Ketentuan, Kebijakan Privasi, dan info Hak Cipta dinamis.
   - Dropdown Akun Navbar Sesuai Role: Menambahkan dropdown menu akun pada Navbar Landing Page yang secara adaptif menampilkan link menu berdasarkan mode session role aktif pengguna (USER, UMKM, ADMIN) serta opsi Keluar/Logout yang aman.
+- **[BARU]** Penyederhanaan Autentikasi Single Login & Dashboard Switcher:
+  - Dropdown Navbar Adaptif: Modifikasi Navbar dropdown agar bertindak murni sebagai pemilih dashboard (Dashboard User, Dashboard UMKM, Dashboard Admin) dan Logout. Menghilangkan tautan Profil User dan Profil Toko dari dropdown karena sudah tersedia di sidebar masing-masing.
+  - Client-Side Role Toggling: Menambahkan `activeRole` state ke `AuthContext` yang disimpan di `localStorage`. User dengan peran `UMKM` dapat beralih secara langsung antara tampilan Dashboard User dan Dashboard UMKM secara instan di sisi klien tanpa perlu login ulang.
+  - Penyelarasan Menu Sidebar: Memperbarui sidebar `AppLayout` untuk user biasa agar menampilkan menu lengkap: Dashboard, Upload Aktivitas, Challenge, Marketplace, Reward, Riwayat, dan Profil.
+  - Proteksi Rute Merchant Terintegrasi: Menyesuaikan aturan redirect middleware `src/middleware.ts` untuk pengguna dengan role `USER` yang mencoba mengakses rute internal `/merchant/*`. Alih-alih di-redirect ke halaman utama `/`, mereka sekarang otomatis diarahkan ke halaman pendaftaran UMKM `/merchant/register` dengan dialog penawaran yang informatif.
+- **[BARU]** Integrasi & Pemisahan Halaman Reward dan Riwayat Ke Landing Page:
+  - Halaman Reward Publik (`/rewards`): Didesain ulang agar konsisten dengan Landing Page layout (Navbar & Footer) dengan perlindungan otentikasi. Menampilkan ringkasan poin, kalkulasi level otomatis, bar kemajuan level berikutnya, daftar voucher tersedia, dan tab daftar voucher yang sudah ditukar (lengkap dengan kode voucher, status penggunaan, dan copy action).
+  - Halaman Riwayat Publik (`/riwayat`): Membuat halaman riwayat aktivitas baru di area publik (memerlukan login). Dilengkapi dengan pencarian judul, filter status (Semua, Menunggu, Disetujui, Ditolak), filter tanggal, foto thumbnail, dan poin perolehan.
+  - Shortcut Dashboard User: Memodifikasi navigasi di dalam Dashboard User (`AppLayout`) agar bertindak sebagai shortcut langsung menuju halaman `/rewards` dan `/riwayat` di Landing Page untuk mencegah duplikasi kode/halaman.
+  - Perbaikan Alur Keluar (Logout) Terproteksi: Memperbarui hook `useLogout` dan handler Navbar untuk membersihkan status autentikasi klien, menghapus riwayat browser cache, dan mengarahkan pengguna secara paksa ke Landing Page utama (`/`) menggunakan `window.location.replace("/")`. Hal ini mencegah pengguna menekan tombol Back Browser untuk kembali ke dashboard setelah keluar.
 
 ### 🔄 In Progress
 

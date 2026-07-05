@@ -8,7 +8,7 @@ import { useAuth } from "@/context/auth-context";
 import { logoutUser } from "@/features/auth/api";
 
 export function Navbar() {
-  const { user, logoutLocally } = useAuth();
+  const { user, logoutLocally, setActiveRole } = useAuth();
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -20,7 +20,7 @@ export function Navbar() {
       console.error(e);
     } finally {
       logoutLocally();
-      window.location.href = "/";
+      window.location.replace("/");
     }
   };
 
@@ -76,10 +76,12 @@ export function Navbar() {
             />
           </Link>
 
-          <div className="hidden md:flex items-center space-x-12">
+          <div className="hidden md:flex items-center space-x-8">
             <Link href="/" className={linkClass}>Beranda</Link>
             <Link href="/marketplace" className={linkClass}>Marketplace</Link>
             <Link href="/challenge" className={linkClass}>Challenge</Link>
+            <Link href="/rewards" className={linkClass}>Reward</Link>
+            <Link href="/riwayat" className={linkClass}>Riwayat</Link>
             <Link href="/about" className={linkClass}>Tentang Kami</Link>
           </div>
 
@@ -114,53 +116,39 @@ export function Navbar() {
 
                     <div className="py-1">
                       {user.role === "USER" && (
-                        <>
-                          <Link
-                            href="/dashboard"
-                            onClick={() => setIsDropdownOpen(false)}
-                            className="block px-4 py-2 text-sm text-ink-700 hover:bg-paper-50 hover:text-moss-700"
-                          >
-                            Dashboard User
-                          </Link>
-                          <Link
-                            href="/profile"
-                            onClick={() => setIsDropdownOpen(false)}
-                            className="block px-4 py-2 text-sm text-ink-700 hover:bg-paper-50 hover:text-moss-700"
-                          >
-                            Profil
-                          </Link>
-                        </>
+                        <Link
+                          href="/dashboard"
+                          onClick={() => {
+                            setActiveRole("USER");
+                            setIsDropdownOpen(false);
+                          }}
+                          className="block px-4 py-2 text-sm text-ink-700 hover:bg-paper-50 hover:text-moss-700"
+                        >
+                          Dashboard User
+                        </Link>
                       )}
 
                       {user.role === "UMKM" && (
                         <>
                           <Link
                             href="/dashboard"
-                            onClick={() => setIsDropdownOpen(false)}
-                            className="block px-4 py-2 text-sm text-ink-700 hover:bg-paper-50 hover:text-moss-700 font-medium"
+                            onClick={() => {
+                              setActiveRole("USER");
+                              setIsDropdownOpen(false);
+                            }}
+                            className="block px-4 py-2 text-sm text-ink-700 hover:bg-paper-50 hover:text-moss-700"
+                          >
+                            Dashboard User
+                          </Link>
+                          <Link
+                            href="/dashboard"
+                            onClick={() => {
+                              setActiveRole("UMKM");
+                              setIsDropdownOpen(false);
+                            }}
+                            className="block px-4 py-2 text-sm text-ink-700 hover:bg-paper-50 hover:text-moss-700 font-bold"
                           >
                             Dashboard UMKM
-                          </Link>
-                          <Link
-                            href="/login?callbackUrl=%2Fdashboard&loginMode=USER"
-                            onClick={() => setIsDropdownOpen(false)}
-                            className="block px-4 py-2 text-sm text-ink-700 hover:bg-paper-50 hover:text-moss-700"
-                          >
-                            Dashboard User (Mode User)
-                          </Link>
-                          <Link
-                            href="/profile"
-                            onClick={() => setIsDropdownOpen(false)}
-                            className="block px-4 py-2 text-sm text-ink-700 hover:bg-paper-50 hover:text-moss-700"
-                          >
-                            Profil User
-                          </Link>
-                          <Link
-                            href="/merchant/profile"
-                            onClick={() => setIsDropdownOpen(false)}
-                            className="block px-4 py-2 text-sm text-ink-700 hover:bg-paper-50 hover:text-moss-700"
-                          >
-                            Profil Toko
                           </Link>
                         </>
                       )}
@@ -168,7 +156,10 @@ export function Navbar() {
                       {user.role === "ADMIN" && (
                         <Link
                           href="/dashboard"
-                          onClick={() => setIsDropdownOpen(false)}
+                          onClick={() => {
+                            setActiveRole("ADMIN");
+                            setIsDropdownOpen(false);
+                          }}
                           className="block px-4 py-2 text-sm text-ink-700 hover:bg-paper-50 hover:text-moss-700 font-semibold"
                         >
                           Dashboard Admin

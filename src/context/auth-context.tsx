@@ -10,6 +10,8 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   setUser: (user: User | null) => void;
   logoutLocally: () => void;
+  activeRole: "USER" | "UMKM" | "ADMIN" | null;
+  setActiveRole: (role: "USER" | "UMKM" | "ADMIN") => void;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -21,12 +23,38 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
  */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [activeRole, setActiveRoleState] = useState<"USER" | "UMKM" | "ADMIN" | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const logoutLocally = useCallback(() => {
     setAccessToken(null);
     setUser(null);
+    setActiveRoleState(null);
+    localStorage.removeItem("ecolution_active_role");
   }, []);
+
+  const setActiveRole = useCallback((role: "USER" | "UMKM" | "ADMIN") => {
+    setActiveRoleState(role);
+    localStorage.setItem("ecolution_active_role", role);
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      const stored = localStorage.getItem("ecolution_active_role") as any;
+      if (
+        stored &&
+        (stored === "USER" ||
+          (stored === "UMKM" && user.role === "UMKM") ||
+          (stored === "ADMIN" && user.role === "ADMIN"))
+      ) {
+        setActiveRoleState(stored);
+      } else {
+        setActiveRoleState(user.role);
+      }
+    } else {
+      setActiveRoleState(null);
+    }
+  }, [user]);
 
   useEffect(() => {
     let isMounted = true;
@@ -55,7 +83,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, isAuthenticated: user !== null, setUser, logoutLocally }}
+      value={{
+        user,
+        isLoading,
+        isAuthenticated: user !== null,
+        setUser,
+        logoutLocally,
+        activeRole,
+        setActiveRole,
+      }}
     >
       {children}
     </AuthContext.Provider>

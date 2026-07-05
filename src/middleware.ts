@@ -83,7 +83,7 @@ export async function middleware(req: NextRequest) {
         { status: 403 }
       );
     }
-    return NextResponse.redirect(new URL("/", req.url));
+    return NextResponse.redirect(new URL("/merchant/register", req.url));
   }
 
   const requestHeaders = new Headers(req.headers);

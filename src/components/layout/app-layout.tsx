@@ -7,7 +7,7 @@ import { useAuth } from "@/context/auth-context";
 import { useLogout } from "@/features/auth/hooks/use-logout";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, activeRole } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const logoutMutation = useLogout();
@@ -38,9 +38,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   if (!user) return null;
 
+  const currentRole = activeRole || user.role;
   let menuItems: { label: string; href: string }[] = [];
 
-  if (user.role === "ADMIN") {
+  if (currentRole === "ADMIN") {
     menuItems = [
       { label: "Dashboard", href: "/dashboard" },
       { label: "Verifikasi Aktivitas", href: "/admin/activity" },
@@ -50,7 +51,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       { label: "Kelola User", href: "/admin/users" },
       { label: "Profil", href: "/profile" },
     ];
-  } else if (user.role === "UMKM") {
+  } else if (currentRole === "UMKM") {
     menuItems = [
       { label: "Dashboard", href: "/dashboard" },
       { label: "Kelola Produk", href: "/merchant/products" },
@@ -61,8 +62,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   } else {
     menuItems = [
       { label: "Dashboard", href: "/dashboard" },
-      { label: "Aktivitasku", href: "/activity" },
-      { label: "Lapor Aktivitas", href: "/activity/new" },
+      { label: "Upload Aktivitas", href: "/activity/new" },
+      { label: "Challenge", href: "/challenge/my" },
+      { label: "Marketplace", href: "/marketplace" },
+      { label: "Reward", href: "/rewards" },
+      { label: "Riwayat", href: "/reward/history" },
       { label: "Profil", href: "/profile" },
     ];
   }

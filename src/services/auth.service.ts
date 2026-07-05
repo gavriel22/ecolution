@@ -110,11 +110,8 @@ export class AuthService {
     if (dbUserRole === "ADMIN") {
       sessionRole = "ADMIN";
     } else if (dbUserRole === "UMKM") {
-      sessionRole = credentials.loginMode === "UMKM" ? "UMKM" : "USER";
+      sessionRole = credentials.loginMode === "USER" ? "USER" : "UMKM";
     } else {
-      if (credentials.loginMode === "UMKM") {
-        throw new ValidationError("Akun Anda belum terdaftar/disetujui sebagai Mitra UMKM.");
-      }
       sessionRole = "USER";
     }
 

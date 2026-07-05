@@ -1,7 +1,7 @@
 import { Navbar } from "@/features/landing/components/Navbar";
 import { Footer } from "@/features/landing/components/Footer";
 
-export default function RewardsLayout({ children }: { children: React.ReactNode }) {
+export default function RewardHistoryLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col bg-[#fbfbf9] text-ink-900 font-sans">
       <Navbar />
