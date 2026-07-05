@@ -63,10 +63,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     menuItems = [
       { label: "Dashboard", href: "/dashboard" },
       { label: "Upload Aktivitas", href: "/activity/new" },
-      { label: "Challenge", href: "/challenge/my" },
-      { label: "Marketplace", href: "/marketplace" },
-      { label: "Reward", href: "/rewards" },
-      { label: "Riwayat", href: "/reward/history" },
       { label: "Profil", href: "/profile" },
     ];
   }
