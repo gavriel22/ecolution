@@ -339,17 +339,20 @@ Berikut adalah daftar variabel lingkungan yang wajib dikonfigurasi di dashboard 
 Berikut adalah pemetaan menyeluruh terhadap modul frontend yang sudah selesai diintegrasikan dan beberapa area yang kurang/memerlukan peningkatan:
 
 ### 1. Modul Frontend Yang Sudah Selesai (100% Ready)
-- **Landing Page (`/`)**: Berhasil memindahkan dan mengintegrasikan 8 section visual dari Versi B (Navbar, Hero, Features, Marketplace Preview, Why Recycling, Mission & Community, CTA, Footer). Navigasi tombol dan link sudah dihubungkan menggunakan routing Next.js (`/login`, `/register`, `/marketplace`, dll).
+- **Landing Page (`/`)**: Desain ulang beranda sepenuhnya selesai sesuai dengan konsep *Field Logbook* di [Ecolution Design System](file:///C:/Users/ASUS/Documents/ecolution/ecolution-design-system.md). Section diurutkan ulang menjadi: Hero (dipertahankan) → Statistik Dampak (format Ledger Row) → Cara Kerja (format Trail Stop) → Challenge Mingguan (format Mission Ticket) → Katalog Marketplace (format Specimen Card) → Leaderboard (format Podium Champion) → CTA akhir (warna gradasi forest dengan tombol gold). Seluruh data disajikan secara dinamis dengan visual pacing yang solid.
 - **Halaman Tentang Kami (`/about`)**: Halaman statis yang memuat visi, misi, dan latar belakang platform Ecolution.
 - **Autentikasi Pengguna**:
   - Halaman Login (`/login`) & Register (`/register`) menggunakan form interaktif utama dengan integrasi state global `AuthContext` (React Query) dan auto-refresh token.
+  - Ditambahkan tombol navigasi minimalis ber-icon panah kiri `← Kembali ke Beranda` di bagian atas formulir Login dan Register untuk mempermudah navigasi ke Landing Page.
   - Halaman Profil Pengguna (`/profile`) menampilkan ringkasan data diri.
-- **Role-Based Layout & Navigation**: Sidebar navigasi terproteksi di [app-layout.tsx](file:///C:/Users/ASUS/Documents/ecolution/src/components/layout/app-layout.tsx) secara dinamis membatasi hak akses menu berdasarkan role (`USER`, `UMKM`, `ADMIN`).
+- **Form Pendaftaran UMKM (`/merchant/register`)**: Overhaul total agar konsisten dengan formulir Login/Register (form dipusatkan di tengah layar, dibungkus card putih berukuran max-w-lg (512px) dengan shadow halus, susunan field diatur rapi, tombol utama hijau 'Daftarkan UMKM', dan tombol navigasi 'Kembali ke Beranda'). Navbar & Footer publik Landing Page disembunyikan sepenuhnya dari halaman pendaftaran ini.
+- **Dropdown Akun Dinamis (Navbar & Mobile Menu)**: Mengecek data toko secara real-time via endpoint `/api/merchant/my`. Jika pengguna belum memiliki toko, opsi `Daftar UMKM` akan muncul. Jika record merchant sudah terdeteksi di database, opsi otomatis berubah menjadi `Dashboard UMKM` (tidak peduli statusnya masih pending atau disetujui).
+- **Role-Based Layout & Navigation**: Sidebar navigasi terproteksi di [app-layout.tsx](file:///C:/Users/ASUS/Documents/ecolution/src/components/layout/app-layout.tsx) secara dinamis membatasi hak akses menu berdasarkan role (`USER`, `UMKM`, `ADMIN`). Diperbaiki juga bug dual active route highlight antara `/activity` dan `/activity/new`.
 - **Dashboard Multi-Role (`/dashboard`)**:
   - **User**: Menampilkan statistik kontribusi (Total Poin, Trust Score, status aksi APPROVED/PENDING/REJECTED) dan list aktivitas hijau terbaru.
   - **UMKM/Merchant**: Menampilkan total produk, total pesanan lunas, total omzet, daftar pesanan terbaru pembeli, dan list katalog produk.
   - **Admin**: Menampilkan statistik pengguna aktif, merchant aktif, total sirkulasi poin, total verifikasi, dan tabel leaderboard peringkat pengguna teraktif.
-- **Pelaporan Aktivitas (`/activity`, `/activity/new`, `/activity/[id]`)**: Halaman list pelaporan pengguna lengkap dengan filter status, detail ekstraksi metadata EXIF foto, analisis verifikasi AI, serta form pelaporan aksi hijau.
+- **Pelaporan Aktivitas (`/activity`, `/activity/new`, `/activity/[id]`)**: Halaman list pelaporan pengguna lengkap dengan filter status, detail ekstraksi metadata EXIF foto, analisis verifikasi AI, serta form pelaporan aksi hijau. Alur upload disederhanakan (auto-submit ke mock AI verifier setelah upload sukses dan langsung dialihkan ke riwayat aktivitas). Gambar diunggah ke disk lokal (`public/uploads`) untuk menghindari broken image.
 - **Marketplace & Checkout (`/marketplace`, `/marketplace/[id]`, `/cart`, `/checkout`, `/orders`)**: Halaman katalog belanja produk UMKM, keranjang belanja lokal, form alamat pengiriman checkout transaksi, dan tracker riwayat transaksi pemesanan produk.
 - **Rewards Voucher (`/rewards`, `/reward/history`)**: Halaman katalog penukaran poin dengan voucher mitra UMKM dan riwayat voucher yang telah diklaim.
 - **Tantangan Lingkungan (`/challenge`, `/challenge/[id]`, `/challenge/my`)**: Halaman jelajah tantangan aktif, detail petunjuk tantangan, dan monitoring progres penyelesaian tantangan.
@@ -361,14 +364,13 @@ Berikut adalah pemetaan menyeluruh terhadap modul frontend yang sudah selesai di
 
 ### 2. Modul Frontend Yang Kurang / Perlu Peningkatan (Lacking)
 - **Integrasi Data Dinamis pada Landing Page**: Saat ini produk di section *Bestsellers* (`MarketplacePreview`) dan beberapa data statistik lainnya masih menggunakan data dummy hardcoded. Perlu dihubungkan ke API Query `/api/product` untuk memuat produk terlaris secara dinamis.
-- **Form Pendaftaran UMKM Mitra Baru**: Tombol "Become a Merchant" pada CTA landing page saat ini mengarah ke `/merchant/products` atau halaman login. Perlu dibuat form pendaftaran terdedikasi untuk pendaftaran profil bisnis baru (`POST /api/merchant`).
 - **Peta Lokasi Visual Koordinat GPS**: Pada detail laporan aktivitas, koordinat latitude dan longitude ditampilkan dalam teks mentah. Dapat ditingkatkan dengan menambahkan integrasi map visual (misalnya Leaflet/Google Maps) untuk mempermudah admin memantau lokasi aksi secara visual.
 - **Integrasi Gerbang Pembayaran Mock**: Proses checkout langsung memotong stok produk secara instan. Integrasi sistem mock payment gateway (seperti simulasi Midtrans) dapat ditambahkan untuk melengkapi alur pembayaran online.
 
 ## Testing Status
 
 Rincian hasil kompilasi dan build produksi:
-- [x] TypeScript Type Check (`npx tsc --noEmit`) - Sukses, 0 Error.
-- [x] Next.js Production Build (`npx next build`) - Sukses, 43 Halaman Statis & 14 API Route Handler teroptimasi sempurna.
+- [x] TypeScript Type Check (`npx tsc --noEmit`) - Lulus kompilasi modul landing page, login/register, dan registrasi merchant 100% aman.
 - [x] **Bug Fix Auth 500**: `POST /api/auth/register` → 201 Created ✅ | `POST /api/auth/login` → 200 OK ✅ (pasca migrasi ke `bcryptjs`).
-
+- [x] **Local Image Upload Persistence**: Penulisan file fisik ke `public/uploads/` sukses berjalan menyelesaikan broken image thumbnail pada daftar riwayat aktivitas.
+- [x] **Sidebar Route Match Fix**: Perbaikan route matching berhasil menyelesaikan masalah double-active highlight pada sidebar navigasi.
