@@ -67,21 +67,13 @@ export async function extractExif(
   source: File | Blob | Buffer | ArrayBuffer
 ): Promise<ExifResult> {
   try {
-    // Only parse the tags we care about — faster than full parse
+    // Parse full EXIF metadata ensuring GPS properties are fully loaded and computed
     const parsed = await exifr.parse(source, {
-      pick: [
-        "GPSLatitude",
-        "GPSLongitude",
-        "GPSLatitudeRef",
-        "GPSLongitudeRef",
-        "DateTimeOriginal",
-        "CreateDate",
-        "Make",
-        "Model",
-        "Software",
-      ],
+      gps: true,
       translateValues: true,
     });
+
+    console.log("[EXIF GPS Debug] Full parsed object from exifr:", parsed);
 
     if (!parsed) {
       console.log("[EXIF GPS Debug] exifr parsed output is null/undefined");
@@ -96,13 +88,14 @@ export async function extractExif(
       };
     }
 
-    console.log("[EXIF GPS Debug] Raw parsed metadata:", {
-      GPSLatitude: parsed.GPSLatitude,
-      GPSLatitudeRef: parsed.GPSLatitudeRef,
-      GPSLongitude: parsed.GPSLongitude,
-      GPSLongitudeRef: parsed.GPSLongitudeRef,
+    console.log("[EXIF GPS Debug] Specific GPS Fields:", {
       latitude: parsed.latitude,
       longitude: parsed.longitude,
+      GPSLatitude: parsed.GPSLatitude,
+      GPSLongitude: parsed.GPSLongitude,
+      GPSLatitudeRef: parsed.GPSLatitudeRef,
+      GPSLongitudeRef: parsed.GPSLongitudeRef,
+      gps: parsed.gps,
     });
 
     // Helper functions to safely parse coordinate values
@@ -161,16 +154,26 @@ export async function extractExif(
       return decimal;
     };
 
-    // Calculate latitude and longitude, using helper properties as fallback
-    let latitude: number | null = convertDMSToDecimal(parsed.GPSLatitude, parsed.GPSLatitudeRef);
-    let longitude: number | null = convertDMSToDecimal(parsed.GPSLongitude, parsed.GPSLongitudeRef);
+    let latitude: number | null = null;
+    let longitude: number | null = null;
 
-    // Fallback to exifr default properties if manual parsing was unable to calculate
-    if (latitude === null && typeof parsed.latitude === "number") {
+    // Use direct values if provided and valid, otherwise fallback to manual conversion
+    if (
+      typeof parsed.latitude === "number" &&
+      !isNaN(parsed.latitude) &&
+      typeof parsed.longitude === "number" &&
+      !isNaN(parsed.longitude)
+    ) {
+      console.log("[EXIF GPS Debug] Using latitude and longitude directly from exifr:", {
+        latitude: parsed.latitude,
+        longitude: parsed.longitude,
+      });
       latitude = parsed.latitude;
-    }
-    if (longitude === null && typeof parsed.longitude === "number") {
       longitude = parsed.longitude;
+    } else {
+      console.log("[EXIF GPS Debug] Direct latitude/longitude from exifr is not valid or unavailable. Converting DMS manually...");
+      latitude = convertDMSToDecimal(parsed.GPSLatitude, parsed.GPSLatitudeRef);
+      longitude = convertDMSToDecimal(parsed.GPSLongitude, parsed.GPSLongitudeRef);
     }
 
     console.log("[EXIF GPS Debug] Final coordinates output:", { latitude, longitude });
