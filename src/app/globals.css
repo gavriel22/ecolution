@@ -28,7 +28,6 @@
   --color-rust-50: #fdf0ed;
   --color-rust-200: #e8b5aa;
 
-  /* Ink — teks utama */
   --color-ink-900: #16241d;
   --color-ink-700: #37473d;
   --color-ink-400: #6b7a70;
@@ -38,6 +37,22 @@
   --font-display: "Fraunces", ui-serif, Georgia, serif;
   --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  /* Design System Colors (Field Logbook Concept) */
+  --color-brand-ink: #12211A;
+  --color-brand-forest: #1E3A2B;
+  --color-brand-forest-2: #2C4F3A;
+  --color-brand-moss: #7C9B82;
+  --color-brand-moss-light: #B9CBB9;
+  --color-brand-paper: #F6F1E4;
+  --color-brand-paper-2: #ECE3CB;
+  --color-brand-paper-3: #E3D8B9;
+  --color-brand-gold: #D9A441;
+  --color-brand-gold-deep: #A8791F;
+  --color-brand-text: #1B2A20;
+  --color-brand-text-soft: #4B5D50;
+  --color-brand-line: rgba(27,42,32,0.14);
+  --color-brand-line-strong: rgba(27,42,32,0.28);
 }
 
 :root {
@@ -105,3 +120,33 @@ a[href] {
 [tabindex="0"] {
   cursor: pointer;
 }
+
+/* Design System Color & Font Utilities Fallback */
+.bg-brand-paper { background-color: #F6F1E4 !important; }
+.bg-brand-paper-2 { background-color: #ECE3CB !important; }
+.bg-brand-paper-3 { background-color: #E3D8B9 !important; }
+.bg-brand-ink { background-color: #12211A !important; }
+.bg-brand-forest { background-color: #1E3A2B !important; }
+.bg-brand-forest-2 { background-color: #2C4F3A !important; }
+.bg-brand-gold { background-color: #D9A441 !important; }
+
+.text-brand-text { color: #1B2A20 !important; }
+.text-brand-text-soft { color: #4B5D50 !important; }
+.text-brand-moss-light { color: #B9CBB9 !important; }
+.text-brand-gold { color: #D9A441 !important; }
+.text-brand-gold-deep { color: #A8791F !important; }
+.text-brand-forest { color: #1E3A2B !important; }
+
+.border-brand-line { border-color: rgba(27,42,32,0.14) !important; }
+.border-brand-line-strong { border-color: rgba(27,42,32,0.28) !important; }
+.border-brand-gold { border-color: #D9A441 !important; }
+.border-brand-forest { border-color: #1E3A2B !important; }
+
+.font-display { font-family: var(--font-display), serif !important; }
+.font-mono { font-family: var(--font-mono), monospace !important; }
+
+/* Custom hover state fallback classes */
+.hover\:bg-brand-gold-deep:hover { background-color: #A8791F !important; }
+.hover\:bg-brand-forest-2:hover { background-color: #2C4F3A !important; }
+.hover\:bg-brand-forest:hover { background-color: #1E3A2B !important; }
+

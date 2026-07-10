@@ -13,7 +13,6 @@ export function PlatformStats() {
   });
 
   useEffect(() => {
-    // Attempt to load live statistics
     apiFetch<any>("/api/dashboard/admin")
       .then((res) => {
         if (res.data) {
@@ -30,46 +29,107 @@ export function PlatformStats() {
   }, []);
 
   return (
-    <section className="py-20 md:py-24 bg-moss-950 text-paper-50 font-sans">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
-          <h2 className="text-3xl md:text-4xl font-extrabold text-white leading-tight">
-            Dampak Nyata Bersama Ecolution
+    <section className="bg-brand-ink text-white font-sans py-[88px]">
+      <div className="max-w-[1180px] mx-auto px-8 md:px-10">
+        {/* Section Header */}
+        <div className="text-left mb-12 space-y-2">
+          <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-brand-gold flex items-center gap-2">
+            <span className="inline-block w-[22px] h-[1px] bg-brand-gold" />
+            Catatan Dampak
+          </p>
+          <h2 className="font-display text-3xl font-semibold text-white leading-tight">
+            Logbook Kontribusi Komunitas
           </h2>
-          <p className="text-base md:text-lg text-paper-100/70">
-            Setiap kontribusi kecil dari pengguna membantu meminimalkan sampah, menumbuhkan kepedulian sosial, dan mendongkrak ekonomi UMKM lokal.
+          <p className="font-body text-[15px] text-brand-moss-light max-w-xl leading-relaxed">
+            Data tercatat secara real-time berdasarkan laporan aktivitas hijau yang terverifikasi di seluruh wilayah.
           </p>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-6">
-          <div className="p-8 bg-white/5 rounded-3xl flex flex-col items-center justify-center space-y-3 transition duration-300 hover:bg-white/10">
-            <span className="text-4xl" role="img" aria-label="User">👥</span>
-            <p className="text-3xl sm:text-4xl font-black text-[#fbbc04] tracking-tight">{stats.totalUsers.toLocaleString("id-ID")}+</p>
-            <p className="text-sm font-semibold text-paper-100/80">User Aktif</p>
+        {/* Ledger Rows */}
+        <div className="border-t border-white/12 divide-y divide-white/12">
+          {/* Row 1 */}
+          <div className="py-6 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-[52px] h-[52px] rounded-full border border-dashed border-brand-gold/55 flex items-center justify-center text-brand-gold text-xl shrink-0">
+                👥
+              </div>
+              <div className="text-left">
+                <p className="font-body text-sm font-semibold text-white leading-tight">User Aktif</p>
+                <p className="font-body text-[12px] text-brand-moss-light/80 mt-1">Anggota penjaga kelestarian lingkungan</p>
+              </div>
+            </div>
+            <p className="font-display text-2xl font-semibold text-white">
+              <span className="font-mono">{stats.totalUsers.toLocaleString("id-ID")}</span>
+              <span className="font-mono text-sm text-brand-gold ml-1">+</span>
+            </p>
           </div>
 
-          <div className="p-8 bg-white/5 rounded-3xl flex flex-col items-center justify-center space-y-3 transition duration-300 hover:bg-white/10">
-            <span className="text-4xl" role="img" aria-label="Toko">🏪</span>
-            <p className="text-3xl sm:text-4xl font-black text-[#fbbc04] tracking-tight">{stats.totalMerchants}+</p>
-            <p className="text-sm font-semibold text-paper-100/80">Mitra UMKM</p>
+          {/* Row 2 */}
+          <div className="py-6 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-[52px] h-[52px] rounded-full border border-dashed border-brand-gold/55 flex items-center justify-center text-brand-gold text-xl shrink-0">
+                🏪
+              </div>
+              <div className="text-left">
+                <p className="font-body text-sm font-semibold text-white leading-tight">Mitra UMKM</p>
+                <p className="font-body text-[12px] text-brand-moss-light/80 mt-1">Penyedia produk ramah lingkungan pilihan</p>
+              </div>
+            </div>
+            <p className="font-display text-2xl font-semibold text-white">
+              <span className="font-mono">{stats.totalMerchants}</span>
+              <span className="font-mono text-sm text-brand-gold ml-1">toko</span>
+            </p>
           </div>
 
-          <div className="p-8 bg-white/5 rounded-3xl flex flex-col items-center justify-center space-y-3 transition duration-300 hover:bg-white/10">
-            <span className="text-4xl" role="img" aria-label="Aksi">✅</span>
-            <p className="text-3xl sm:text-4xl font-black text-[#fbbc04] tracking-tight">{stats.totalVerifiedActivities.toLocaleString("id-ID")}+</p>
-            <p className="text-sm font-semibold text-paper-100/80">Aksi Terverifikasi</p>
+          {/* Row 3 */}
+          <div className="py-6 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-[52px] h-[52px] rounded-full border border-dashed border-brand-gold/55 flex items-center justify-center text-brand-gold text-xl shrink-0">
+                ✅
+              </div>
+              <div className="text-left">
+                <p className="font-body text-sm font-semibold text-white leading-tight">Aksi Terverifikasi</p>
+                <p className="font-body text-[12px] text-brand-moss-light/80 mt-1">Aksi lingkungan terverifikasi foto GPS</p>
+              </div>
+            </div>
+            <p className="font-display text-2xl font-semibold text-white">
+              <span className="font-mono">{stats.totalVerifiedActivities.toLocaleString("id-ID")}</span>
+              <span className="font-mono text-sm text-brand-gold ml-1">aksi</span>
+            </p>
           </div>
 
-          <div className="p-8 bg-white/5 rounded-3xl flex flex-col items-center justify-center space-y-3 transition duration-300 hover:bg-white/10">
-            <span className="text-4xl" role="img" aria-label="Daur Ulang">♻️</span>
-            <p className="text-3xl sm:text-4xl font-black text-white tracking-tight">{stats.totalRecycledWaste} Ton</p>
-            <p className="text-sm font-semibold text-paper-100/80">Sampah Terdaur Ulang</p>
+          {/* Row 4 */}
+          <div className="py-6 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-[52px] h-[52px] rounded-full border border-dashed border-brand-gold/55 flex items-center justify-center text-brand-gold text-xl shrink-0">
+                ♻️
+              </div>
+              <div className="text-left">
+                <p className="font-body text-sm font-semibold text-white leading-tight">Sampah Terdaur Ulang</p>
+                <p className="font-body text-[12px] text-brand-moss-light/80 mt-1">Total sampah plastik &amp; organik tereduksi</p>
+              </div>
+            </div>
+            <p className="font-display text-2xl font-semibold text-white">
+              <span className="font-mono">{stats.totalRecycledWaste}</span>
+              <span className="font-mono text-sm text-brand-gold ml-1">Ton</span>
+            </p>
           </div>
 
-          <div className="p-8 bg-white/5 rounded-3xl flex flex-col items-center justify-center space-y-3 transition duration-300 hover:bg-white/10 col-span-2 lg:col-span-1">
-            <span className="text-4xl" role="img" aria-label="Hadiah">🎁</span>
-            <p className="text-3xl sm:text-4xl font-black text-[#fbbc04] tracking-tight">{stats.totalRewardsRedeemed.toLocaleString("id-ID")}+</p>
-            <p className="text-sm font-semibold text-paper-100/80">Voucher Ditukar</p>
+          {/* Row 5 */}
+          <div className="py-6 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-[52px] h-[52px] rounded-full border border-dashed border-brand-gold/55 flex items-center justify-center text-brand-gold text-xl shrink-0">
+                🎁
+              </div>
+              <div className="text-left">
+                <p className="font-body text-sm font-semibold text-white leading-tight">Voucher Ditukar</p>
+                <p className="font-body text-[12px] text-brand-moss-light/80 mt-1">Reward terdistribusi bagi pejuang aksi hijau</p>
+              </div>
+            </div>
+            <p className="font-display text-2xl font-semibold text-white">
+              <span className="font-mono">{stats.totalRewardsRedeemed.toLocaleString("id-ID")}</span>
+              <span className="font-mono text-sm text-brand-gold ml-1">kali</span>
+            </p>
           </div>
         </div>
       </div>
