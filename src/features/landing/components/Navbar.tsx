@@ -6,6 +6,8 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { logoutUser } from "@/features/auth/api";
+import { useQuery } from "@tanstack/react-query";
+import { apiFetch } from "@/lib/api-client";
 
 export function Navbar() {
   const { user, logoutLocally, setActiveRole } = useAuth();
@@ -15,6 +17,13 @@ export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileAccountOpen, setIsMobileAccountOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const { data: myMerchantResponse } = useQuery({
+    queryKey: ["myMerchant", user?.id],
+    queryFn: () => apiFetch<{ merchant: any }>("/api/merchant/my"),
+    enabled: !!user,
+  });
+  const hasMerchant = !!myMerchantResponse?.data?.merchant;
 
   const handleLogout = async () => {
     try {
@@ -32,6 +41,7 @@ export function Navbar() {
   const isHidden =
     pathname === "/login" ||
     pathname === "/register" ||
+    pathname === "/merchant/register" ||
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/admin") ||
     pathname.startsWith("/activity") ||
@@ -145,16 +155,15 @@ export function Navbar() {
                     </div>
 
                     <div className="py-1">
-                      {user.role === "USER" && (
+                      {user.role === "ADMIN" ? (
                         <Link
                           href="/dashboard"
-                          onClick={() => { setActiveRole("USER"); setIsDropdownOpen(false); }}
-                          className="block px-4 py-2 text-sm text-ink-700 hover:bg-paper-50 hover:text-moss-700"
+                          onClick={() => { setActiveRole("ADMIN"); setIsDropdownOpen(false); }}
+                          className="block px-4 py-2 text-sm font-semibold text-ink-700 hover:bg-paper-50 hover:text-moss-700"
                         >
-                          Dashboard User
+                          Dashboard Admin
                         </Link>
-                      )}
-                      {user.role === "UMKM" && (
+                      ) : (
                         <>
                           <Link
                             href="/dashboard"
@@ -163,23 +172,24 @@ export function Navbar() {
                           >
                             Dashboard User
                           </Link>
-                          <Link
-                            href="/dashboard"
-                            onClick={() => { setActiveRole("UMKM"); setIsDropdownOpen(false); }}
-                            className="block px-4 py-2 text-sm font-bold text-ink-700 hover:bg-paper-50 hover:text-moss-700"
-                          >
-                            Dashboard UMKM
-                          </Link>
+                          {hasMerchant ? (
+                            <Link
+                              href="/dashboard"
+                              onClick={() => { setActiveRole("UMKM"); setIsDropdownOpen(false); }}
+                              className="block px-4 py-2 text-sm font-bold text-ink-700 hover:bg-paper-50 hover:text-moss-700"
+                            >
+                              Dashboard UMKM
+                            </Link>
+                          ) : (
+                            <Link
+                              href="/merchant/register"
+                              onClick={() => setIsDropdownOpen(false)}
+                              className="block px-4 py-2 text-sm text-ink-700 hover:bg-paper-50 hover:text-moss-700"
+                            >
+                              Daftar UMKM
+                            </Link>
+                          )}
                         </>
-                      )}
-                      {user.role === "ADMIN" && (
-                        <Link
-                          href="/dashboard"
-                          onClick={() => { setActiveRole("ADMIN"); setIsDropdownOpen(false); }}
-                          className="block px-4 py-2 text-sm font-semibold text-ink-700 hover:bg-paper-50 hover:text-moss-700"
-                        >
-                          Dashboard Admin
-                        </Link>
                       )}
                     </div>
 
@@ -290,25 +300,7 @@ export function Navbar() {
               {/* Collapsed/expanded account menu */}
               {isMobileAccountOpen && (
                 <div className="mt-2 ml-9 flex flex-col gap-1">
-                  {(user.role === "USER" || user.role === "UMKM") && (
-                    <Link
-                      href="/dashboard"
-                      onClick={() => { setActiveRole("USER"); closeMobileMenu(); }}
-                      className="py-2 text-sm text-ink-700 hover:text-moss-700 font-medium"
-                    >
-                      Dashboard User
-                    </Link>
-                  )}
-                  {user.role === "UMKM" && (
-                    <Link
-                      href="/dashboard"
-                      onClick={() => { setActiveRole("UMKM"); closeMobileMenu(); }}
-                      className="py-2 text-sm font-bold text-ink-700 hover:text-moss-700"
-                    >
-                      Dashboard UMKM
-                    </Link>
-                  )}
-                  {user.role === "ADMIN" && (
+                  {user.role === "ADMIN" ? (
                     <Link
                       href="/dashboard"
                       onClick={() => { setActiveRole("ADMIN"); closeMobileMenu(); }}
@@ -316,6 +308,33 @@ export function Navbar() {
                     >
                       Dashboard Admin
                     </Link>
+                  ) : (
+                    <>
+                      <Link
+                        href="/dashboard"
+                        onClick={() => { setActiveRole("USER"); closeMobileMenu(); }}
+                        className="py-2 text-sm text-ink-700 hover:text-moss-700 font-medium"
+                      >
+                        Dashboard User
+                      </Link>
+                      {hasMerchant ? (
+                        <Link
+                          href="/dashboard"
+                          onClick={() => { setActiveRole("UMKM"); closeMobileMenu(); }}
+                          className="py-2 text-sm font-bold text-ink-700 hover:text-moss-700"
+                        >
+                          Dashboard UMKM
+                        </Link>
+                      ) : (
+                        <Link
+                          href="/merchant/register"
+                          onClick={closeMobileMenu}
+                          className="py-2 text-sm text-ink-700 hover:text-moss-700 font-medium"
+                        >
+                          Daftar UMKM
+                        </Link>
+                      )}
+                    </>
                   )}
                   <button
                     onClick={() => { closeMobileMenu(); handleLogout(); }}

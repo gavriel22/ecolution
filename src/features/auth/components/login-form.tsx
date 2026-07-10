@@ -79,6 +79,25 @@ export function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-5">
+      <Link
+        href="/"
+        className="inline-flex items-center gap-1.5 text-sm font-semibold text-moss-700 hover:text-moss-900 transition-colors mb-2"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          className="h-4 w-4 animate-none"
+        >
+          <path
+            fillRule="evenodd"
+            d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z"
+            clipRule="evenodd"
+          />
+        </svg>
+        Kembali ke Beranda
+      </Link>
+
       <div className="space-y-1">
         <h1 className="font-display text-3xl font-semibold text-ink-900">Masuk</h1>
         <p className="text-sm text-ink-400">Lanjutkan aksi lingkunganmu di Ecolution.</p>
