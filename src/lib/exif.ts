@@ -67,9 +67,11 @@ export async function extractExif(
   source: File | Blob | Buffer | ArrayBuffer
 ): Promise<ExifResult> {
   try {
-    // Parse full EXIF metadata ensuring GPS properties are fully loaded and computed
+    // Parse full EXIF metadata ensuring GPS, TIFF, and EXIF blocks are fully parsed
     const parsed = await exifr.parse(source, {
       gps: true,
+      exif: true,
+      tiff: true,
       translateValues: true,
     });
 
@@ -87,16 +89,6 @@ export async function extractExif(
         hasExif: false,
       };
     }
-
-    console.log("[EXIF GPS Debug] Specific GPS Fields:", {
-      latitude: parsed.latitude,
-      longitude: parsed.longitude,
-      GPSLatitude: parsed.GPSLatitude,
-      GPSLongitude: parsed.GPSLongitude,
-      GPSLatitudeRef: parsed.GPSLatitudeRef,
-      GPSLongitudeRef: parsed.GPSLongitudeRef,
-      gps: parsed.gps,
-    });
 
     // Helper functions to safely parse coordinate values
     const parseRatioOrNumber = (val: any): number => {
@@ -157,26 +149,62 @@ export async function extractExif(
     let latitude: number | null = null;
     let longitude: number | null = null;
 
-    // Use direct values if provided and valid, otherwise fallback to manual conversion
+    // Gather all potential variables from root and nested objects (parsed.gps or parsed.GPS)
+    const rawLatitude = parsed.latitude ?? parsed.gps?.latitude ?? parsed.GPS?.latitude ?? null;
+    const rawLongitude = parsed.longitude ?? parsed.gps?.longitude ?? parsed.GPS?.longitude ?? null;
+
+    const rawGPSLatitude = parsed.GPSLatitude ?? parsed.gps?.GPSLatitude ?? parsed.GPS?.GPSLatitude ?? null;
+    const rawGPSLongitude = parsed.GPSLongitude ?? parsed.gps?.GPSLongitude ?? parsed.GPS?.GPSLongitude ?? null;
+
+    const rawGPSLatitudeRef = parsed.GPSLatitudeRef ?? parsed.gps?.GPSLatitudeRef ?? parsed.GPS?.GPSLatitudeRef ?? null;
+    const rawGPSLongitudeRef = parsed.GPSLongitudeRef ?? parsed.gps?.GPSLongitudeRef ?? parsed.GPS?.GPSLongitudeRef ?? null;
+
+    console.log("[EXIF GPS Debug] Specific EXIF Fields Checked:", {
+      latitude: parsed.latitude,
+      longitude: parsed.longitude,
+      GPSLatitude: parsed.GPSLatitude,
+      GPSLongitude: parsed.GPSLongitude,
+      GPSLatitudeRef: parsed.GPSLatitudeRef,
+      GPSLongitudeRef: parsed.GPSLongitudeRef,
+      gps: parsed.gps,
+      GPS: parsed.GPS,
+    });
+
+    console.log("[EXIF GPS Debug] Extracted raw variables:", {
+      rawLatitude,
+      rawLongitude,
+      rawGPSLatitude,
+      rawGPSLongitude,
+      rawGPSLatitudeRef,
+      rawGPSLongitudeRef,
+    });
+
+    // Determine coordinate resolution method
     if (
-      typeof parsed.latitude === "number" &&
-      !isNaN(parsed.latitude) &&
-      typeof parsed.longitude === "number" &&
-      !isNaN(parsed.longitude)
+      typeof rawLatitude === "number" &&
+      !isNaN(rawLatitude) &&
+      typeof rawLongitude === "number" &&
+      !isNaN(rawLongitude)
     ) {
-      console.log("[EXIF GPS Debug] Using latitude and longitude directly from exifr:", {
-        latitude: parsed.latitude,
-        longitude: parsed.longitude,
-      });
-      latitude = parsed.latitude;
-      longitude = parsed.longitude;
+      console.log("[EXIF GPS Debug] Latitude parsed directly:", rawLatitude);
+      console.log("[EXIF GPS Debug] Longitude parsed directly:", rawLongitude);
+      latitude = rawLatitude;
+      longitude = rawLongitude;
     } else {
-      console.log("[EXIF GPS Debug] Direct latitude/longitude from exifr is not valid or unavailable. Converting DMS manually...");
-      latitude = convertDMSToDecimal(parsed.GPSLatitude, parsed.GPSLatitudeRef);
-      longitude = convertDMSToDecimal(parsed.GPSLongitude, parsed.GPSLongitudeRef);
+      console.log("[EXIF GPS Debug] Direct latitude/longitude from exifr is not valid or unavailable. Trying manual DMS conversion...");
+      if (rawGPSLatitude !== null && rawGPSLongitude !== null) {
+        latitude = convertDMSToDecimal(rawGPSLatitude, rawGPSLatitudeRef);
+        longitude = convertDMSToDecimal(rawGPSLongitude, rawGPSLongitudeRef);
+      } else {
+        console.log("[EXIF GPS Debug] GPS field not found. Coordinates could not be resolved from raw DMS fields.");
+      }
     }
 
-    console.log("[EXIF GPS Debug] Final coordinates output:", { latitude, longitude });
+    if (latitude === null || longitude === null) {
+      console.log("[EXIF GPS Debug] Validation failed. Reason: GPS coordinates are missing or unresolved.");
+    } else {
+      console.log("[EXIF GPS Debug] GPS resolved successfully:", { latitude, longitude });
+    }
 
     // DateTimeOriginal takes priority over CreateDate (modification-resistant)
     const rawDate: Date | string | null =

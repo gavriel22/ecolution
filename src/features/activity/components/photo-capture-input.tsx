@@ -358,27 +358,18 @@ export function PhotoCaptureInput({
         </button>
       )}
 
-      {/*
-        File input — NO capture attribute to allow both camera AND gallery on Android.
-        capture="environment" on Android Chrome forces camera only and skips the
-        file picker entirely, which breaks the "pilih dari galeri" flow.
-        Users can still tap the camera icon in the native file picker.
-      */}
       <input
         ref={inputRef}
         type="file"
-        accept="image/*,.jpg,.jpeg,.heic,.heif,.tiff,.tif"
+        accept="image/*"
+        capture="environment"
         className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0] ?? null;
-          // Reset the input value so the same file can be re-selected after reset
-          // (do this AFTER reading the file, not before)
           handleFileChange(file);
-          // Allow re-selecting same file
           e.target.value = "";
         }}
       />
-
       {/* ── EXIF status feedback ──────────────────────────────────────────── */}
 
       {parseState.status === "parsing" && (
