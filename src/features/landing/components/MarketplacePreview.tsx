@@ -23,6 +23,8 @@ function ProductImageWithFallback({ src, alt }: { src: string; alt: string }) {
       src={imgSrc}
       alt={alt}
       onError={() => setImgSrc(fallback)}
+      loading="lazy"
+      decoding="async"
       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
     />
   );

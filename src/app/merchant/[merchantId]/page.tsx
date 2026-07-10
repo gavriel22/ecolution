@@ -98,7 +98,7 @@ export default function MerchantStorePage({ params }: { params: Promise<{ mercha
             {/* Logo */}
             <div className="h-24 w-24 md:h-32 md:w-32 rounded-full overflow-hidden border-4 border-white bg-white shadow-md flex items-center justify-center shrink-0">
               {merchant.logoUrl ? (
-                <img src={merchant.logoUrl} alt={merchant.businessName} className="h-full w-full object-cover" />
+                <img loading="lazy" decoding="async" src={merchant.logoUrl} alt={merchant.businessName} className="h-full w-full object-cover" />
               ) : (
                 <div className="text-moss-900 font-display font-semibold text-4xl uppercase select-none">
                   {merchant.businessName.charAt(0)}

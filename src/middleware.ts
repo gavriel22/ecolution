@@ -108,8 +108,6 @@ export async function middleware(req: NextRequest) {
   requestHeaders.set("x-user-role", payload.role);
   requestHeaders.set("x-user-username", payload.username);
 
-  console.log("[MIDDLEWARE] Injected headers: x-user-id =", payload.id, "x-user-role =", payload.role);
-
   const response = NextResponse.next({
     request: {
       headers: requestHeaders,
@@ -138,6 +136,7 @@ export const config = {
     "/dashboard/:path*",
     "/api/auth/me",
     "/api/auth/avatar",
+    "/api/upload",
     "/api/activity",
     "/api/activity/:path*",
   ],

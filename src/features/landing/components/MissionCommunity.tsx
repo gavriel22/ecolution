@@ -21,16 +21,16 @@ export function MissionCommunity() {
         {/* Images Grid */}
         <div className="absolute top-0 w-full flex justify-center items-end gap-6 h-[40%] -mt-10 md:mt-0 px-4">
           <div className="w-[180px] h-[240px] md:w-[240px] md:h-[320px] rounded-[40px] overflow-hidden shadow-xl mb-12 hidden md:block">
-            <img src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=1913&auto=format&fit=crop" alt="Eco lifestyle" className="w-full h-full object-cover" />
+            <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=1913&auto=format&fit=crop" alt="Eco lifestyle" className="w-full h-full object-cover" />
           </div>
           <div className="w-[200px] h-[260px] md:w-[280px] md:h-[360px] rounded-[40px] overflow-hidden shadow-xl z-10 border-4 border-white">
-            <img src="https://images.unsplash.com/photo-1528183429752-a97d0bf99b5a?q=80&w=2070&auto=format&fit=crop" alt="Tree planting" className="w-full h-full object-cover" />
+            <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1528183429752-a97d0bf99b5a?q=80&w=2070&auto=format&fit=crop" alt="Tree planting" className="w-full h-full object-cover" />
           </div>
           <div className="w-[200px] h-[260px] md:w-[280px] md:h-[360px] rounded-[40px] overflow-hidden shadow-xl z-10 border-4 border-white mb-8">
-            <img src="https://images.unsplash.com/photo-1594705574514-99884c98f828?q=80&w=2070&auto=format&fit=crop" alt="Community cleanup" className="w-full h-full object-cover" />
+            <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1594705574514-99884c98f828?q=80&w=2070&auto=format&fit=crop" alt="Community cleanup" className="w-full h-full object-cover" />
           </div>
           <div className="w-[180px] h-[240px] md:w-[240px] md:h-[320px] rounded-[40px] overflow-hidden shadow-xl mb-16 hidden lg:block border-4 border-white">
-            <img src="https://images.unsplash.com/photo-1587841103046-e55d642b58ea?q=80&w=1969&auto=format&fit=crop" alt="Eco products" className="w-full h-full object-cover" />
+            <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1587841103046-e55d642b58ea?q=80&w=1969&auto=format&fit=crop" alt="Eco products" className="w-full h-full object-cover" />
           </div>
         </div>
 

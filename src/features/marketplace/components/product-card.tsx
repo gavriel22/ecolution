@@ -23,6 +23,8 @@ export function ProductCard({ product }: { product: Product }) {
           <img
             src={product.imageThumbnail}
             alt={product.name}
+            loading="lazy"
+            decoding="async"
             className="h-full w-full object-cover object-center transition duration-300 hover:scale-105"
           />
         ) : (

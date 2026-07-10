@@ -37,7 +37,7 @@ export function ActivityDetail({ id }: { id: string }) {
       {photo && (
         <div className="overflow-hidden rounded-md border border-paper-200">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={photo.imageUrl} alt={activity.title} className="w-full object-cover" />
+          <img loading="lazy" decoding="async" src={photo.imageUrl} alt={activity.title} className="w-full object-cover" />
           <div className="flex items-center justify-between bg-paper-50 px-3 py-2 text-xs text-ink-400">
             <span>{photo.hasExif ? "✓ Metadata GPS & waktu terverifikasi" : "⚠ Tanpa metadata EXIF"}</span>
             {photo.takenAt && <span>{new Date(photo.takenAt).toLocaleDateString("id-ID")}</span>}

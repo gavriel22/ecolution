@@ -311,7 +311,7 @@ export class AuthService {
     };
   }
 
-  async refresh(token: string): Promise<{ accessToken: string }> {
+  async refresh(token: string): Promise<{ accessToken: string; user: SafeUser }> {
     if (!token) {
       throw new ValidationError("Refresh token is required");
     }
@@ -331,14 +331,19 @@ export class AuthService {
       throw new UnauthorizedError("User is no longer active");
     }
 
-    const newAccessToken = await generateAccessToken({
-      id: user.id,
-      email: user.email,
-      role: payload.role || user.role,
-      username: user.username,
-    });
+    const [newAccessToken, safeUser] = await Promise.all([
+      generateAccessToken({
+        id: user.id,
+        email: user.email,
+        role: payload.role || user.role,
+        username: user.username,
+      }),
+      this.toSafeUser(user),
+    ]);
 
-    return { accessToken: newAccessToken };
+    // Return the user alongside the token so the client can restore the whole
+    // session in a single round trip (no separate /api/auth/me call needed).
+    return { accessToken: newAccessToken, user: safeUser };
   }
 
   async logout(token: string): Promise<void> {

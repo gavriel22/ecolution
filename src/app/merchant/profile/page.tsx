@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { apiFetch } from "@/lib/api-client";
+import { useState, useEffect, useRef } from "react";
+import { apiFetch, ApiError } from "@/lib/api-client";
 import { toast } from "sonner";
 import { useConfirm } from "@/providers/confirm-provider";
 
@@ -16,6 +16,9 @@ export default function MerchantProfilePage() {
   const [businessName, setBusinessName] = useState("");
   const [description, setDescription] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState("");
+  const logoInputRef = useRef<HTMLInputElement>(null);
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -46,11 +49,35 @@ export default function MerchantProfilePage() {
     loadData();
   }, []);
 
+  const resetLogoState = (existingUrl = "") => {
+    if (logoPreview.startsWith("blob:")) URL.revokeObjectURL(logoPreview);
+    setLogoUrl(existingUrl);
+    setLogoPreview(existingUrl);
+    setLogoFile(null);
+    if (logoInputRef.current) logoInputRef.current.value = "";
+  };
+
+  const handleLogoSelect = (file: File | null) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setErrorMsg("File harus berupa gambar (JPG, PNG, WEBP, atau GIF).");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMsg("Ukuran logo maksimum 5 MB.");
+      return;
+    }
+    setErrorMsg(null);
+    if (logoPreview.startsWith("blob:")) URL.revokeObjectURL(logoPreview);
+    setLogoFile(file);
+    setLogoPreview(URL.createObjectURL(file));
+  };
+
   const handleStartEdit = () => {
     if (merchant) {
       setBusinessName(merchant.businessName || "");
       setDescription(merchant.description || "");
-      setLogoUrl(merchant.logoUrl || "");
+      resetLogoState(merchant.logoUrl || "");
       setAddress(merchant.address || "");
       setPhone(merchant.phone || "");
       setEmail(merchant.email || "");
@@ -61,7 +88,7 @@ export default function MerchantProfilePage() {
       // Clear for create
       setBusinessName("");
       setDescription("");
-      setLogoUrl("");
+      resetLogoState("");
       setAddress("");
       setPhone("");
       setEmail("");
@@ -83,10 +110,29 @@ export default function MerchantProfilePage() {
     setIsSubmitting(true);
     setErrorMsg(null);
 
+    // Upload a newly picked logo first, then use the returned URL.
+    let finalLogoUrl = logoUrl.trim();
+    if (logoFile) {
+      try {
+        const form = new FormData();
+        form.append("image", logoFile);
+        form.append("folder", "merchants");
+        const uploadRes = await apiFetch<{ url: string }>("/api/upload", {
+          method: "POST",
+          body: form,
+        });
+        finalLogoUrl = uploadRes.data.url;
+      } catch (err) {
+        setErrorMsg(err instanceof ApiError ? err.message : "Gagal mengunggah logo toko.");
+        setIsSubmitting(false);
+        return;
+      }
+    }
+
     const bodyData = {
       businessName: businessName.trim(),
       description: description.trim() || null,
-      logoUrl: logoUrl.trim() || null,
+      logoUrl: finalLogoUrl || null,
       address: address.trim() || null,
       phone: phone.trim() || null,
       email: email.trim() || null,
@@ -198,7 +244,7 @@ export default function MerchantProfilePage() {
             <div className="flex flex-col md:flex-row gap-5 items-center text-center md:text-left">
               <div className="h-24 w-24 shrink-0 rounded-full border border-paper-200 overflow-hidden bg-paper-50 flex items-center justify-center">
                 {merchant.logoUrl ? (
-                  <img src={merchant.logoUrl} alt={merchant.businessName} className="h-full w-full object-cover" />
+                  <img loading="lazy" decoding="async" src={merchant.logoUrl} alt={merchant.businessName} className="h-full w-full object-cover" />
                 ) : (
                   <svg className="h-10 w-10 text-ink-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -305,27 +351,51 @@ export default function MerchantProfilePage() {
           )}
 
           <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Logo URL */}
+            {/* Logo Upload */}
             <div className="space-y-1.5 md:col-span-2">
               <label className="text-xs font-semibold uppercase tracking-wider text-ink-400">
-                Tautan Logo Toko
+                Logo Toko
               </label>
-              <div className="flex gap-4 items-center">
-                <div className="h-16 w-16 rounded-full overflow-hidden border border-paper-200 bg-paper-50 flex items-center justify-center">
-                  {logoUrl ? (
-                    <img src={logoUrl} alt="Preview" className="h-full w-full object-cover" />
+              <div className="flex flex-wrap gap-4 items-center">
+                <div className="h-16 w-16 rounded-full overflow-hidden border border-paper-200 bg-paper-50 flex items-center justify-center shrink-0">
+                  {logoPreview ? (
+                    <img loading="lazy" decoding="async" src={logoPreview} alt="Preview" className="h-full w-full object-cover" />
                   ) : (
                     <span className="text-[10px] text-ink-300">No Image</span>
                   )}
                 </div>
-                <input
-                  type="text"
-                  placeholder="https://example.com/logo.jpg"
-                  value={logoUrl}
-                  onChange={(e) => setLogoUrl(e.target.value)}
-                  className="flex-1 rounded-md border border-paper-200 bg-white px-3 py-2.5 text-sm text-ink-900 outline-none focus:border-moss-500"
-                />
+                <div className="flex flex-col gap-2">
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => logoInputRef.current?.click()}
+                      className="rounded-md border border-paper-200 bg-white px-3 py-2 text-xs font-semibold text-moss-700 transition hover:bg-moss-50"
+                    >
+                      {logoPreview ? "Ganti Logo" : "Unggah Logo"}
+                    </button>
+                    {logoPreview && (
+                      <button
+                        type="button"
+                        onClick={() => resetLogoState("")}
+                        className="rounded-md border border-paper-200 bg-white px-3 py-2 text-xs font-medium text-rust-600 transition hover:bg-rust-50"
+                      >
+                        Hapus
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-[10px] text-ink-400 font-mono">JPG, PNG, WEBP, GIF · maks. 5MB</p>
+                </div>
               </div>
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/gif"
+                className="hidden"
+                onChange={(e) => {
+                  handleLogoSelect(e.target.files?.[0] ?? null);
+                  e.target.value = "";
+                }}
+              />
             </div>
 
             {/* Nama Toko */}

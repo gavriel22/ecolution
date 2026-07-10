@@ -115,6 +115,11 @@ export async function extractExif(
         val instanceof Float64Array ||
         (typeof val === "object" && "length" in val)
       ) {
+        // A placeholder GPS block like [null, null, null] means the device did
+        // NOT record a location. Treat it as "no GPS" instead of coordinate 0,
+        // otherwise photos without location would falsely pass verification.
+        if (val[0] === undefined || val[0] === null) return null;
+
         const degrees = val[0] !== undefined ? parseRatioOrNumber(val[0]) : 0;
         const minutes = val[1] !== undefined ? parseRatioOrNumber(val[1]) : 0;
         const seconds = val[2] !== undefined ? parseRatioOrNumber(val[2]) : 0;
@@ -198,6 +203,14 @@ export async function extractExif(
       } else {
         console.log("[EXIF GPS Debug] GPS field not found. Coordinates could not be resolved from raw DMS fields.");
       }
+    }
+
+    // Guard against "Null Island" (0,0): coordinates that resolve to exactly
+    // zero are effectively missing (empty/placeholder GPS tags), never a real
+    // outdoor activity location — so reject them as no-GPS.
+    if (latitude === 0 && longitude === 0) {
+      latitude = null;
+      longitude = null;
     }
 
     if (latitude === null || longitude === null) {

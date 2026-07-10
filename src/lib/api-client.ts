@@ -63,11 +63,20 @@ export function onAccessTokenChange(listener: TokenListener) {
   return () => listeners.delete(listener);
 }
 
+export interface RefreshedSession<U = unknown> {
+  accessToken: string;
+  /** Present when the refresh endpoint also returns the user (session restore). */
+  user?: U | null;
+}
+
 /**
  * Calls /api/auth/refresh using the HttpOnly refresh_token cookie.
- * Returns the new access token, or null if the session is no longer valid.
+ * Returns the new access token + user, or null if the session is no longer valid.
+ *
+ * Returning the user here lets callers restore the whole session in a single
+ * round trip instead of following up with a separate /api/auth/me request.
  */
-export async function refreshAccessToken(): Promise<string | null> {
+export async function refreshSession<U = unknown>(): Promise<RefreshedSession<U> | null> {
   try {
     const res = await fetch("/api/auth/refresh", {
       method: "POST",
@@ -79,13 +88,21 @@ export async function refreshAccessToken(): Promise<string | null> {
       return null;
     }
 
-    const json = (await res.json()) as ApiSuccess<{ accessToken: string }>;
+    const json = (await res.json()) as ApiSuccess<{ accessToken: string; user?: U | null }>;
     setAccessToken(json.data.accessToken);
-    return json.data.accessToken;
+    return { accessToken: json.data.accessToken, user: json.data.user ?? null };
   } catch {
     setAccessToken(null);
     return null;
   }
+}
+
+/**
+ * Convenience wrapper used by the fetch retry path — only needs the token.
+ */
+export async function refreshAccessToken(): Promise<string | null> {
+  const session = await refreshSession();
+  return session?.accessToken ?? null;
 }
 
 interface ApiFetchOptions extends Omit<RequestInit, "body"> {

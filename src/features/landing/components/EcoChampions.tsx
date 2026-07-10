@@ -91,7 +91,7 @@ export function EcoChampions() {
                   }`}
                 >
                   {usr.profileImageUrl ? (
-                    <img src={usr.profileImageUrl} alt={usr.name} className="h-full w-full object-cover" />
+                    <img loading="lazy" decoding="async" src={usr.profileImageUrl} alt={usr.name} className="h-full w-full object-cover" />
                   ) : (
                     <span className={`font-display font-bold text-brand-forest ${isFirst ? "text-2xl" : "text-xl"}`}>
                       {usr.name ? usr.name[0] : "?"}
@@ -135,7 +135,7 @@ export function EcoChampions() {
                     {/* Mini Avatar */}
                     <div className="h-9 w-9 rounded-full overflow-hidden bg-brand-paper-2 border border-brand-line flex items-center justify-center shrink-0">
                       {usr.profileImageUrl ? (
-                        <img src={usr.profileImageUrl} alt={usr.name} className="h-full w-full object-cover" />
+                        <img loading="lazy" decoding="async" src={usr.profileImageUrl} alt={usr.name} className="h-full w-full object-cover" />
                       ) : (
                         <span className="font-display text-sm font-semibold text-brand-forest">
                           {usr.name ? usr.name[0] : "?"}

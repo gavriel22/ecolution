@@ -134,7 +134,7 @@ export default function ChallengeDetailPage({ params }: { params: Promise<{ id: 
         {/* Image if provided */}
         {challenge.imageUrl && (
           <div className="aspect-video w-full rounded-md bg-paper-50 flex items-center justify-center overflow-hidden border border-paper-100">
-            <img src={challenge.imageUrl} alt={challenge.title} className="h-full w-full object-cover" />
+            <img loading="lazy" decoding="async" src={challenge.imageUrl} alt={challenge.title} className="h-full w-full object-cover" />
           </div>
         )}
 

@@ -128,6 +128,12 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             <img
               src={displayImage}
               alt={product.name}
+              decoding="async"
+              onError={(e) => {
+                if (e.currentTarget.src !== window.location.origin + "/placeholder.png") {
+                  e.currentTarget.src = "/placeholder.png";
+                }
+              }}
               className="h-full w-full object-cover object-center"
             />
           </div>
@@ -143,7 +149,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                     displayImage === url ? "border-moss-500 ring-2 ring-moss-500/20" : "border-paper-200 hover:border-moss-300"
                   }`}
                 >
-                  <img src={url} alt={`Thumbnail ${i}`} className="h-full w-full object-cover" />
+                  <img loading="lazy" decoding="async" src={url} alt={`Thumbnail ${i}`} className="h-full w-full object-cover" />
                 </button>
               ))}
             </div>

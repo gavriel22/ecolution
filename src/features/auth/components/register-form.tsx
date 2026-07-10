@@ -216,14 +216,18 @@ export function RegisterForm() {
         <div className="flex-grow border-t border-paper-200"></div>
       </div>
 
-      <div className="w-full flex justify-center">
-        {googleLoading ? (
-          <div className="flex items-center justify-center gap-2 py-2 text-xs font-mono text-ink-400">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-moss-200 border-t-moss-700"></div>
-            Menghubungkan ke Google...
+      {/* Keep the button mounted; overlay a centered spinner while connecting. */}
+      <div className="relative flex min-h-[40px] w-full items-center justify-center">
+        <div
+          id="google-signup-btn"
+          className={`flex w-full justify-center transition-opacity ${
+            googleLoading ? "pointer-events-none opacity-0" : "opacity-100"
+          }`}
+        ></div>
+        {googleLoading && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-moss-200 border-t-moss-700"></div>
           </div>
-        ) : (
-          <div id="google-signup-btn" className="w-full flex justify-center"></div>
         )}
       </div>
 

@@ -190,7 +190,7 @@ export default function AdminCategoryPage() {
                   <td className="px-5 py-3 font-semibold text-ink-900 flex items-center gap-3">
                     <div className="h-10 w-10 shrink-0 overflow-hidden rounded border border-paper-100 bg-paper-50 flex items-center justify-center">
                       {cat.imageUrl ? (
-                        <img src={cat.imageUrl} alt={cat.name} className="h-full w-full object-cover" />
+                        <img loading="lazy" decoding="async" src={cat.imageUrl} alt={cat.name} className="h-full w-full object-cover" />
                       ) : (
                         <span className="text-[9px] text-ink-300 font-mono">No Image</span>
                       )}
@@ -251,7 +251,7 @@ export default function AdminCategoryPage() {
               <div className="flex gap-4 items-center">
                 <div className="h-16 w-16 shrink-0 overflow-hidden rounded border border-paper-200 bg-paper-50 flex items-center justify-center">
                   {imageUrl && imageUrl.trim().startsWith("http") ? (
-                    <img src={imageUrl} alt="Preview" className="h-full w-full object-cover" />
+                    <img loading="lazy" decoding="async" src={imageUrl} alt="Preview" className="h-full w-full object-cover" />
                   ) : (
                     <span className="text-[9px] text-ink-300 font-mono uppercase">Preview</span>
                   )}

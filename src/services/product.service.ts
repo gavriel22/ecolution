@@ -8,13 +8,23 @@ import {
   NotFoundError,
 } from "@/utils/errors";
 
+// Accepts either an absolute http(s) URL or a local upload path ("/uploads/…"),
+// so images uploaded via /api/upload (which return relative paths) are valid.
+const imageRefSchema = z
+  .string()
+  .max(255)
+  .refine(
+    (v) => /^https?:\/\//.test(v) || v.startsWith("/"),
+    "Gambar harus berupa URL atau hasil unggahan yang valid"
+  );
+
 const createProductSchema = z.object({
   name: z.string().min(3, "Product name must be at least 3 characters").max(150),
   description: z.string().max(1000).optional().nullable(),
   price: z.preprocess((val) => Number(val), z.number().positive("Price must be greater than 0")),
   stock: z.preprocess((val) => Number(val), z.number().int().nonnegative("Stock cannot be negative")),
-  imageThumbnail: z.string().max(255).url("Invalid image thumbnail URL").optional().nullable(),
-  images: z.array(z.string().url("Invalid image URL")).optional(),
+  imageThumbnail: imageRefSchema.optional().nullable(),
+  images: z.array(imageRefSchema).optional(),
 });
 
 const updateProductSchema = z.object({
@@ -22,8 +32,8 @@ const updateProductSchema = z.object({
   description: z.string().max(1000).optional().nullable(),
   price: z.preprocess((val) => Number(val), z.number().positive("Price must be greater than 0")).optional(),
   stock: z.preprocess((val) => Number(val), z.number().int().nonnegative("Stock cannot be negative")).optional(),
-  imageThumbnail: z.string().max(255).url("Invalid image thumbnail URL").optional().nullable(),
-  images: z.array(z.string().url("Invalid image URL")).optional(),
+  imageThumbnail: imageRefSchema.optional().nullable(),
+  images: z.array(imageRefSchema).optional(),
   status: z.nativeEnum(ProductStatus).optional(),
 });
 

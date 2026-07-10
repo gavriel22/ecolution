@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
-import { apiFetch, refreshAccessToken, setAccessToken } from "@/lib/api-client";
+import { apiFetch, refreshSession, setAccessToken } from "@/lib/api-client";
 import type { User } from "@/features/auth/types";
 
 interface AuthContextValue {
@@ -66,12 +66,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let isMounted = true;
 
     (async () => {
-      const token = await refreshAccessToken();
-      if (!token) {
+      const session = await refreshSession<User>();
+      if (!session) {
         if (isMounted) setIsLoading(false);
         return;
       }
 
+      // Fast path: /api/auth/refresh already returned the user, so we can
+      // restore the session in a single round trip (no extra /api/auth/me).
+      if (session.user) {
+        if (isMounted) {
+          setUser(session.user);
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      // Fallback for older responses that don't include the user.
       try {
         const res = await apiFetch<User>("/api/auth/me");
         if (isMounted) setUser(res.data);

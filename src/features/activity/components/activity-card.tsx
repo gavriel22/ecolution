@@ -31,6 +31,8 @@ export function ActivityCard({ activity }: { activity: Activity }) {
             src={imageUrl}
             alt={activity.title}
             onError={() => setImgError(true)}
+            loading="lazy"
+            decoding="async"
             className="h-full w-full object-cover"
           />
         ) : (

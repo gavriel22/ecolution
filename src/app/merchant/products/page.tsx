@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, useRef, type FormEvent } from "react";
 import { useAuth } from "@/context/auth-context";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api-client";
@@ -53,6 +53,10 @@ export default function MerchantProductsPage() {
   const [price, setPrice] = useState(0);
   const [stock, setStock] = useState(0);
   const [imageThumbnail, setImageThumbnail] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState<ProductStatus>("AVAILABLE");
 
@@ -65,12 +69,36 @@ export default function MerchantProductsPage() {
     );
   }
 
+  const resetImageState = (existingUrl = "") => {
+    if (imagePreview.startsWith("blob:")) URL.revokeObjectURL(imagePreview);
+    setImageThumbnail(existingUrl);
+    setImagePreview(existingUrl);
+    setImageFile(null);
+    if (imageInputRef.current) imageInputRef.current.value = "";
+  };
+
+  const handleImageSelect = (file: File | null) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setErrorMsg("File harus berupa gambar (JPG, PNG, WEBP, atau GIF).");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMsg("Ukuran foto maksimum 5 MB.");
+      return;
+    }
+    setErrorMsg(null);
+    if (imagePreview.startsWith("blob:")) URL.revokeObjectURL(imagePreview);
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
   const openAddModal = () => {
     setEditingProduct(null);
     setName("");
     setPrice(0);
     setStock(0);
-    setImageThumbnail("");
+    resetImageState("");
     setDescription("");
     setStatus("AVAILABLE");
     setErrorMsg(null);
@@ -82,7 +110,7 @@ export default function MerchantProductsPage() {
     setName(product.name);
     setPrice(product.price);
     setStock(product.stock);
-    setImageThumbnail(product.imageThumbnail || "");
+    resetImageState(product.imageThumbnail || "");
     setDescription(product.description || "");
     setStatus(product.status);
     setErrorMsg(null);
@@ -103,7 +131,7 @@ export default function MerchantProductsPage() {
     }
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
 
@@ -121,13 +149,34 @@ export default function MerchantProductsPage() {
       return;
     }
 
+    // If the merchant picked a new photo, upload it first and use the URL.
+    let finalImageUrl = imageThumbnail.trim();
+    if (imageFile) {
+      try {
+        setIsUploading(true);
+        const form = new FormData();
+        form.append("image", imageFile);
+        form.append("folder", "products");
+        const uploadRes = await apiFetch<{ url: string }>("/api/upload", {
+          method: "POST",
+          body: form,
+        });
+        finalImageUrl = uploadRes.data.url;
+      } catch (err) {
+        setErrorMsg(err instanceof ApiError ? err.message : "Gagal mengunggah foto produk.");
+        return;
+      } finally {
+        setIsUploading(false);
+      }
+    }
+
     const payload = {
       name: name.trim(),
       price,
       stock,
-      imageThumbnail: imageThumbnail.trim() || null,
+      imageThumbnail: finalImageUrl || null,
       description: description.trim() || null,
-      images: imageThumbnail.trim() ? [imageThumbnail.trim()] : [],
+      images: finalImageUrl ? [finalImageUrl] : [],
     };
 
     if (editingProduct) {
@@ -170,6 +219,7 @@ export default function MerchantProductsPage() {
   };
 
   const isMutating =
+    isUploading ||
     createProductMutation.isPending ||
     updateProductMutation.isPending ||
     deleteProductMutation.isPending;
@@ -238,7 +288,7 @@ export default function MerchantProductsPage() {
                     <td className="px-5 py-3 flex items-center gap-3">
                       <div className="h-10 w-10 shrink-0 overflow-hidden rounded border border-paper-100 bg-paper-50 flex items-center justify-center">
                         {prod.imageThumbnail ? (
-                          <img src={prod.imageThumbnail} alt={prod.name} className="h-full w-full object-cover" />
+                          <img loading="lazy" decoding="async" src={prod.imageThumbnail} alt={prod.name} className="h-full w-full object-cover" />
                         ) : (
                           <svg className="h-5 w-5 text-ink-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -307,26 +357,49 @@ export default function MerchantProductsPage() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Live Image Preview */}
-              <div className="flex gap-4 items-center">
-                <div className="h-20 w-20 shrink-0 overflow-hidden rounded border border-paper-200 bg-paper-50 flex items-center justify-center">
-                  {imageThumbnail && imageThumbnail.trim().startsWith("http") ? (
-                    <img src={imageThumbnail} alt="Preview" className="h-full w-full object-cover" />
-                  ) : (
-                    <span className="text-[10px] text-ink-400 uppercase tracking-wider text-center px-1 font-mono">No Preview</span>
-                  )}
+              {/* Product Photo Upload */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold uppercase tracking-wider text-ink-400">Foto Produk</label>
+                <div className="flex flex-wrap gap-4 items-center">
+                  <div className="h-20 w-20 shrink-0 overflow-hidden rounded border border-paper-200 bg-paper-50 flex items-center justify-center">
+                    {imagePreview ? (
+                      <img loading="lazy" decoding="async" src={imagePreview} alt="Preview" className="h-full w-full object-cover" />
+                    ) : (
+                      <span className="text-[10px] text-ink-400 uppercase tracking-wider text-center px-1 font-mono">No Preview</span>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => imageInputRef.current?.click()}
+                        className="rounded-md border border-paper-200 bg-white px-3 py-2 text-xs font-semibold text-moss-700 transition hover:bg-moss-50"
+                      >
+                        {imagePreview ? "Ganti Foto" : "Unggah Foto"}
+                      </button>
+                      {imagePreview && (
+                        <button
+                          type="button"
+                          onClick={() => resetImageState("")}
+                          className="rounded-md border border-paper-200 bg-white px-3 py-2 text-xs font-medium text-rust-600 transition hover:bg-rust-50"
+                        >
+                          Hapus
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-ink-400 font-mono">JPG, PNG, WEBP, GIF · maks. 5MB</p>
+                  </div>
                 </div>
-                <div className="flex-1 space-y-1">
-                  <label htmlFor="imageUrl" className="text-xs font-semibold uppercase tracking-wider text-ink-400">URL Gambar</label>
-                  <input
-                    id="imageUrl"
-                    type="url"
-                    placeholder="https://example.com/image.jpg"
-                    value={imageThumbnail}
-                    onChange={(e) => setImageThumbnail(e.target.value)}
-                    className="w-full rounded-md border border-paper-200 bg-white px-3 py-1.5 text-xs text-ink-900 outline-none focus:border-moss-500"
-                  />
-                </div>
+                <input
+                  ref={imageInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/gif"
+                  className="hidden"
+                  onChange={(e) => {
+                    handleImageSelect(e.target.files?.[0] ?? null);
+                    e.target.value = "";
+                  }}
+                />
               </div>
 
               {/* Name */}
@@ -419,7 +492,7 @@ export default function MerchantProductsPage() {
                   disabled={isMutating}
                   className="flex-1 rounded-md bg-moss-700 py-2 text-sm font-semibold text-paper-50 hover:bg-moss-900 transition disabled:opacity-50"
                 >
-                  {isMutating ? "Menyimpan..." : "Simpan Produk"}
+                  {isUploading ? "Mengunggah foto..." : isMutating ? "Menyimpan..." : "Simpan Produk"}
                 </button>
               </div>
             </form>
