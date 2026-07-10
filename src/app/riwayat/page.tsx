@@ -7,6 +7,21 @@ import { useActivities } from "@/features/activity/hooks/use-activities";
 import { StatusBadge } from "@/features/activity/components/status-badge";
 import Link from "next/link";
 
+function ActivityImage({ src, alt }: { src: string | null; alt: string }) {
+  const [error, setError] = useState(false);
+  if (!src || error) {
+    return <span className="text-2xl">♻️</span>;
+  }
+  return (
+    <img
+      src={src}
+      alt={alt}
+      onError={() => setError(true)}
+      className="h-full w-full object-cover"
+    />
+  );
+}
+
 export default function RiwayatPage() {
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
@@ -161,11 +176,7 @@ export default function RiwayatPage() {
                 <div className="flex gap-4 items-center flex-1 min-w-0">
                   {/* Photo Thumbnail */}
                   <div className="h-16 w-16 shrink-0 rounded-xl border border-paper-200 bg-paper-50 overflow-hidden flex items-center justify-center">
-                    {photoUrl ? (
-                      <img src={photoUrl} alt={act.title} className="h-full w-full object-cover" />
-                    ) : (
-                      <span className="text-2xl">♻️</span>
-                    )}
+                    <ActivityImage src={photoUrl} alt={act.title} />
                   </div>
                   
                   {/* Info details */}

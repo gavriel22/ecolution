@@ -63,8 +63,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   } else {
     menuItems = [
       { label: "Dashboard", href: "/dashboard" },
-      { label: "Pesanan", href: "/orders" },
+      { label: "Riwayat Aktivitas", href: "/activity" },
       { label: "Upload Aktivitas", href: "/activity/new" },
+      { label: "Pesanan", href: "/orders" },
       { label: "Profil", href: "/profile" },
     ];
   }
@@ -148,9 +149,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </Link>
             <div className="border-b border-paper-100 mb-2"></div>
             {menuItems.map((item) => {
-              // Exact match or prefix match for subpaths (e.g. /activity/new starts with /activity)
+              // Exact match or specific route matching to avoid duplicate highlights (e.g. /activity vs /activity/new)
               const isActive =
-                item.href === "/dashboard"
+                item.href === "/activity"
+                  ? pathname === "/activity" || (pathname.startsWith("/activity/") && pathname !== "/activity/new")
+                  : item.href === "/dashboard"
                   ? pathname === "/dashboard"
                   : pathname.startsWith(item.href);
 

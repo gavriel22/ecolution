@@ -64,22 +64,15 @@ export function ActivityDetail({ id }: { id: string }) {
       {activity.status === "PENDING" && (
         <div className="flex gap-3 pt-2">
           <button
-            onClick={() => submitActivity.mutate()}
-            disabled={submitActivity.isPending}
-            className="flex-1 rounded-md bg-moss-700 px-4 py-2.5 font-medium text-paper-50 hover:bg-moss-900 disabled:opacity-60"
-          >
-            {submitActivity.isPending ? "Memproses..." : "Kirim untuk Verifikasi"}
-          </button>
-          <button
             onClick={async () => {
               if (await confirm("Hapus aktivitas ini?")) {
                 deleteActivity.mutate(id, { onSuccess: () => router.push("/activity") });
               }
             }}
             disabled={deleteActivity.isPending}
-            className="rounded-md border border-rust-500 px-4 py-2.5 font-medium text-rust-600 hover:bg-rust-500/5 disabled:opacity-60"
+            className="flex-1 rounded-md border border-rust-500 px-4 py-2.5 font-medium text-rust-600 hover:bg-rust-500/5 disabled:opacity-60"
           >
-            Hapus
+            Hapus Aktivitas
           </button>
         </div>
       )}

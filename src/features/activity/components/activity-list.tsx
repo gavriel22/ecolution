@@ -22,12 +22,12 @@ export function ActivityList() {
   return (
     <div className="mx-auto w-full max-w-2xl space-y-5">
       <div className="flex items-center justify-between gap-3">
-        <h1 className="font-display text-3xl font-semibold text-ink-900">Aktivitasku</h1>
+        <h1 className="font-display text-3xl font-semibold text-ink-900">Riwayat Aktivitas</h1>
         <Link
           href="/activity/new"
           className="rounded-md bg-moss-700 px-4 py-2 text-sm font-medium text-paper-50 hover:bg-moss-900"
         >
-          + Lapor Aktivitas
+          + Lapor Aktivitas Baru
         </Link>
       </div>
 

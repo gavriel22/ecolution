@@ -6,6 +6,7 @@ import { useCreateActivity } from "../hooks/use-create-activity";
 import { CategorySelect } from "./category-select";
 import { PhotoCaptureInput, type PhotoExifData, type ExifValidationError } from "./photo-capture-input";
 import { ApiError } from "@/lib/api-client";
+import { submitActivity } from "../api";
 
 export function ActivityForm() {
   const router = useRouter();
@@ -56,7 +57,16 @@ export function ActivityForm() {
         location: exifData.location || undefined,
       },
       {
-        onSuccess: (res) => router.push(`/activity/${res.data.id}`),
+        onSuccess: async (res) => {
+          try {
+            // Auto submit newly created activity to mock verifier
+            await submitActivity(res.data.id);
+          } catch (err) {
+            console.error("Auto submit failed:", err);
+          }
+          // Redirect to Riwayat Aktivitas page
+          router.push("/activity");
+        },
       }
     );
   }

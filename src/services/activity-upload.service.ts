@@ -13,6 +13,8 @@ import { extractExif } from "@/lib/exif";
 import { ValidationError, NotFoundError } from "@/utils/errors";
 import { ActivityStatus } from "@prisma/client";
 import { getPaginationMetadata } from "@/utils/pagination";
+import fs from "fs/promises";
+import path from "path";
 
 // Maksimum ukuran file: 10 MB
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
@@ -104,9 +106,17 @@ export class ActivityUploadService {
       : ActivityStatus.REJECTED;
 
     // ── 6. Simpan Activity + Photo ke DB ─────────────────────────────────────
-    // Gunakan imageUrl placeholder (dalam produksi: upload ke storage seperti UploadThing/S3 dulu)
-    // Di sini kita simpan nama file asli sebagai imageUrl sementara
-    const imageUrl = `/uploads/${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
+    // Write image buffer to public/uploads/ so it is statically served by Next.js
+    const uploadDir = path.join(process.cwd(), "public", "uploads");
+    try {
+      await fs.mkdir(uploadDir, { recursive: true });
+    } catch (e) {
+      console.warn("Could not create uploads directory:", e);
+    }
+    const filename = `${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
+    const filepath = path.join(uploadDir, filename);
+    await fs.writeFile(filepath, buffer);
+    const imageUrl = `/uploads/${filename}`;
 
     const activity = await activityRepository.create({
       userId,
