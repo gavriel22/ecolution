@@ -95,12 +95,12 @@ export class AuthService {
     context: { deviceName?: string; ipAddress?: string; userAgent?: string }
   ): Promise<{ user: SafeUser; accessToken: string; refreshToken: string }> {
     if (!credentials.email || !credentials.password) {
-      throw new ValidationError("Email and password are required");
+      throw new ValidationError("Email dan kata sandi wajib diisi");
     }
 
     const user = await userRepository.findByEmail(credentials.email);
     if (!user || !user.passwordHash || !user.isActive) {
-      throw new UnauthorizedError("Invalid email or password");
+      throw new UnauthorizedError("Email atau kata sandi salah");
     }
 
     const isPasswordValid = await bcrypt.compare(
@@ -109,7 +109,7 @@ export class AuthService {
     );
 
     if (!isPasswordValid) {
-      throw new UnauthorizedError("Invalid email or password");
+      throw new UnauthorizedError("Email atau kata sandi salah");
     }
 
     const dbUserRole = user.role;
@@ -130,23 +130,29 @@ export class AuthService {
       username: user.username,
     };
 
-    const accessToken = await generateAccessToken(payload);
-    const refreshToken = await generateRefreshToken(payload);
+    // Generate both tokens in parallel for faster response
+    const [accessToken, refreshToken] = await Promise.all([
+      generateAccessToken(payload),
+      generateRefreshToken(payload),
+    ]);
 
     // Refresh Token expires in 30 days
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 30);
 
-    await userRepository.saveRefreshToken({
-      userId: user.id,
-      token: refreshToken,
-      expiresAt,
-      deviceName: context.deviceName,
-      ipAddress: context.ipAddress,
-      userAgent: context.userAgent,
-    });
+    // Save refresh token and build safe user object in parallel
+    const [safeUser] = await Promise.all([
+      this.toSafeUser(user),
+      userRepository.saveRefreshToken({
+        userId: user.id,
+        token: refreshToken,
+        expiresAt,
+        deviceName: context.deviceName,
+        ipAddress: context.ipAddress,
+        userAgent: context.userAgent,
+      }),
+    ]);
 
-    const safeUser = await this.toSafeUser(user);
     safeUser.role = sessionRole;
 
     return {

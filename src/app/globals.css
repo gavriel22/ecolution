@@ -11,20 +11,29 @@
   --color-moss-600: #255740;
   --color-moss-700: #1b4332;
   --color-moss-900: #102a20;
+  --color-moss-50: #eaf2ed;
+  --color-moss-200: #b8d3c2;
 
   /* Ochre — pending / poin / highlight */
   --color-ochre-400: #d99a3d;
   --color-ochre-500: #c97c1c;
   --color-ochre-600: #a8630f;
+  --color-ochre-50: #fdf6ec;
+  --color-ochre-200: #f0d09a;
+  --color-ochre-700: #8a5210;
 
   /* Rust — rejected / destructive */
   --color-rust-500: #a5432d;
   --color-rust-600: #8a3423;
+  --color-rust-50: #fdf0ed;
+  --color-rust-200: #e8b5aa;
 
   /* Ink — teks utama */
   --color-ink-900: #16241d;
   --color-ink-700: #37473d;
   --color-ink-400: #6b7a70;
+  --color-ink-300: #9aab9f;
+  --color-ink-450: #55695d;
 
   --font-display: "Fraunces", ui-serif, Georgia, serif;
   --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
@@ -48,4 +57,51 @@
     --background: #0a0a0a;
     --foreground: #ededed;
   }
+}
+
+/* -------------------------------------------------------
+   Global interactive element cursor rules
+   Ensures all clickable elements display pointer cursor
+   without needing to add cursor-pointer class individually
+------------------------------------------------------- */
+
+/* Buttons and form controls */
+button:not(:disabled),
+[type="button"]:not(:disabled),
+[type="submit"]:not(:disabled),
+[type="reset"]:not(:disabled),
+select,
+label[for],
+summary {
+  cursor: pointer;
+}
+
+/* Disabled elements — always show not-allowed */
+button:disabled,
+[type="button"]:disabled,
+[type="submit"]:disabled,
+[type="reset"]:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+  cursor: not-allowed;
+}
+
+/* Links */
+a[href] {
+  cursor: pointer;
+}
+
+/* Elements with explicit click/keyboard roles */
+[role="button"]:not(:disabled),
+[role="menuitem"],
+[role="option"],
+[role="tab"],
+[role="checkbox"],
+[role="radio"],
+[role="switch"],
+[role="combobox"],
+[role="listbox"],
+[tabindex="0"] {
+  cursor: pointer;
 }

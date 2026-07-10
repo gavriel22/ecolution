@@ -104,7 +104,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </Link>
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="rounded-md p-2 text-ink-700 hover:bg-paper-100 hover:text-moss-700 focus:outline-none"
+          className="cursor-pointer rounded-md p-2 text-ink-700 hover:bg-paper-100 hover:text-moss-700 focus:outline-none"
           aria-label="Toggle menu"
         >
           {isMobileMenuOpen ? (
@@ -159,9 +159,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   key={`${item.label}-${item.href}`}
                   href={item.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex h-10 items-center rounded-md text-sm font-medium transition-all duration-200 ${
+                  className={`cursor-pointer flex h-10 items-center rounded-md text-sm font-medium transition-all duration-200 ${
                     isActive
-                      ? "bg-moss-50 text-moss-700 font-semibold border-l-4 border-moss-700 pl-3"
+                      ? "bg-moss-50 text-moss-700 font-semibold pl-4"
                       : "text-ink-700 hover:bg-paper-50 hover:text-moss-700 pl-4"
                   }`}
                 >
@@ -196,7 +196,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <button
             onClick={handleLogout}
             disabled={logoutMutation.isPending}
-            className="flex w-full items-center justify-center gap-2 rounded-md border border-paper-200 bg-white py-2 text-xs font-semibold text-rust-600 transition hover:bg-paper-50 hover:text-rust-700 disabled:opacity-50"
+            className="cursor-pointer flex w-full items-center justify-center gap-2 rounded-md border border-paper-200 bg-white py-2 text-xs font-semibold text-rust-600 transition hover:bg-paper-50 hover:text-rust-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {logoutMutation.isPending ? (
               <span>Logging out...</span>
@@ -216,7 +216,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       {isMobileMenuOpen && (
         <div
           onClick={() => setIsMobileMenuOpen(false)}
-          className="fixed inset-0 z-30 bg-black/35 backdrop-blur-xs md:hidden"
+          className="cursor-pointer fixed inset-0 z-30 bg-black/35 backdrop-blur-xs md:hidden"
         ></div>
       )}
 
