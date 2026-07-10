@@ -30,7 +30,7 @@ export class UserRepository {
     name: string;
     username: string;
     email: string;
-    passwordHash: string;
+    passwordHash?: string | null;
     role?: UserRole;
   }): Promise<User> {
     return prisma.user.create({
@@ -38,7 +38,7 @@ export class UserRepository {
         name: data.name,
         username: data.username,
         email: data.email.toLowerCase(),
-        passwordHash: data.passwordHash,
+        passwordHash: data.passwordHash ?? null,
         role: data.role ?? UserRole.USER,
         isActive: true,
       },

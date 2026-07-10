@@ -1,15 +1,94 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useRegister } from "../hooks/use-register";
-import { ApiError } from "@/lib/api-client";
+import { ApiError, apiFetch } from "@/lib/api-client";
+import { useAuth } from "@/context/auth-context";
+import { toast } from "sonner";
 
 export function RegisterForm() {
   const router = useRouter();
   const register = useRegister();
+  const { user, isLoading, setUser } = useAuth();
   const [form, setForm] = useState({ name: "", username: "", email: "", password: "" });
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  async function handleGoogleCredentialResponse(response: any) {
+    setGoogleLoading(true);
+    try {
+      const res = await apiFetch<any>("/api/auth/google", {
+        method: "POST",
+        body: { idToken: response.credential },
+      });
+
+      setUser(res.data.user);
+
+      toast.success("Daftar Google berhasil, mengalihkan...", {
+        duration: 2000,
+        position: "top-center",
+      });
+
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 800);
+    } catch (error: any) {
+      toast.error(error.message || "Gagal mendaftar menggunakan Google", {
+        position: "top-center",
+        duration: 4000,
+      });
+    } finally {
+      setGoogleLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (isLoading || user) return;
+
+    apiFetch<{ clientId: string | null }>("/api/auth/google")
+      .then((res) => {
+        const clientId = res.data?.clientId;
+        if (!clientId) return;
+
+        const loadGoogleScript = (callback: () => void) => {
+          if (typeof window === "undefined") return;
+          if ((window as any).google) {
+            callback();
+            return;
+          }
+          const script = document.createElement("script");
+          script.src = "https://accounts.google.com/gsi/client";
+          script.async = true;
+          script.defer = true;
+          script.onload = callback;
+          document.head.appendChild(script);
+        };
+
+        loadGoogleScript(() => {
+          const google = (window as any).google;
+          if (google) {
+            google.accounts.id.initialize({
+              client_id: clientId,
+              callback: handleGoogleCredentialResponse,
+            });
+            google.accounts.id.renderButton(
+              document.getElementById("google-signup-btn"),
+              {
+                theme: "outline",
+                size: "large",
+                width: 384,
+                text: "signup_with",
+                shape: "rectangular",
+              }
+            );
+          }
+        });
+      })
+      .catch((err) => {
+        console.error("Failed to load Google client ID config", err);
+      });
+  }, [user, isLoading]);
 
   function update<K extends keyof typeof form>(key: K, value: string) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -127,6 +206,24 @@ export function RegisterForm() {
       >
         {register.isPending ? "Memproses..." : "Buat Akun"}
       </button>
+
+      {/* Google Login Button */}
+      <div className="relative flex py-1 items-center">
+        <div className="flex-grow border-t border-paper-200"></div>
+        <span className="flex-shrink mx-4 text-ink-400 text-[10px] uppercase font-mono tracking-wider">atau</span>
+        <div className="flex-grow border-t border-paper-200"></div>
+      </div>
+
+      <div className="w-full flex justify-center">
+        {googleLoading ? (
+          <div className="flex items-center justify-center gap-2 py-2 text-xs font-mono text-ink-400">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-moss-200 border-t-moss-700"></div>
+            Menghubungkan ke Google...
+          </div>
+        ) : (
+          <div id="google-signup-btn" className="w-full flex justify-center"></div>
+        )}
+      </div>
 
       <p className="text-center text-sm text-ink-400">
         Sudah punya akun?{" "}

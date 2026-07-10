@@ -7,6 +7,7 @@ import {
   UnauthorizedError,
   NotFoundError,
   ValidationError,
+  ForbiddenError,
 } from "@/utils/errors";
 import {
   generateAccessToken,
@@ -141,6 +142,145 @@ export class AuthService {
     expiresAt.setDate(expiresAt.getDate() + 30);
 
     // Save refresh token and build safe user object in parallel
+    const [safeUser] = await Promise.all([
+      this.toSafeUser(user),
+      userRepository.saveRefreshToken({
+        userId: user.id,
+        token: refreshToken,
+        expiresAt,
+        deviceName: context.deviceName,
+        ipAddress: context.ipAddress,
+        userAgent: context.userAgent,
+      }),
+    ]);
+
+    safeUser.role = sessionRole;
+
+    return {
+      user: safeUser,
+      accessToken,
+      refreshToken,
+    };
+  }
+
+  async loginWithGoogle(
+    idToken: string,
+    context: { deviceName?: string; ipAddress?: string; userAgent?: string }
+  ): Promise<{ user: SafeUser; accessToken: string; refreshToken: string }> {
+    if (!idToken) {
+      throw new ValidationError("Google ID Token wajib diisi");
+    }
+
+    // 1. Verify Google ID Token via Google's tokeninfo API
+    let payload;
+    try {
+      const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`);
+      if (!response.ok) {
+        throw new Error("Gagal verifikasi dengan Google");
+      }
+      payload = await response.json();
+    } catch (e: any) {
+      throw new ValidationError("Token Google tidak valid atau gagal verifikasi: " + e.message);
+    }
+
+    if (!payload || !payload.email) {
+      throw new ValidationError("Email tidak tersedia pada token Google");
+    }
+
+    // Verify audience matches our Client ID
+    const googleClientId = process.env.GOOGLE_CLIENT_ID;
+    if (googleClientId && payload.aud !== googleClientId) {
+      throw new ValidationError("Google Client ID tidak cocok (invalid audience)");
+    }
+
+    // Check expiry
+    const now = Math.floor(Date.now() / 1000);
+    if (payload.exp && now > Number(payload.exp)) {
+      throw new ValidationError("Token Google sudah kedaluwarsa");
+    }
+
+    const email = payload.email.toLowerCase();
+    const name = payload.name || email.split("@")[0];
+    const profileImageUrl = payload.picture || null;
+
+    // 2. Find user by email
+    let user = await userRepository.findByEmail(email);
+
+    if (!user) {
+      // Create user if not exists
+      let username = email.split("@")[0].replace(/[^a-zA-Z0-9]/g, "_");
+      let usernameTaken = await userRepository.findByUsername(username);
+      if (usernameTaken) {
+        username = `${username}_${Math.floor(Math.random() * 1000)}`;
+      }
+
+      user = await userRepository.create({
+        name,
+        username,
+        email,
+        passwordHash: null,
+        role: "USER",
+      });
+
+      // Update profile picture
+      if (profileImageUrl) {
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: { profileImageUrl },
+        });
+      }
+
+      // Link Account model
+      await prisma.account.create({
+        data: {
+          type: "oauth",
+          provider: "GOOGLE",
+          providerAccountId: payload.sub,
+          idToken,
+          userId: user.id,
+        },
+      });
+    } else {
+      // User exists. Let's make sure they have a linked Account, if not create it
+      const existingAccount = await prisma.account.findFirst({
+        where: { userId: user.id, provider: "GOOGLE" },
+      });
+      if (!existingAccount) {
+        await prisma.account.create({
+          data: {
+            type: "oauth",
+            provider: "GOOGLE",
+            providerAccountId: payload.sub || user.id,
+            idToken,
+            userId: user.id,
+          },
+        });
+      }
+    }
+
+    if (!user.isActive) {
+      throw new ForbiddenError("Akun Anda telah dinonaktifkan oleh administrator");
+    }
+
+    // 3. Generate tokens (same as regular login)
+    const dbUserRole = user.role;
+    const sessionRole: UserRole = dbUserRole;
+
+    const jwtPayload: JWTPayload = {
+      id: user.id,
+      email: user.email,
+      role: sessionRole,
+      username: user.username,
+    };
+
+    const [accessToken, refreshToken] = await Promise.all([
+      generateAccessToken(jwtPayload),
+      generateRefreshToken(jwtPayload),
+    ]);
+
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 30);
+
     const [safeUser] = await Promise.all([
       this.toSafeUser(user),
       userRepository.saveRefreshToken({
