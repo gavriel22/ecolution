@@ -26,10 +26,10 @@ export function ActivityForm() {
   }
 
   function handleExifError(error: ExifValidationError) {
+    // NOTE: do NOT clear the photo here — the file is still selected
+    // and the preview should remain visible. Only the EXIF status changes.
     setExifError(error);
     setExifData(null);
-    // Also clear the photo so the submit button stays disabled
-    setPhoto(null);
   }
 
   function handlePhotoChange(file: File | null) {
@@ -69,6 +69,7 @@ export function ActivityForm() {
         : null;
 
   // Submit is only allowed when a photo with valid EXIF is selected
+  // (exifData is only set after successful EXIF validation)
   const canSubmit = !!photo && !!exifData && !createActivity.isPending;
 
   return (

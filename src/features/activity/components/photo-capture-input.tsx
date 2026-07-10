@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { extractExif, isEditedBySoftware, type ExifResult } from "@/lib/exif";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -28,13 +28,15 @@ export interface PhotoExifData {
 }
 
 export type ExifValidationError =
-  | "NO_EXIF"           // no EXIF at all
-  | "MISSING_DATE"      // DateTimeOriginal absent
-  | "MISSING_GPS"       // no GPS coordinates
-  | "MISSING_CAMERA";   // no Make/Model
+  | "NO_EXIF"        // no EXIF at all
+  | "MISSING_DATE"   // DateTimeOriginal absent
+  | "MISSING_GPS"    // no GPS coordinates
+  | "MISSING_CAMERA" // no Make/Model
+  | "FILE_ERROR";    // file could not be read
 
 interface PhotoCaptureInputProps {
   value: File | null;
+  /** Called whenever user selects or clears a file */
   onChange: (file: File | null) => void;
   /** Called once EXIF is successfully parsed from the selected photo */
   onExifReady: (data: PhotoExifData) => void;
@@ -54,7 +56,6 @@ async function reverseGeocode(lat: number, lon: number): Promise<string> {
     });
     if (!res.ok) throw new Error("Nominatim request failed");
     const data = await res.json();
-    // Build a clean, short address from the address components
     const addr = data.address ?? {};
     const parts = [
       addr.road || addr.pedestrian || addr.footway,
@@ -64,13 +65,43 @@ async function reverseGeocode(lat: number, lon: number): Promise<string> {
     ].filter(Boolean);
     return parts.length > 0 ? parts.join(", ") : (data.display_name ?? `${lat}, ${lon}`);
   } catch {
-    // Fallback to coordinate string if geocoding fails
     return `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Status icons
+// Helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+function validateExif(exif: ExifResult): ExifValidationError | null {
+  if (!exif.hasExif) return "NO_EXIF";
+  if (!exif.takenAt) return "MISSING_DATE";
+  if (exif.latitude === null || exif.longitude === null) return "MISSING_GPS";
+  if (!exif.make && !exif.model) return "MISSING_CAMERA";
+  return null;
+}
+
+function friendlyError(error: ExifValidationError): string {
+  switch (error) {
+    case "FILE_ERROR":
+      return "Gagal membaca file. Pastikan file tidak rusak dan coba lagi.";
+    case "NO_EXIF":
+    case "MISSING_CAMERA":
+    case "MISSING_DATE":
+    case "MISSING_GPS":
+    default:
+      return "Foto tidak memenuhi syarat. Gunakan foto asli yang diambil langsung dari kamera dengan lokasi (GPS) dan metadata aktif.";
+  }
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Icons
 // ─────────────────────────────────────────────────────────────────────────────
 
 function IconCheckCircle() {
@@ -83,7 +114,7 @@ function IconCheckCircle() {
 
 function IconWarning() {
   return (
-    <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 text-ochre-600 shrink-0" aria-hidden="true">
+    <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 text-ochre-600 shrink-0 mt-0.5" aria-hidden="true">
       <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
     </svg>
   );
@@ -99,54 +130,38 @@ function IconCamera() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Validation helper
+// Parse state machine
 // ─────────────────────────────────────────────────────────────────────────────
 
-function validateExif(exif: ExifResult): ExifValidationError | null {
-  if (!exif.hasExif) return "NO_EXIF";
-  if (!exif.takenAt) return "MISSING_DATE";
-  if (exif.latitude === null || exif.longitude === null) return "MISSING_GPS";
-  if (!exif.make && !exif.model) return "MISSING_CAMERA";
-  return null;
-}
-
-function friendlyError(error: ExifValidationError): string {
-  switch (error) {
-    case "NO_EXIF":
-    case "MISSING_CAMERA":
-      return "Foto tidak memenuhi syarat. Gunakan foto asli yang diambil langsung dari kamera dengan lokasi dan metadata aktif.";
-    case "MISSING_DATE":
-      return "Foto tidak memenuhi syarat. Gunakan foto asli yang diambil langsung dari kamera dengan lokasi dan metadata aktif.";
-    case "MISSING_GPS":
-      return "Foto tidak memenuhi syarat. Gunakan foto asli yang diambil langsung dari kamera dengan lokasi dan metadata aktif.";
-  }
-}
+type ParseState =
+  | { status: "idle" }
+  | { status: "selected"; file: File }   // file chosen, EXIF pending
+  | { status: "parsing"; file: File }
+  | { status: "error"; error: ExifValidationError; file: File }
+  | { status: "ready"; data: PhotoExifData; file: File };
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Main component
 // ─────────────────────────────────────────────────────────────────────────────
 
-type ParseState =
-  | { status: "idle" }
-  | { status: "parsing" }
-  | { status: "error"; error: ExifValidationError }
-  | { status: "ready"; data: PhotoExifData };
-
 /**
  * PhotoCaptureInput — file picker that auto-reads EXIF metadata.
  *
- * On photo selection:
- *  1. Reads EXIF via exifr (browser-side, no upload needed)
- *  2. Validates DateTimeOriginal, GPS, and Make/Model are present
- *  3. Reverse-geocodes GPS → human-readable address (Nominatim)
- *  4. Flags photos edited with known software (Photoshop, Canva, etc.)
- *  5. Calls onExifReady with parsed data, or onExifError on failure
+ * Flow:
+ *  1. User picks a photo (file picker or camera)
+ *  2. File is stored immediately; preview is shown
+ *  3. EXIF is read via exifr (browser-side, no upload)
+ *  4. If EXIF is valid → calls onExifReady, form can submit
+ *  5. If EXIF is invalid → shows clear error; FILE IS KEPT for re-try
+ *     awareness, but onExifError is called so parent can block submit
+ *
+ * KEY FIX: On EXIF validation failure, we NO LONGER clear the file
+ * from state — we only notify the parent. The parent decides what to
+ * do. This prevents the "photo disappears after selection" bug.
  *
  * IMPORTANT: keep this a plain <input type="file">.
  * Do NOT rebuild with a custom <video>/<canvas> camera UI —
- * canvas re-encoding strips EXIF (GPS + capture time), and the
- * backend rejects activities with missing EXIF. The native capture
- * keeps the original EXIF intact.
+ * canvas re-encoding strips EXIF (GPS + capture time).
  */
 export function PhotoCaptureInput({
   value,
@@ -158,11 +173,10 @@ export function PhotoCaptureInput({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [parseState, setParseState] = useState<ParseState>({ status: "idle" });
 
-  // Build/revoke object URL for preview
+  // Build/revoke object URL for preview whenever `value` changes externally
   useEffect(() => {
     if (!value) {
       setPreviewUrl(null);
-      setParseState({ status: "idle" });
       return;
     }
     const url = URL.createObjectURL(value);
@@ -170,7 +184,10 @@ export function PhotoCaptureInput({
     return () => URL.revokeObjectURL(url);
   }, [value]);
 
+  // ── File selection ─────────────────────────────────────────────────────────
+
   async function handleFileChange(file: File | null) {
+    // Always tell the parent about the new file (or null)
     onChange(file);
 
     if (!file) {
@@ -178,26 +195,48 @@ export function PhotoCaptureInput({
       return;
     }
 
-    setParseState({ status: "parsing" });
+    // Log received file for debugging (visible in browser DevTools)
+    console.log("[PhotoCaptureInput] File received:", {
+      name: file.name,
+      size: formatBytes(file.size),
+      type: file.type || "(no MIME type — likely Android camera)",
+    });
+
+    // Show the file immediately (status: selected) before EXIF parsing starts
+    setParseState({ status: "selected", file });
+    setParseState({ status: "parsing", file });
 
     try {
       const exif = await extractExif(file);
+
+      console.log("[PhotoCaptureInput] EXIF parsed:", {
+        hasExif: exif.hasExif,
+        takenAt: exif.takenAt,
+        latitude: exif.latitude,
+        longitude: exif.longitude,
+        make: exif.make,
+        model: exif.model,
+        software: exif.software,
+      });
+
       const validationError = validateExif(exif);
 
       if (validationError) {
-        setParseState({ status: "error", error: validationError });
+        console.warn("[PhotoCaptureInput] EXIF validation failed:", validationError);
+        // ⚠ FILE IS KEPT — only the EXIF status changes
+        // The parent's onChange was already called above with the file
+        setParseState({ status: "error", error: validationError, file });
         onExifError(validationError);
         return;
       }
 
-      // All required fields are present at this point
       const lat = exif.latitude!;
       const lon = exif.longitude!;
       const takenAt = exif.takenAt!;
       const make = exif.make!;
       const model = exif.model;
 
-      // Reverse geocode in parallel, don't block on failure
+      // Reverse geocode — may take a moment; doesn't block file acceptance
       const location = await reverseGeocode(lat, lon);
 
       const cameraInfo = model ? `${make} ${model}`.trim() : make;
@@ -213,11 +252,19 @@ export function PhotoCaptureInput({
         software: exif.software,
       };
 
-      setParseState({ status: "ready", data });
+      console.log("[PhotoCaptureInput] EXIF ready:", {
+        activityDate: takenAt.toISOString(),
+        location,
+        cameraInfo,
+        flaggedAsEdited,
+      });
+
+      setParseState({ status: "ready", data, file });
       onExifReady(data);
-    } catch {
-      setParseState({ status: "error", error: "NO_EXIF" });
-      onExifError("NO_EXIF");
+    } catch (err) {
+      console.error("[PhotoCaptureInput] EXIF extraction threw:", err);
+      setParseState({ status: "error", error: "FILE_ERROR", file });
+      onExifError("FILE_ERROR");
     }
   }
 
@@ -227,54 +274,116 @@ export function PhotoCaptureInput({
     setParseState({ status: "idle" });
   }
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  // Retry: user can re-pick a photo without clearing the form
+  function handleRetry() {
+    inputRef.current?.click();
+  }
+
+  // ── Render ─────────────────────────────────────────────────────────────────
+
+  const currentFile =
+    parseState.status === "selected" ||
+    parseState.status === "parsing" ||
+    parseState.status === "error" ||
+    parseState.status === "ready"
+      ? parseState.file
+      : null;
+
+  const hasFile = !!previewUrl || !!currentFile;
 
   return (
-    <div className="space-y-2">
-      <label className="text-xs font-medium uppercase tracking-wide text-ink-400">Foto Bukti</label>
+    <div className="space-y-3">
+      <label className="text-xs font-medium uppercase tracking-wide text-ink-400">
+        Foto Bukti
+      </label>
 
-      {/* Photo preview */}
-      {previewUrl ? (
-        <div className="relative overflow-hidden rounded-md border border-paper-200">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={previewUrl} alt="Preview foto aktivitas" className="h-56 w-full object-cover" />
-          <button
-            type="button"
-            onClick={handleReset}
-            className="absolute right-2 top-2 rounded-md bg-ink-900/70 px-2 py-1 text-xs font-medium text-paper-50 hover:bg-ink-900"
-          >
-            Ganti Foto
-          </button>
+      {/* ── Photo preview / picker ─────────────────────────────────────────── */}
+      {hasFile ? (
+        <div className="relative overflow-hidden rounded-md border border-paper-200 bg-paper-50">
+          {previewUrl ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={previewUrl}
+              alt="Preview foto aktivitas"
+              className="h-56 w-full object-cover"
+            />
+          ) : (
+            /* Fallback while URL is being created */
+            <div className="flex h-56 items-center justify-center text-xs text-ink-400">
+              {currentFile?.name ?? "Memuat preview..."}
+            </div>
+          )}
+
+          {/* File info bar */}
+          {currentFile && (
+            <div className="flex items-center justify-between bg-ink-900/60 px-3 py-1.5 text-xs text-paper-50">
+              <span className="truncate max-w-[60%]">{currentFile.name}</span>
+              <span className="shrink-0 ml-2 opacity-75">{formatBytes(currentFile.size)}</span>
+            </div>
+          )}
+
+          {/* Action buttons */}
+          <div className="absolute right-2 top-2 flex gap-1.5">
+            {parseState.status === "error" && (
+              <button
+                type="button"
+                onClick={handleRetry}
+                className="rounded-md bg-ochre-500/90 px-2 py-1 text-xs font-medium text-white hover:bg-ochre-600"
+              >
+                Pilih Ulang
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={handleReset}
+              className="rounded-md bg-ink-900/70 px-2 py-1 text-xs font-medium text-paper-50 hover:bg-ink-900"
+            >
+              Hapus
+            </button>
+          </div>
         </div>
       ) : (
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="flex h-40 w-full flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed border-paper-200 text-ink-400 transition hover:border-moss-500 hover:text-moss-700"
+          className="flex h-44 w-full flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed border-paper-200 text-ink-400 transition hover:border-moss-500 hover:text-moss-700 active:scale-[0.99]"
         >
           <IconCamera />
           <span className="text-sm font-medium">Ambil / Unggah Foto Asli</span>
-          <span className="text-xs opacity-70">JPEG, HEIC, atau TIFF · maks. 10MB</span>
+          <span className="text-xs opacity-70">JPEG, HEIC, TIFF · maks. 10MB</span>
         </button>
       )}
 
+      {/*
+        File input — NO capture attribute to allow both camera AND gallery on Android.
+        capture="environment" on Android Chrome forces camera only and skips the
+        file picker entirely, which breaks the "pilih dari galeri" flow.
+        Users can still tap the camera icon in the native file picker.
+      */}
       <input
         ref={inputRef}
         type="file"
-        accept="image/jpeg,image/heic,image/heif,image/tiff,image/jpg"
-        capture="environment"
+        accept="image/*,.jpg,.jpeg,.heic,.heif,.tiff,.tif"
         className="hidden"
-        onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
+        onChange={(e) => {
+          const file = e.target.files?.[0] ?? null;
+          // Reset the input value so the same file can be re-selected after reset
+          // (do this AFTER reading the file, not before)
+          handleFileChange(file);
+          // Allow re-selecting same file
+          e.target.value = "";
+        }}
       />
 
-      {/* EXIF parse status */}
+      {/* ── EXIF status feedback ──────────────────────────────────────────── */}
+
       {parseState.status === "parsing" && (
         <div className="flex items-center gap-2 rounded-md border border-paper-200 bg-paper-50 px-3 py-2.5 text-xs text-ink-400">
           <svg className="h-3.5 w-3.5 animate-spin shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
           </svg>
-          <span>Membaca metadata foto & lokasi GPS...</span>
+          <span>Membaca metadata foto &amp; lokasi GPS…</span>
         </div>
       )}
 
@@ -282,18 +391,22 @@ export function PhotoCaptureInput({
         <div
           role="alert"
           aria-live="assertive"
-          className="flex items-start gap-2.5 rounded-md border border-rust-500/30 bg-rust-500/5 px-3 py-2.5 text-sm text-rust-600"
+          className="rounded-md border border-rust-500/30 bg-rust-500/5 px-3 py-2.5 text-sm text-rust-600"
         >
-          <svg viewBox="0 0 20 20" fill="currentColor" className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
-          </svg>
-          <span>{friendlyError(parseState.error)}</span>
+          <div className="flex items-start gap-2">
+            <svg viewBox="0 0 20 20" fill="currentColor" className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
+            </svg>
+            <span>{friendlyError(parseState.error)}</span>
+          </div>
+          <p className="mt-1.5 pl-6 text-xs text-rust-600/80">
+            Pastikan GPS aktif saat memotret, atau gunakan foto asli dari kamera — bukan screenshot atau gambar dari internet.
+          </p>
         </div>
       )}
 
       {parseState.status === "ready" && (
         <div className="space-y-2">
-          {/* Edited warning — show before the success info */}
           {parseState.data.flaggedAsEdited && (
             <div
               role="alert"
@@ -308,23 +421,28 @@ export function PhotoCaptureInput({
             </div>
           )}
 
-          {/* Metadata summary */}
           <div className="rounded-md border border-moss-200 bg-moss-50/60 px-3 py-2.5 text-xs text-ink-700 space-y-1.5">
             <div className="flex items-center gap-1.5 font-semibold text-moss-700 mb-1">
               <IconCheckCircle />
               <span>Metadata foto berhasil dibaca</span>
             </div>
-            <MetaRow icon="📅" label="Diambil pada" value={parseState.data.activityDate.toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })} />
+            <MetaRow
+              icon="📅"
+              label="Diambil pada"
+              value={parseState.data.activityDate.toLocaleString("id-ID", {
+                dateStyle: "medium",
+                timeStyle: "short",
+              })}
+            />
             <MetaRow icon="📍" label="Lokasi GPS" value={parseState.data.location} />
             <MetaRow icon="📷" label="Kamera" value={parseState.data.cameraInfo} />
           </div>
         </div>
       )}
 
-      {/* Persistent instruction */}
       <p className="text-xs text-ink-400">
         Foto harus diambil langsung dari kamera dengan GPS aktif. Metadata EXIF (tanggal, lokasi, kamera)
-        wajib tersedia — foto tanpa metadata atau yang telah diedit tidak dapat diterima.
+        wajib tersedia — foto tanpa metadata tidak dapat diterima.
       </p>
     </div>
   );
