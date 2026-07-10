@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { useLogout } from "@/features/auth/hooks/use-logout";
+import { Avatar } from "@/components/ui/avatar";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, isLoading, activeRole } = useAuth();
@@ -103,11 +104,19 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <Link href="/dashboard" className="font-display text-2xl font-bold text-moss-700">
           Ecolution
         </Link>
-        <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="cursor-pointer rounded-md p-2 text-ink-700 hover:bg-paper-100 hover:text-moss-700 focus:outline-none"
-          aria-label="Toggle menu"
-        >
+        <div className="flex items-center gap-3">
+          <Link href="/profile" aria-label="Profil">
+            <Avatar
+              name={user.name}
+              src={user.profileImageUrl}
+              className="h-9 w-9 text-sm ring-1 ring-paper-200"
+            />
+          </Link>
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="cursor-pointer rounded-md p-2 text-ink-700 hover:bg-paper-100 hover:text-moss-700 focus:outline-none"
+            aria-label="Toggle menu"
+          >
           {isMobileMenuOpen ? (
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -117,7 +126,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           )}
-        </button>
+          </button>
+        </div>
       </header>
 
       {/* Sidebar Layout */}
@@ -178,9 +188,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         {/* User Info / Profile & Logout */}
         <div className="border-t border-paper-100 pt-4 space-y-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-paper-200 text-ink-900 font-display font-semibold text-lg uppercase shadow-xs">
-              {user.name.charAt(0)}
-            </div>
+            <Avatar
+              name={user.name}
+              src={user.profileImageUrl}
+              className="h-10 w-10 text-lg shadow-xs ring-1 ring-paper-200"
+            />
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold text-ink-900 leading-tight">
                 {user.name}

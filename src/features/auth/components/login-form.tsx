@@ -80,16 +80,19 @@ export function LoginForm() {
               client_id: clientId,
               callback: handleGoogleCredentialResponse,
             });
-            google.accounts.id.renderButton(
-              document.getElementById("google-signin-btn"),
-              {
-                theme: "outline",
-                size: "large",
-                width: 384,
-                text: "signin_with",
-                shape: "rectangular",
-              }
-            );
+
+            const container = document.getElementById("google-signin-btn");
+            // Google's button needs a fixed px width; derive it from the actual
+            // container so it never overflows on narrow phones (max 400 per GSI).
+            const width = Math.min(400, Math.max(200, container?.clientWidth || 320));
+
+            google.accounts.id.renderButton(container, {
+              theme: "outline",
+              size: "large",
+              width,
+              text: "signin_with",
+              shape: "rectangular",
+            });
           }
         });
       })
@@ -156,6 +159,19 @@ export function LoginForm() {
       : login.error
         ? "Login gagal. Periksa koneksi internet dan coba lagi."
         : null;
+
+  // While the session is being restored, or when an already-authenticated user
+  // is about to be redirected, show a loader instead of flashing the login form.
+  if (isLoading || user) {
+    return (
+      <div className="flex w-full max-w-sm flex-col items-center justify-center gap-3 py-16">
+        <div className="h-9 w-9 animate-spin rounded-full border-4 border-moss-200 border-t-moss-700" />
+        <p className="font-mono text-xs text-ink-400">
+          {user ? "Mengalihkan ke dashboard..." : "Menyiapkan halaman masuk..."}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-5">
@@ -310,6 +326,11 @@ export function LoginForm() {
  * Maps ApiError codes/statuses to user-friendly Indonesian messages.
  */
 function getFriendlyErrorMessage(error: ApiError): string {
+  // Rate limit: build a message using the user's own local time.
+  if (error.status === 429) {
+    return getRateLimitMessage(error);
+  }
+
   // Server-provided message takes priority
   if (error.message && error.code !== "UNKNOWN_ERROR") {
     return error.message;
@@ -331,4 +352,48 @@ function getFriendlyErrorMessage(error: ApiError): string {
     default:
       return error.message || "Terjadi kesalahan. Periksa koneksi dan coba lagi.";
   }
+}
+
+/**
+ * Builds a rate-limit message in the user's *own* local time.
+ *
+ * The server sends raw timing (`resetAt` epoch ms + `retryAfterSec`) inside
+ * `error.details`. We compute the remaining wait against the browser clock and
+ * format the retry time with `toLocaleTimeString`, so the user always sees a
+ * time in their real timezone instead of the server's UTC ISO string.
+ */
+function getRateLimitMessage(error: ApiError): string {
+  const details = (error.details ?? {}) as { retryAfterSec?: number; resetAt?: number };
+
+  // Prefer resetAt (absolute) so the countdown stays accurate if the message
+  // is shown a little later; fall back to retryAfterSec, then a sane default.
+  const resetAt =
+    typeof details.resetAt === "number"
+      ? details.resetAt
+      : typeof details.retryAfterSec === "number"
+        ? Date.now() + details.retryAfterSec * 1000
+        : null;
+
+  if (resetAt == null) {
+    return "Terlalu banyak percobaan login. Silakan coba lagi beberapa menit kemudian.";
+  }
+
+  const remainingSec = Math.max(0, Math.round((resetAt - Date.now()) / 1000));
+
+  let durationText: string;
+  if (remainingSec >= 60) {
+    const minutes = Math.ceil(remainingSec / 60);
+    durationText = `sekitar ${minutes} menit lagi`;
+  } else if (remainingSec > 0) {
+    durationText = `sekitar ${remainingSec} detik lagi`;
+  } else {
+    durationText = "sekarang";
+  }
+
+  const clockText = new Date(resetAt).toLocaleTimeString("id-ID", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  return `Terlalu banyak percobaan login. Coba lagi ${durationText} (pukul ${clockText}).`;
 }

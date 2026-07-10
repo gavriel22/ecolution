@@ -241,7 +241,16 @@ export class AuthService {
         },
       });
     } else {
-      // User exists. Let's make sure they have a linked Account, if not create it
+      // User exists. Backfill their profile picture from Google if they don't
+      // have one yet, so the avatar shows up everywhere after a Google login.
+      if (profileImageUrl && !user.profileImageUrl) {
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: { profileImageUrl },
+        });
+      }
+
+      // Make sure they have a linked Account, if not create it
       const existingAccount = await prisma.account.findFirst({
         where: { userId: user.id, provider: "GOOGLE" },
       });

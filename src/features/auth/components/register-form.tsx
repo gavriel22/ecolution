@@ -72,16 +72,18 @@ export function RegisterForm() {
               client_id: clientId,
               callback: handleGoogleCredentialResponse,
             });
-            google.accounts.id.renderButton(
-              document.getElementById("google-signup-btn"),
-              {
-                theme: "outline",
-                size: "large",
-                width: 384,
-                text: "signup_with",
-                shape: "rectangular",
-              }
-            );
+            const container = document.getElementById("google-signup-btn");
+            // Derive width from the container so the button never overflows on
+            // narrow phones (Google caps the width at 400px).
+            const width = Math.min(400, Math.max(200, container?.clientWidth || 320));
+
+            google.accounts.id.renderButton(container, {
+              theme: "outline",
+              size: "large",
+              width,
+              text: "signup_with",
+              shape: "rectangular",
+            });
           }
         });
       })

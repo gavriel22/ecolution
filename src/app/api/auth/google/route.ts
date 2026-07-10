@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      path: "/api/auth",
+      path: "/", // "/" so middleware can silent-refresh on hard reloads
       maxAge: 60 * 60 * 24 * 30, // 30 days
     });
 
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: 60 * 60, // 1 hour
+      maxAge: 60 * 15, // 15 minutes (matches the access-token JWT expiry)
     });
 
     return response;

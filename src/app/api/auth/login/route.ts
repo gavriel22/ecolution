@@ -21,18 +21,25 @@ export async function POST(req: NextRequest) {
     });
 
     if (!rl.success) {
+      const retryAfterSec = Math.max(1, Math.ceil((rl.resetAt - Date.now()) / 1000));
       return NextResponse.json(
         {
           success: false,
           error: {
             code: "TOO_MANY_REQUESTS",
-            message: `Too many login attempts. Try again after ${new Date(rl.resetAt).toISOString()}.`,
+            message: "Terlalu banyak percobaan login. Silakan coba lagi nanti.",
+            // Send raw timing data so the client can render it in the user's
+            // own local timezone (real user time), not the server's timezone.
+            details: {
+              retryAfterSec,
+              resetAt: rl.resetAt, // epoch ms
+            },
           },
         },
         {
           status: 429,
           headers: {
-            "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)),
+            "Retry-After": String(retryAfterSec),
             "X-RateLimit-Limit": String(RATE_LIMIT_MAX),
             "X-RateLimit-Remaining": "0",
             "X-RateLimit-Reset": String(Math.ceil(rl.resetAt / 1000)),
@@ -62,11 +69,14 @@ export async function POST(req: NextRequest) {
     // --- Set refresh token as HttpOnly cookie ---
     const response = successResponse({ user: result.user, accessToken: result.accessToken }, 200);
 
+    // Path "/" so the middleware can perform a silent refresh on hard page
+    // reloads (it guards /dashboard, /admin, /merchant/*). sameSite:strict +
+    // httpOnly keep it safe against CSRF/XSS.
     response.cookies.set("refresh_token", result.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      path: "/api/auth",          // hanya dikirim ke endpoint auth
+      path: "/",
       maxAge: 60 * 60 * 24 * 30, // 30 hari (sesuai expiry di DB)
     });
 
@@ -76,7 +86,7 @@ export async function POST(req: NextRequest) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: 60 * 60, // 1 hour (sesuai expiry token)
+      maxAge: 60 * 15, // 15 minutes (matches the access-token JWT expiry)
     });
 
     return response;

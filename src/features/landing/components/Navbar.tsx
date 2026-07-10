@@ -6,6 +6,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { logoutUser } from "@/features/auth/api";
+import { Avatar } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api-client";
 
@@ -38,18 +39,18 @@ export function Navbar() {
 
   const isLandingPage = pathname === "/";
 
+  // Routes that render their own chrome (AppLayout sidebar) or a focused auth
+  // screen must NOT also show the global landing navbar — otherwise the fixed
+  // navbar overlaps their content. Keep this in sync with the AppLayout routes.
   const isHidden =
     pathname === "/login" ||
     pathname === "/register" ||
-    pathname === "/merchant/register" ||
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/admin") ||
     pathname.startsWith("/activity") ||
     pathname.startsWith("/profile") ||
-    pathname.startsWith("/merchant/products") ||
-    pathname.startsWith("/merchant/orders") ||
-    pathname.startsWith("/merchant/statistics") ||
-    pathname.startsWith("/merchant/profile");
+    pathname.startsWith("/orders") ||
+    pathname.startsWith("/merchant");
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -134,9 +135,14 @@ export function Navbar() {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className={`font-semibold text-sm font-mono flex items-center gap-1.5 focus:outline-none hover:opacity-80 transition ${isTransparent ? "text-white" : "text-ink-900"}`}
+                  className={`font-semibold text-sm font-mono flex items-center gap-2 focus:outline-none hover:opacity-80 transition ${isTransparent ? "text-white" : "text-ink-900"}`}
                 >
-                  Halo, {user.name}
+                  <Avatar
+                    name={user.name}
+                    src={user.profileImageUrl}
+                    className="h-8 w-8 text-xs ring-1 ring-black/10"
+                  />
+                  <span className="hidden sm:inline">Halo, {user.name}</span>
                   <svg
                     className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`}
                     fill="none"
@@ -278,10 +284,7 @@ export function Navbar() {
                 className="flex w-full items-center justify-between py-2 text-sm font-bold text-ink-900"
               >
                 <span className="flex items-center gap-2">
-                  {/* Avatar initial */}
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-moss-700 text-xs font-bold text-white uppercase">
-                    {user.name.charAt(0)}
-                  </span>
+                  <Avatar name={user.name} src={user.profileImageUrl} className="h-7 w-7 text-xs" />
                   <span>Akun Saya</span>
                 </span>
                 <svg

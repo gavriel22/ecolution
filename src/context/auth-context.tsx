@@ -31,6 +31,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setActiveRoleState(null);
     localStorage.removeItem("ecolution_active_role");
+    // Safety net: expire the client-readable accessToken cookie ourselves in
+    // case the logout request failed (offline). The refresh_token is HttpOnly
+    // and is cleared server-side by /api/auth/logout.
+    if (typeof document !== "undefined") {
+      document.cookie = "accessToken=; path=/; max-age=0; samesite=lax";
+    }
   }, []);
 
   const setActiveRole = useCallback((role: "USER" | "UMKM" | "ADMIN") => {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyAccessToken } from "@/lib/jwt";
+import { verifyAccessToken, verifyRefreshToken, generateAccessToken } from "@/lib/jwt";
 
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
@@ -42,10 +42,26 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  console.log("PATH:", req.nextUrl.pathname);
-  console.log("AUTH:", authHeader);
-  console.log("TOKEN:", token);
-  console.log("PAYLOAD:", payload);
+  // Silent refresh at the edge: on a hard page refresh there is no Authorization
+  // header, and the short-lived access token cookie (15m) may already be expired
+  // even though the 30-day refresh token is still valid. Fall back to the refresh
+  // token and mint a fresh access token so the user is NOT bounced to /login.
+  let refreshedAccessToken: string | null = null;
+  if (!payload) {
+    const refreshToken = req.cookies.get("refresh_token")?.value;
+    if (refreshToken) {
+      const refreshPayload = await verifyRefreshToken(refreshToken);
+      if (refreshPayload) {
+        payload = refreshPayload;
+        refreshedAccessToken = await generateAccessToken({
+          id: refreshPayload.id,
+          email: refreshPayload.email,
+          role: refreshPayload.role,
+          username: refreshPayload.username,
+        });
+      }
+    }
+  }
 
   if (!payload) {
     if (path.startsWith("/api/")) {
@@ -94,11 +110,25 @@ export async function middleware(req: NextRequest) {
 
   console.log("[MIDDLEWARE] Injected headers: x-user-id =", payload.id, "x-user-role =", payload.role);
 
-  return NextResponse.next({
+  const response = NextResponse.next({
     request: {
       headers: requestHeaders,
     },
   });
+
+  // If we minted a new access token from the refresh token, persist it so the
+  // client and subsequent navigations pick it up (keeps the session alive).
+  if (refreshedAccessToken) {
+    response.cookies.set("accessToken", refreshedAccessToken, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 15, // 15 minutes, matches the JWT expiry
+    });
+  }
+
+  return response;
 }
 
 export const config = {
@@ -107,6 +137,7 @@ export const config = {
     "/merchant/:path*",
     "/dashboard/:path*",
     "/api/auth/me",
+    "/api/auth/avatar",
     "/api/activity",
     "/api/activity/:path*",
   ],

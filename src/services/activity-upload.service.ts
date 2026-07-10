@@ -13,14 +13,24 @@ import { extractExif } from "@/lib/exif";
 import { ValidationError, NotFoundError } from "@/utils/errors";
 import { ActivityStatus } from "@prisma/client";
 import { getPaginationMetadata } from "@/utils/pagination";
+import { compressImage } from "@/lib/image";
 import fs from "fs/promises";
 import path from "path";
 
 // Maksimum ukuran file: 10 MB
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
-// MIME type yang diizinkan
-const ALLOWED_MIME = new Set(["image/jpeg", "image/jpg", "image/heic", "image/heif", "image/tiff"]);
+// MIME type yang diizinkan. Semua dinormalisasi menjadi JPEG saat disimpan,
+// jadi HEIC (default iPhone), PNG, dan WebP pun aman untuk ditampilkan browser.
+const ALLOWED_MIME = new Set([
+  "image/jpeg",
+  "image/jpg",
+  "image/heic",
+  "image/heif",
+  "image/tiff",
+  "image/png",
+  "image/webp",
+]);
 
 export interface UploadActivityResult {
   id: string;
@@ -113,9 +123,13 @@ export class ActivityUploadService {
     } catch (e) {
       console.warn("Could not create uploads directory:", e);
     }
-    const filename = `${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
+    // Compress & normalize to JPEG for storage. EXIF was already extracted from
+    // the original `buffer` above, so stripping metadata here is safe.
+    const compressed = await compressImage(buffer, { maxSize: 1600, quality: 72 });
+    const baseName = file.name.replace(/\.[^./\\]+$/, "").replace(/\s+/g, "_") || "photo";
+    const filename = `${Date.now()}-${baseName}${compressed.ext}`;
     const filepath = path.join(uploadDir, filename);
-    await fs.writeFile(filepath, buffer);
+    await fs.writeFile(filepath, compressed.buffer);
     const imageUrl = `/uploads/${filename}`;
 
     const activity = await activityRepository.create({

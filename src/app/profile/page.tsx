@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/auth-context";
 import { apiFetch } from "@/lib/api-client";
+import { Avatar } from "@/components/ui/avatar";
 
 export default function ProfilePage() {
   const { user, setUser, isLoading } = useAuth();
@@ -20,7 +20,9 @@ export default function ProfilePage() {
   const [bio, setBio] = useState("");
   const [profileImageUrl, setProfileImageUrl] = useState("");
   const [previewUrl, setPreviewUrl] = useState("");
-  
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+
   // Feedback States
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -61,13 +63,36 @@ export default function ProfilePage() {
     setBio(user.bio || "");
     setProfileImageUrl(user.profileImageUrl || "");
     setPreviewUrl(user.profileImageUrl || "");
+    setAvatarFile(null);
     setErrorMsg(null);
     setIsEditModalOpen(true);
   };
 
-  const handleProfileImageChange = (val: string) => {
-    setProfileImageUrl(val);
-    setPreviewUrl(val);
+  const handleAvatarSelect = (file: File | null) => {
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setErrorMsg("File harus berupa gambar (JPG, PNG, WEBP, atau GIF).");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMsg("Ukuran foto maksimum 5 MB.");
+      return;
+    }
+
+    setErrorMsg(null);
+    setAvatarFile(file);
+    // Revoke the previous object URL (if any) before creating a new one.
+    if (previewUrl.startsWith("blob:")) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(URL.createObjectURL(file));
+  };
+
+  const handleAvatarRemove = () => {
+    if (previewUrl.startsWith("blob:")) URL.revokeObjectURL(previewUrl);
+    setAvatarFile(null);
+    setProfileImageUrl("");
+    setPreviewUrl("");
+    if (avatarInputRef.current) avatarInputRef.current.value = "";
   };
 
   const handleSaveProfile = async (e: React.FormEvent) => {
@@ -104,6 +129,18 @@ export default function ProfilePage() {
     setErrorMsg(null);
 
     try {
+      // If the user picked a new photo, upload it first and use the returned URL.
+      let finalImageUrl: string | null = profileImageUrl.trim() || null;
+      if (avatarFile) {
+        const form = new FormData();
+        form.append("image", avatarFile);
+        const uploadRes = await apiFetch<{ url: string }>("/api/auth/avatar", {
+          method: "POST",
+          body: form,
+        });
+        finalImageUrl = uploadRes.data.url;
+      }
+
       const res = await apiFetch<any>("/api/auth/me", {
         method: "PUT",
         body: {
@@ -111,7 +148,7 @@ export default function ProfilePage() {
           username: username.trim(),
           email: email.trim(),
           phone: phone.trim() || null,
-          profileImageUrl: profileImageUrl.trim() || null,
+          profileImageUrl: finalImageUrl,
           bio: bio.trim() || null,
           address: address.trim() || null,
         },
@@ -187,13 +224,11 @@ export default function ProfilePage() {
       {/* Header Profile Section */}
       <div className="rounded-lg border border-paper-200 bg-white p-6 shadow-xs flex flex-col sm:flex-row gap-6 items-center justify-between">
         <div className="flex flex-col sm:flex-row gap-5 items-center text-center sm:text-left">
-          <div className="h-20 w-20 rounded-full border border-paper-200 overflow-hidden bg-paper-50 flex items-center justify-center font-display font-bold text-moss-700 text-3xl uppercase">
-            {user.profileImageUrl ? (
-              <img src={user.profileImageUrl} alt={user.name} className="h-full w-full object-cover" />
-            ) : (
-              user.name.charAt(0)
-            )}
-          </div>
+          <Avatar
+            name={user.name}
+            src={user.profileImageUrl}
+            className="h-20 w-20 text-3xl border border-paper-200"
+          />
           <div className="space-y-1">
             <h1 className="font-display text-2xl font-bold text-ink-900">{user.name}</h1>
             <p className="text-sm text-ink-400 font-mono">@{user.username}</p>
@@ -310,27 +345,45 @@ export default function ProfilePage() {
             )}
 
             <form onSubmit={handleSaveProfile} className="space-y-4">
-              {/* Profile Image Preview & URL input */}
+              {/* Profile Image Upload */}
               <div className="space-y-2">
                 <label className="text-xs font-semibold uppercase tracking-wider text-ink-400">
                   Foto Profil
                 </label>
-                <div className="flex gap-4 items-center">
-                  <div className="h-16 w-16 rounded-full overflow-hidden border border-paper-200 bg-paper-50 flex items-center justify-center text-moss-700 font-bold text-2xl uppercase">
-                    {previewUrl ? (
-                      <img src={previewUrl} alt="Preview" className="h-full w-full object-cover" />
-                    ) : (
-                      name.charAt(0) || "U"
-                    )}
+                <div className="flex flex-wrap gap-4 items-center">
+                  <Avatar name={name} src={previewUrl} className="h-16 w-16 text-2xl border border-paper-200" />
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => avatarInputRef.current?.click()}
+                        className="rounded-md border border-paper-200 bg-white px-3 py-2 text-sm font-semibold text-moss-700 transition hover:bg-moss-50"
+                      >
+                        {previewUrl ? "Ganti Foto" : "Unggah Foto"}
+                      </button>
+                      {previewUrl && (
+                        <button
+                          type="button"
+                          onClick={handleAvatarRemove}
+                          className="rounded-md border border-paper-200 bg-white px-3 py-2 text-sm font-medium text-rust-600 transition hover:bg-rust-50"
+                        >
+                          Hapus
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-xs text-ink-400">JPG, PNG, WEBP, atau GIF · maks. 5MB</p>
                   </div>
-                  <input
-                    type="text"
-                    placeholder="Tautan Gambar Foto Profil (https://...)"
-                    value={profileImageUrl}
-                    onChange={(e) => handleProfileImageChange(e.target.value)}
-                    className="flex-1 rounded-md border border-paper-200 bg-white px-3 py-2 text-sm text-ink-900 outline-none focus:border-moss-500"
-                  />
                 </div>
+                <input
+                  ref={avatarInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/gif"
+                  className="hidden"
+                  onChange={(e) => {
+                    handleAvatarSelect(e.target.files?.[0] ?? null);
+                    e.target.value = "";
+                  }}
+                />
               </div>
 
               {/* Name */}
