@@ -14,8 +14,7 @@ import { ValidationError, NotFoundError } from "@/utils/errors";
 import { ActivityStatus } from "@prisma/client";
 import { getPaginationMetadata } from "@/utils/pagination";
 import { compressImage } from "@/lib/image";
-import fs from "fs/promises";
-import path from "path";
+import { saveUpload } from "@/lib/storage";
 
 // Maksimum ukuran file: 10 MB
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
@@ -116,21 +115,18 @@ export class ActivityUploadService {
       : ActivityStatus.REJECTED;
 
     // ── 6. Simpan Activity + Photo ke DB ─────────────────────────────────────
-    // Write image buffer to public/uploads/ so it is statically served by Next.js
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    try {
-      await fs.mkdir(uploadDir, { recursive: true });
-    } catch (e) {
-      console.warn("Could not create uploads directory:", e);
-    }
     // Compress & normalize to JPEG for storage. EXIF was already extracted from
-    // the original `buffer` above, so stripping metadata here is safe.
+    // the original `buffer` above, so stripping metadata here is safe. Storage
+    // is portable: Vercel Blob in production, local disk in development.
     const compressed = await compressImage(buffer, { maxSize: 1600, quality: 72 });
     const baseName = file.name.replace(/\.[^./\\]+$/, "").replace(/\s+/g, "_") || "photo";
     const filename = `${Date.now()}-${baseName}${compressed.ext}`;
-    const filepath = path.join(uploadDir, filename);
-    await fs.writeFile(filepath, compressed.buffer);
-    const imageUrl = `/uploads/${filename}`;
+    const imageUrl = await saveUpload(
+      "activities",
+      filename,
+      compressed.buffer,
+      compressed.contentType
+    );
 
     const activity = await activityRepository.create({
       userId,

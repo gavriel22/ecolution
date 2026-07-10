@@ -24,6 +24,9 @@
 .DS_Store
 *.pem
 
+# runtime-uploaded images (dev local fallback); production uses Vercel Blob
+/public/uploads/
+
 # debug
 npm-debug.log*
 yarn-debug.log*

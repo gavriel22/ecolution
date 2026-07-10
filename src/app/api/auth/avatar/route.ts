@@ -1,9 +1,8 @@
 import { NextRequest } from "next/server";
-import fs from "fs/promises";
-import path from "path";
 import { successResponse, errorResponse } from "@/utils/response";
 import { UnauthorizedError, ValidationError } from "@/utils/errors";
 import { compressImage } from "@/lib/image";
+import { saveUpload } from "@/lib/storage";
 
 // Accept common profile-picture formats (unlike activity photos, no EXIF needed).
 const ALLOWED_MIME = new Set(["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"]);
@@ -46,14 +45,9 @@ export async function POST(req: NextRequest) {
     // be large, and this keeps stored files tiny and fast to load.
     const compressed = await compressImage(original, { maxSize: 512, quality: 80 });
 
-    // Persist under public/uploads/avatars so Next serves it statically.
-    const uploadDir = path.join(process.cwd(), "public", "uploads", "avatars");
-    await fs.mkdir(uploadDir, { recursive: true });
-
     const filename = `${userId}-${Date.now()}${compressed.ext}`;
-    await fs.writeFile(path.join(uploadDir, filename), compressed.buffer);
+    const url = await saveUpload("avatars", filename, compressed.buffer, compressed.contentType);
 
-    const url = `/uploads/avatars/${filename}`;
     return successResponse({ url }, 201);
   } catch (error) {
     return errorResponse(error);
