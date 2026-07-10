@@ -642,7 +642,12 @@ paths:
       summary: Create activity with image upload
       description: |
         Create a new activity with photo upload using multipart/form-data.
-        The service extracts EXIF metadata from the image. If EXIF metadata (GPS coordinates and original date time) is missing, the activity status will be set to **REJECTED**.
+        The request expects the client to validate the image's EXIF metadata prior to upload:
+        - `activityDate` must be extracted from the photo's EXIF `DateTimeOriginal` header.
+        - `location` must be reverse-geocoded from the photo's EXIF GPS coordinates (`GPSLatitude`/`GPSLongitude`).
+        - The image must contain valid camera info (`Make` and `Model`).
+        - The photo must not be edited (images containing editing Software signatures are flagged).
+        - Direct user input for date/location is disabled on the client. If any required EXIF tags are missing, the upload is rejected.
       tags:
         - Activity
       security:

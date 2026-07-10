@@ -86,9 +86,13 @@ function friendlyError(error: ExifValidationError): string {
     case "FILE_ERROR":
       return "Gagal membaca file. Pastikan file tidak rusak dan coba lagi.";
     case "NO_EXIF":
-    case "MISSING_CAMERA":
+      return "Foto tidak memenuhi syarat. Metadata EXIF tidak ditemukan pada foto ini.";
     case "MISSING_DATE":
+      return "Foto tidak memenuhi syarat. Tanggal pengambilan foto asli (DateTimeOriginal) tidak ditemukan.";
     case "MISSING_GPS":
+      return "Foto tidak memenuhi syarat. Informasi lokasi (GPS) tidak tersedia di dalam foto. Pastikan fitur lokasi/GPS aktif saat memotret.";
+    case "MISSING_CAMERA":
+      return "Foto tidak memenuhi syarat. Informasi perangkat kamera (Make/Model) tidak ditemukan.";
     default:
       return "Foto tidak memenuhi syarat. Gunakan foto asli yang diambil langsung dari kamera dengan lokasi (GPS) dan metadata aktif.";
   }
