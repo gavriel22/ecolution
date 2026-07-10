@@ -1,97 +1,110 @@
+"use client";
+
 import { Camera, Gift, Trophy, Store } from "lucide-react";
 
 export function Features() {
-  const features = [
+  const steps = [
     {
-      title: "Log Activities",
-      description: "Snap a photo of your recycling activity. We use EXIF metadata to verify the location and time of your eco-friendly action.",
-      icon: <Camera className="w-6 h-6 text-indigo-600" />,
-      color: "bg-indigo-50",
+      title: "1. Ambil Foto Aktivitas",
+      description: "Potret aktivitas daur ulang sampahmu langsung dari kamera HP dengan GPS aktif.",
+      icon: <Camera className="w-6 h-6 text-moss-700" />,
+      color: "bg-moss-50",
     },
     {
-      title: "Earn Points",
-      description: "Once verified, you'll receive points based on the type of activity. The bigger the impact, the more points you earn.",
-      icon: <Gift className="w-6 h-6 text-pink-600" />,
-      color: "bg-pink-50",
+      title: "2. Verifikasi Otomatis",
+      description: "Sistem kami memverifikasi waktu, lokasi GPS, dan keaslian foto dalam hitungan detik.",
+      icon: <Store className="w-6 h-6 text-moss-700" />,
+      color: "bg-moss-50",
     },
     {
-      title: "Join Challenges",
-      description: "Participate in community challenges to build a habit and win bonus points upon completion.",
-      icon: <Trophy className="w-6 h-6 text-yellow-600" />,
-      color: "bg-yellow-50",
+      title: "3. Dapatkan Koin Poin",
+      description: "Setelah disetujui, kamu langsung mendapatkan koin poin reward sesuai dengan dampak lingkungan aksimu.",
+      icon: <Trophy className="w-6 h-6 text-moss-700" />,
+      color: "bg-moss-50",
     },
     {
-      title: "Eco Marketplace",
-      description: "Exchange your hard-earned points for vouchers and exclusive eco-friendly products from our verified merchant partners.",
-      icon: <Store className="w-6 h-6 text-teal-600" />,
-      color: "bg-teal-50",
+      title: "4. Tukarkan Voucher",
+      description: "Tukarkan poinmu dengan voucher belanja digital gratis dari mitra UMKM lokal.",
+      icon: <Gift className="w-6 h-6 text-moss-700" />,
+      color: "bg-moss-50",
     },
   ];
 
   return (
-    <section className="py-24 bg-gray-50 overflow-hidden">
+    <section className="py-20 md:py-24 bg-white overflow-hidden font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
           {/* Text Content */}
-          <div>
-            <h2 className="text-sm font-bold tracking-widest text-green-600 uppercase mb-3">
-              How It Works
-            </h2>
-            <h3 className="text-3xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-6">
-              Turn your green habits into <span className="text-green-600">rewards</span>
-            </h3>
-            <p className="text-xl text-gray-600 mb-10 leading-relaxed">
-              Ecolution makes saving the environment fun and rewarding. Follow these simple steps to start earning.
-            </p>
+          <div className="lg:col-span-7 space-y-8">
+            <div className="space-y-3">
+              <h2 className="text-xs font-bold tracking-widest text-moss-700 uppercase">
+                Alur Kontribusi
+              </h2>
+              <h3 className="text-3xl sm:text-4xl font-extrabold text-ink-900 tracking-tight leading-tight">
+                Bagaimana Cara Kerja <span className="text-moss-700">Ecolution?</span>
+              </h3>
+              <p className="text-base sm:text-lg text-ink-400 leading-relaxed max-w-xl">
+                Ecolution mempermudah kamu menjaga bumi sekaligus mengumpulkan reward secara menyenangkan. Cukup ikuti empat langkah mudah ini.
+              </p>
+            </div>
 
-            <div className="space-y-8">
-              {features.map((feature, idx) => (
-                <div key={idx} className="flex gap-4">
-                  <div className={`flex-shrink-0 w-12 h-12 rounded-full ${feature.color} flex items-center justify-center mt-1`}>
-                    {feature.icon}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {steps.map((step, idx) => (
+                <div 
+                  key={idx} 
+                  className="p-6 rounded-2xl bg-paper-50/50 border border-paper-100 hover:border-moss-200 hover:shadow-xs transition duration-300 space-y-4"
+                >
+                  <div className={`w-12 h-12 rounded-xl ${step.color} flex items-center justify-center`}>
+                    {step.icon}
                   </div>
-                  <div>
-                    <h4 className="text-xl font-bold text-gray-900 mb-2">{feature.title}</h4>
-                    <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                  <div className="space-y-1">
+                    <h4 className="text-base font-bold text-ink-900">{step.title}</h4>
+                    <p className="text-xs text-ink-400 leading-relaxed">{step.description}</p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Decorative Image / Mockup area */}
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-tr from-green-400 to-yellow-300 rounded-[3rem] rotate-3 opacity-20 blur-2xl"></div>
-            <div className="relative bg-white border border-gray-100 rounded-[3rem] shadow-2xl p-8 aspect-[4/5] flex flex-col">
-              <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                    <span className="text-xl">🧑‍🌾</span>
+          {/* Right Column: Visual Mockup */}
+          <div className="lg:col-span-5 relative flex justify-center">
+            {/* Soft decorative background glows */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-moss-300 to-[#fbbc04]/20 rounded-[3rem] rotate-3 opacity-20 blur-2xl"></div>
+            
+            <div className="relative w-full max-w-[340px] bg-paper-50 border border-paper-200 rounded-[40px] shadow-xl p-6 aspect-[4/5] flex flex-col justify-between">
+              <div className="flex items-center justify-between border-b border-paper-100 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-moss-100 flex items-center justify-center">
+                    <span className="text-base">🧑‍🌾</span>
                   </div>
-                  <div>
-                    <div className="text-sm font-bold">Your Progress</div>
-                    <div className="text-xs text-gray-500">1,250 Pts</div>
+                  <div className="text-left">
+                    <div className="text-xs font-bold text-ink-900">Misi Daur Ulang</div>
+                    <div className="text-[9px] text-ink-400">Verifikasi Lokasi Aktif</div>
                   </div>
                 </div>
-                <div className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">
+                <div className="px-2.5 py-0.5 bg-moss-100 text-moss-700 text-[10px] font-bold rounded-full">
                   Level 3
                 </div>
               </div>
               
-              <div className="flex-1 bg-gray-50 rounded-2xl border border-gray-100 p-6 flex flex-col justify-center items-center text-center">
-                <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4">
-                  <Camera className="w-8 h-8" />
+              <div className="flex-1 bg-white rounded-2xl border border-paper-100 p-6 flex flex-col justify-center items-center text-center my-4 space-y-4">
+                <div className="w-16 h-16 bg-moss-50 text-moss-700 rounded-full flex items-center justify-center shadow-xs">
+                  <Camera className="w-6 h-6" />
                 </div>
-                <h5 className="font-bold text-lg mb-2">Upload Activity</h5>
-                <p className="text-sm text-gray-500">Take a picture of your recycling bin to earn +50 pts</p>
-                <div className="mt-6 w-full bg-green-600 text-white py-3 rounded-xl font-medium shadow-md">
-                  Snap Photo
+                <div className="space-y-1">
+                  <h5 className="font-bold text-sm text-ink-900">Upload Foto Botol Plastik</h5>
+                  <p className="text-xs text-ink-400 max-w-[200px]">Ambil foto bukti aktivitas daur ulang botol plastik di tempat sampah khusus.</p>
                 </div>
+                <div className="w-full bg-moss-700 text-white py-2 rounded-xl text-xs font-semibold shadow-xs hover:bg-moss-900 transition duration-300">
+                  Ambil Foto Aksi
+                </div>
+              </div>
+
+              <div className="bg-moss-50/50 p-2.5 rounded-xl border border-moss-100 text-center">
+                <p className="text-[10px] text-moss-800 font-bold">🎉 +50 Poin akan langsung dikirim setelah verifikasi</p>
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </section>

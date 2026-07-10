@@ -1,82 +1,103 @@
+"use client";
+
 import Link from "next/link";
+import { useAuth } from "@/context/auth-context";
 
 export function Hero() {
+  const { user } = useAuth();
+
   return (
-    <div className="relative min-h-screen bg-cover bg-center bg-no-repeat overflow-hidden" style={{ backgroundImage: 'url("/landing.jpg")' }}>
-      <div className="absolute inset-0 bg-black/30" />
+    <div className="relative min-h-screen bg-cover bg-center bg-no-repeat overflow-hidden flex items-center justify-center py-20 md:py-32" style={{ backgroundImage: 'url("/landing.jpg")' }}>
+      <div className="absolute inset-0 bg-black/45" />
 
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen pt-24 px-4">
-        {/* Headline */}
-        <h1 className="text-center flex flex-col items-center drop-shadow-lg">
-          <span className="font-[cursive] text-5xl md:text-7xl lg:text-[90px] text-[#fbbc04] font-medium leading-none z-10" style={{ transform: 'rotate(-2deg)' }}>
-            Aksi Hijau,
-          </span>
-          <span className="font-sans text-4xl md:text-6xl lg:text-[75px] text-white font-black tracking-tight mt-2">
-            Dapat Poin Reward!
-          </span>
-        </h1>
-
-        {/* Dashboard Mockup in place of empty card */}
-        <div className="mt-8 relative w-full">
-          <div className="w-[300px] h-[330px] md:w-[350px] md:h-[370px] lg:w-[400px] lg:h-[420px] bg-white text-ink-900 rounded-[30px] md:rounded-[40px] overflow-hidden shadow-2xl relative z-20 mx-auto p-6 flex flex-col justify-between font-sans border border-gray-150">
-            {/* Header Mockup */}
-            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-              <div className="flex items-center gap-2">
-                <span className="text-xl md:text-2xl">🌱</span>
-                <div className="text-left">
-                  <h3 className="font-bold text-xs md:text-sm text-ink-900">Ecolution App</h3>
-                  <p className="text-[9px] md:text-xs text-ink-400">Dashboard Kontribusi</p>
-                </div>
-              </div>
-              <span className="px-2 py-0.5 bg-moss-100 text-moss-700 text-[9px] md:text-xs font-bold rounded-full">Level 4</span>
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full mt-10 md:mt-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+          {/* Left Column: Text & CTAs */}
+          <div className="lg:col-span-7 text-center lg:text-left space-y-6 md:space-y-8">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white leading-[1.1] tracking-tight drop-shadow-md">
+              Aksi Hijau Nyata,<br />
+              <span className="text-[#fbbc04]">Dapatkan Poin Reward!</span>
+            </h1>
+            <p className="text-lg md:text-xl text-paper-50/90 font-medium max-w-xl mx-auto lg:mx-0 leading-relaxed drop-shadow-sm">
+              Lapor aktivitas daur ulang sampahmu secara otomatis dengan foto berbasis GPS. Tukar poin dengan voucher belanja di marketplace UMKM lokal kami.
+            </p>
+            <div className="flex flex-wrap justify-center lg:justify-start gap-4">
+              <Link
+                href={user ? "/dashboard" : "/register"}
+                className="px-8 py-4 bg-[#fbbc04] hover:bg-[#e3aa04] text-gray-900 font-bold rounded-xl transition duration-300 shadow-lg hover:scale-[1.02] text-base"
+              >
+                Mulai Sekarang
+              </Link>
+              <Link
+                href="/marketplace"
+                className="px-8 py-4 bg-white/15 backdrop-blur-md border border-white/20 hover:bg-white/25 text-white font-bold rounded-xl transition duration-300 shadow-md hover:scale-[1.02] text-base"
+              >
+                Marketplace
+              </Link>
             </div>
-
-            {/* Stats Mockup */}
-            <div className="grid grid-cols-2 gap-3 my-2 text-center">
-              <div className="bg-moss-50/50 p-2 md:p-3 rounded-xl border border-moss-100">
-                <p className="text-[9px] md:text-xs text-moss-700 font-semibold uppercase tracking-wider">Total Poin</p>
-                <p className="text-sm md:text-lg font-bold text-moss-800 mt-0.5">2,450 Pts</p>
-              </div>
-              <div className="bg-ochre-50/20 p-2 md:p-3 rounded-xl border border-ochre-200">
-                <p className="text-[9px] md:text-xs text-ochre-700 font-semibold uppercase tracking-wider">Trust Score</p>
-                <p className="text-sm md:text-lg font-bold text-ochre-600 mt-0.5">98%</p>
-              </div>
-            </div>
-
-            {/* Progress Mockup */}
-            <div className="bg-paper-50 p-3 rounded-xl border border-paper-200 space-y-1.5 text-left">
-              <div className="flex justify-between items-center text-[10px] md:text-xs">
-                <span className="font-semibold text-ink-800">♻️ Daur Ulang Plastik</span>
-                <span className="font-mono text-ink-500 font-bold">4 / 5 Botol</span>
-              </div>
-              <div className="w-full bg-paper-200 h-2 rounded-full overflow-hidden">
-                <div className="bg-moss-700 h-full rounded-full" style={{ width: "80%" }}></div>
-              </div>
-              <p className="text-[9px] text-ink-400 text-right">+100 Poin reward jika selesai</p>
-            </div>
-
-            {/* Button Mockup */}
-            <Link href="/activity/new" className="bg-moss-700 text-white text-center py-2 rounded-xl font-bold text-[10px] md:text-xs shadow-md hover:bg-moss-900 transition-colors block">
-              + Lapor Aksi Hijau Baru
-            </Link>
           </div>
-        </div>
 
-        {/* Subheadline and CTA buttons */}
-        <div className="w-full max-w-3xl mx-auto text-center mt-10 space-y-6 text-white drop-shadow-md pb-12">
-          <p className="text-base md:text-lg font-medium leading-relaxed max-w-2xl mx-auto">
-            Kelola sampah dengan gamifikasi interaktif. Kumpulkan poin dari setiap aksi ramah lingkunganmu, selesaikan challenge mingguan, dan tukarkan dengan voucher menarik untuk mendukung produk lokal UMKM!
-          </p>
-          <div className="flex flex-wrap justify-center gap-4 pt-2">
-            <Link href="/register" className="px-6 py-3 bg-[#fbbc04] hover:bg-[#e3aa04] text-gray-900 rounded-full font-bold transition-all shadow-lg hover:scale-105 text-sm md:text-base">
-              Mulai Berkontribusi
-            </Link>
-            <Link href="/activity/new" className="px-6 py-3 bg-white hover:bg-gray-100 text-moss-900 rounded-full font-bold transition-all shadow-lg hover:scale-105 text-sm md:text-base">
-              Upload Aktivitas
-            </Link>
-            <Link href="/marketplace" className="px-6 py-3 bg-transparent border border-white hover:bg-white/10 text-white rounded-full font-bold transition-all hover:scale-105 text-sm md:text-base">
-              Jelajahi Marketplace
-            </Link>
+          {/* Right Column: Mockup */}
+          <div className="lg:col-span-5 flex justify-center">
+            <div className="relative w-full max-w-[340px] sm:max-w-[380px] lg:max-w-[400px]">
+              {/* Decorative backgrounds */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-moss-500 to-[#fbbc04] rounded-[40px] rotate-3 opacity-30 blur-2xl"></div>
+
+              {/* Premium Phone-like Mockup Card */}
+              <div className="relative bg-white/95 backdrop-blur-lg text-ink-900 rounded-[36px] overflow-hidden shadow-2xl p-6 flex flex-col justify-between font-sans border border-paper-200/50 aspect-[9/13]">
+                {/* Header Mockup */}
+                <div className="flex items-center justify-between border-b border-paper-100 pb-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">🌱</span>
+                    <div className="text-left">
+                      <h3 className="font-bold text-sm text-ink-900 leading-tight">Ecolution</h3>
+                      <p className="text-[10px] text-ink-400 font-medium">Aksi &amp; Dampak Hijau</p>
+                    </div>
+                  </div>
+                  <span className="px-2.5 py-1 bg-moss-100 text-moss-700 text-xs font-bold rounded-full">Level 4</span>
+                </div>
+
+                {/* Score Circular / Large Stat mockup */}
+                <div className="my-4 text-center py-2">
+                  <div className="inline-block relative">
+                    <div className="w-24 h-24 rounded-full border-4 border-moss-200 flex items-center justify-center flex-col bg-moss-50/30">
+                      <span className="text-xl font-black text-moss-700">98%</span>
+                      <span className="text-[9px] text-ink-400 uppercase tracking-widest font-semibold">Trust</span>
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-ink-400 mt-2 font-medium">Skor Kepercayaan Kamu Tergolong Sangat Tinggi!</p>
+                </div>
+
+                {/* Stats Mockup */}
+                <div className="grid grid-cols-2 gap-3 my-2 text-center">
+                  <div className="bg-moss-50/50 p-3 rounded-2xl border border-moss-100/50">
+                    <p className="text-[9px] text-moss-700 font-bold uppercase tracking-wider">Total Poin</p>
+                    <p className="text-base font-extrabold text-moss-900 mt-0.5">2,450 Pts</p>
+                  </div>
+                  <div className="bg-ochre-50/20 p-3 rounded-2xl border border-ochre-200/30">
+                    <p className="text-[9px] text-ochre-700 font-bold uppercase tracking-wider">Aksi Hijau</p>
+                    <p className="text-base font-extrabold text-ochre-800 mt-0.5">48 Aksi</p>
+                  </div>
+                </div>
+
+                {/* Progress Mockup */}
+                <div className="bg-paper-50 p-3.5 rounded-2xl border border-paper-100 space-y-2 text-left">
+                  <div className="flex justify-between items-center text-[10px] sm:text-xs">
+                    <span className="font-bold text-ink-800">♻️ Misi Daur Ulang</span>
+                    <span className="font-mono text-moss-700 font-bold">4 / 5 Botol</span>
+                  </div>
+                  <div className="w-full bg-paper-200 h-2 rounded-full overflow-hidden">
+                    <div className="bg-moss-700 h-full rounded-full" style={{ width: "80%" }}></div>
+                  </div>
+                  <p className="text-[9px] text-ink-400 font-medium text-right">+100 Poin reward jika selesai</p>
+                </div>
+
+                {/* Button Mockup */}
+                <Link href={user ? "/activity/new" : "/login"} className="bg-moss-700 text-white text-center py-2.5 rounded-xl font-semibold text-xs shadow-md hover:bg-moss-900 transition-colors block mt-2">
+                  + Lapor Aksi Hijau Baru
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </div>
