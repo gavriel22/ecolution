@@ -21,16 +21,16 @@ model User {
   name                  String                 @db.VarChar(100)
   phone                 String?                @db.VarChar(20)
   profileImageUrl       String?                @db.VarChar(255)
-  bio                   String?                @db.VarChar(255)
-  address               String?                @db.VarChar(255)
   totalPoint            Int                    @default(0)
   id                    String                 @id @default(uuid()) @db.Uuid
+  address               String?                @db.VarChar(255)
+  bio                   String?                @db.VarChar(255)
   accounts              Account[]
   activities            Activity[]
   verifications         ActivityVerification[]
   challengeParticipants ChallengeParticipant[]
   challengeProgresses   ChallengeProgress[]
-  merchants             Merchant[]
+  merchants             Merchant?
   orders                Order[]
   pointHistories        PointHistory[]
   refreshTokens         RefreshToken[]
@@ -47,10 +47,10 @@ model ActivityCategory {
   name        String     @unique @db.VarChar(100)
   description String?
   pointReward Int
-  imageUrl    String?    @db.VarChar(255)
   isActive    Boolean    @default(true)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+  imageUrl    String?    @db.VarChar(255)
   activities  Activity[]
 
   @@map("activity_categories")
@@ -85,15 +85,15 @@ model ActivityPhoto {
   id         String    @id @default(uuid()) @db.Uuid
   activityId String    @db.Uuid
   imageUrl   String    @db.VarChar(255)
+  uploadedAt DateTime  @default(now())
+  /// Whether this photo passed EXIF metadata validation
+  hasExif    Boolean   @default(false)
   /// EXIF GPS latitude (-90 to 90), null if not present in image
   latitude   Float?
   /// EXIF GPS longitude (-180 to 180), null if not present in image
   longitude  Float?
   /// EXIF DateTimeOriginal, null if not present in image
   takenAt    DateTime?
-  /// Whether this photo passed EXIF metadata validation
-  hasExif    Boolean   @default(false)
-  uploadedAt DateTime  @default(now())
   activity   Activity  @relation(fields: [activityId], references: [id], onDelete: Cascade)
 
   @@index([activityId])
@@ -207,12 +207,12 @@ model Voucher {
   title          String              @db.VarChar(150)
   description    String?
   pointCost      Int
-  discountAmount Int                 @default(0)
   stock          Int
   expiredAt      DateTime?
   status         VoucherStatus       @default(AVAILABLE)
   createdAt      DateTime            @default(now())
   updatedAt      DateTime            @updatedAt
+  discountAmount Int                 @default(0)
   redemptions    VoucherRedemption[]
 
   @@index([status])
@@ -228,11 +228,11 @@ model VoucherRedemption {
   status        RedemptionStatus @default(PENDING)
   redeemedAt    DateTime         @default(now())
   completedAt   DateTime?
-  usedInOrderId String?          @unique @db.Uuid
   usedAt        DateTime?
+  usedInOrderId String?          @unique @db.Uuid
+  order         Order?           @relation(fields: [usedInOrderId], references: [id])
   user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   voucher       Voucher          @relation(fields: [voucherId], references: [id], onDelete: Cascade)
-  order         Order?           @relation(fields: [usedInOrderId], references: [id])
 
   @@unique([voucherId, userId])
   @@index([userId])
@@ -302,13 +302,13 @@ model Order {
   id                String             @id @default(uuid()) @db.Uuid
   userId            String             @db.Uuid
   totalPrice        Decimal            @db.Decimal(12, 2)
-  discountAmount    Decimal            @default(0) @db.Decimal(12, 2)
-  finalPrice        Decimal            @db.Decimal(12, 2)
   status            OrderStatus        @default(PENDING)
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   note              String?
   orderNumber       String             @unique @db.VarChar(30)
+  discountAmount    Decimal            @default(0) @db.Decimal(12, 2)
+  finalPrice        Decimal            @db.Decimal(12, 2)
   items             OrderItem[]
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   voucherRedemption VoucherRedemption?
