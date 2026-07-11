@@ -20,7 +20,7 @@ export function Hero() {
               <span className="text-[#fbbc04]">Dapatkan Poin Reward!</span>
             </h1>
             <p className="text-lg md:text-xl text-paper-50/90 font-medium max-w-xl mx-auto lg:mx-0 leading-relaxed drop-shadow-sm">
-              Laporkan aktivitas daur ulangmu dengan foto berbasis GPS. Kumpulkan poin dan tukarkan dengan voucher di marketplace UMKM lokal.
+              Laporkan aktivitas jaga lingkunganmu dengan foto berbasis GPS. Kumpulkan poin dan tukarkan dengan voucher di marketplace UMKM lokal.
             </p>
             <div className="flex flex-wrap justify-center lg:justify-start gap-4">
               <Link

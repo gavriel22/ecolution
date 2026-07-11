@@ -10,7 +10,7 @@ export function MarketplacePreview() {
   const products = data?.products || [];
 
   return (
-    <section className="py-[88px] bg-brand-paper font-sans">
+    <section className="py-[88px] bg-white font-sans">
       <div className="max-w-[1180px] mx-auto px-8 md:px-10">
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 mb-12">
@@ -20,7 +20,7 @@ export function MarketplacePreview() {
               Produk Pilihan
             </p>
             <h2 className="font-display text-3xl font-semibold text-brand-text leading-tight">
-              Katalog Produk Hijau Populer
+              Katalog Produk Populer
             </h2>
             <p className="font-body text-[15px] text-brand-text-soft max-w-xl leading-relaxed">
               Dukung gerakan zero-waste dengan menukarkan poin ramah lingkunganmu dengan barang berkelanjutan langsung dari mitra UMKM kami.
