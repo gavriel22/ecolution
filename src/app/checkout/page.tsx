@@ -31,6 +31,7 @@ export default function CheckoutPage() {
   const [isClient, setIsClient] = useState(false);
   const [selectedRedemption, setSelectedRedemption] = useState<VoucherRedemption | null>(null);
   const [showVoucherList, setShowVoucherList] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   // Fetch user's available (unused) voucher redemptions
   const { data: redemptionData } = useRedemptionHistory({ page: 1, limit: 100 });
@@ -51,6 +52,45 @@ export default function CheckoutPage() {
       }
     }
   }, [router, isAuthLoading, cartKey]);
+
+  if (isSuccess) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 px-4 text-center space-y-6 font-body bg-white rounded-xl border border-paper-200 shadow-sm max-w-xl mx-auto my-8">
+        <div className="mx-auto w-20 h-20 bg-moss-50 rounded-full flex items-center justify-center text-moss-700 animate-bounce">
+          <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+
+        <div className="space-y-2 max-w-md">
+          <h1 className="font-display text-2xl font-bold text-ink-900">
+            Pembayaran Berhasil!
+          </h1>
+          <p className="text-sm text-ink-500 leading-relaxed">
+            Terima kasih! Pembayaran Anda telah kami konfirmasi dan pesanan Anda sedang diproses oleh mitra UMKM Ecolution.
+          </p>
+          <p className="text-xs text-ink-400">
+            Detail transaksi dan status pengiriman dapat Anda pantau secara berkala melalui halaman riwayat transaksi.
+          </p>
+        </div>
+
+        <div className="pt-4 border-t border-paper-100 w-full max-w-sm flex flex-col gap-3">
+          <Link
+            href="/orders"
+            className="w-full rounded-md bg-moss-700 py-3 text-center text-sm font-semibold text-paper-50 hover:bg-moss-900 transition shadow-sm"
+          >
+            Lihat Riwayat Transaksi
+          </Link>
+          <Link
+            href="/marketplace"
+            className="w-full rounded-md border border-paper-200 bg-white py-3 text-center text-sm font-semibold text-ink-700 hover:bg-paper-50 transition"
+          >
+            Kembali ke Marketplace
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   if (!isClient || cart.length === 0) return null;
 
@@ -86,8 +126,8 @@ export default function CheckoutPage() {
         onSuccess: () => {
           // Clear cart
           localStorage.removeItem(cartKey);
-          // Redirect to orders
-          router.push("/orders");
+          // Show success screen
+          setIsSuccess(true);
         },
       }
     );

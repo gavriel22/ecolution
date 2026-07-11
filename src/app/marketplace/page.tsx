@@ -182,7 +182,7 @@ export default function MarketplacePage() {
             )}
 
             {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6">
                 {Array.from({ length: 8 }).map((_, i) => (
                   <div key={i} className="animate-pulse rounded-2xl bg-white border border-brand-line overflow-hidden">
                     <div className="aspect-[4/3] bg-brand-line/50" />
@@ -216,7 +216,7 @@ export default function MarketplacePage() {
               </div>
             ) : (
               /* Grid */
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6">
                 {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}

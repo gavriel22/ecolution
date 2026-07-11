@@ -145,7 +145,7 @@ export class OrderRepository {
           finalPrice,
           orderNumber,
           note: note || null,
-          status: OrderStatus.PENDING,
+          status: OrderStatus.PROCESSING,
           items: {
             create: orderItemsData,
           },
