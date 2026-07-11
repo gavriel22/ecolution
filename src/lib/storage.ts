@@ -19,8 +19,8 @@ export async function saveUpload(
 ): Promise<string> {
   const key = `${folder}/${filename}`;
 
-  // Production / Vercel Blob
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
+  // Production / Vercel Blob (Menggunakan token atau OIDC / BLOB_STORE_ID di Vercel)
+  if (process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_STORE_ID) {
     const blob = await put(key, buffer, {
       access: "public",
       contentType,
