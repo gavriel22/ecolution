@@ -172,8 +172,8 @@ export default function AdminActivityPage() {
             >
               {/* Photo */}
               <div className="h-36 w-full md:w-44 shrink-0 overflow-hidden rounded bg-paper-50 flex items-center justify-center border border-paper-100">
-                {act.imageUrl ? (
-                  <img loading="lazy" decoding="async" src={act.imageUrl} alt={act.title} className="h-full w-full object-cover" />
+                {act.photos?.[0]?.imageUrl ? (
+                  <img loading="lazy" decoding="async" src={act.photos[0].imageUrl} alt={act.title} className="h-full w-full object-cover" />
                 ) : (
                   <span className="text-[10px] text-ink-300 uppercase tracking-wider font-mono">No Image</span>
                 )}

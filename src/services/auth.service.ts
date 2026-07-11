@@ -335,7 +335,7 @@ export class AuthService {
       generateAccessToken({
         id: user.id,
         email: user.email,
-        role: payload.role || user.role,
+        role: user.role,
         username: user.username,
       }),
       this.toSafeUser(user),

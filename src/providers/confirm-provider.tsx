@@ -61,7 +61,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
               </button>
               <button
                 onClick={() => handleClose(true)}
-                className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg shadow-sm transition-all cursor-pointer"
+                className="px-4 py-2 text-sm font-medium text-white bg-moss-700 hover:bg-moss-900 rounded-lg shadow-sm transition-all cursor-pointer"
               >
                 Lanjutkan
               </button>
