@@ -83,9 +83,9 @@ export function ActivityForm() {
   const canSubmit = !!photo && !!exifData && !createActivity.isPending;
 
   return (
-    <form onSubmit={handleSubmit} className="mx-auto w-full max-w-lg space-y-5">
+    <form onSubmit={handleSubmit} className="w-full space-y-5">
       <div className="space-y-1">
-        <h1 className="font-display text-3xl font-semibold text-ink-900">Lapor Aktivitas</h1>
+        <h1 className="font-display text-3xl font-semibold text-ink-900">Upload Aktivitas</h1>
         <p className="text-sm text-ink-400">
           Catat aksi lingkunganmu untuk mendapatkan poin. Tanggal dan lokasi diambil otomatis dari foto.
         </p>
@@ -158,7 +158,7 @@ export function ActivityForm() {
         type="submit"
         disabled={!canSubmit}
         aria-busy={createActivity.isPending}
-        className="flex w-full items-center justify-center gap-2 rounded-md bg-moss-700 px-4 py-2.5 font-medium text-paper-50 transition hover:bg-moss-900 disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex w-full items-center justify-center gap-2 rounded-md bg-moss-900 px-4 py-2.5 font-medium text-paper-50 transition hover:bg-moss-950 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {createActivity.isPending && (
           <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">

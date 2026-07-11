@@ -303,17 +303,17 @@ export function PhotoCaptureInput({
 
       {/* ── Photo preview / picker ─────────────────────────────────────────── */}
       {hasFile ? (
-        <div className="relative overflow-hidden rounded-md border border-paper-200 bg-paper-50">
+        <div className="relative overflow-hidden rounded-xl border border-paper-200 bg-paper-50 max-w-sm w-full mx-auto shadow-sm">
           {previewUrl ? (
             /* eslint-disable-next-line @next/next/no-img-element */
             <img
               src={previewUrl}
               alt="Preview foto aktivitas"
-              className="h-56 w-full object-cover"
+              className="h-auto max-h-64 w-full object-contain bg-paper-100"
             />
           ) : (
             /* Fallback while URL is being created */
-            <div className="flex h-56 items-center justify-center text-xs text-ink-400">
+            <div className="flex h-64 items-center justify-center text-xs text-ink-400">
               {currentFile?.name ?? "Memuat preview..."}
             </div>
           )}
@@ -350,11 +350,26 @@ export function PhotoCaptureInput({
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="flex h-44 w-full flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed border-paper-200 text-ink-400 transition hover:border-moss-500 hover:text-moss-700 active:scale-[0.99]"
+          className="flex min-h-[240px] w-full flex-col items-center justify-center gap-4 rounded-[2rem] border-2 border-dashed border-moss-400 bg-transparent px-4 py-8 transition hover:bg-moss-50/50 hover:border-moss-600 active:scale-[0.99]"
         >
-          <IconCamera />
-          <span className="text-sm font-medium">Ambil / Unggah Foto Asli</span>
-          <span className="text-xs opacity-70">JPEG, HEIC, TIFF · maks. 10MB</span>
+          {/* Circular icon wrapper */}
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-moss-100 text-moss-700 shadow-sm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="12" y1="18" x2="12" y2="12"></line>
+              <polyline points="9 15 12 12 15 15"></polyline>
+            </svg>
+          </div>
+          
+          <div className="text-center font-body">
+            <p className="text-base font-medium text-ink-600">
+              <span className="font-semibold text-moss-700 hover:underline">Click here</span> to upload your file or drag.
+            </p>
+            <p className="mt-1 text-xs text-ink-400">
+              Supported Format: JPG, PNG, HEIC (10MB max)
+            </p>
+          </div>
         </button>
       )}
 

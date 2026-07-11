@@ -6,6 +6,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { useLogout } from "@/features/auth/hooks/use-logout";
 import { Avatar } from "@/components/ui/avatar";
+import Image from "next/image";
+import { Home } from "lucide-react";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, isLoading, activeRole } = useAuth();
@@ -64,8 +66,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   } else {
     menuItems = [
       { label: "Dashboard", href: "/dashboard" },
-      { label: "Riwayat Aktivitas", href: "/activity" },
       { label: "Upload Aktivitas", href: "/activity/new" },
+      { label: "Riwayat Aktivitas", href: "/activity" },
       { label: "Pesanan", href: "/orders" },
       { label: "Profil", href: "/profile" },
     ];
@@ -98,7 +100,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="flex min-h-screen flex-col md:flex-row bg-paper-50 font-body">
+    <div className="flex h-screen overflow-hidden flex-col md:flex-row bg-paper-50 font-body">
       {/* Mobile Top Navbar */}
       <header className="flex h-16 items-center justify-between border-b border-paper-200 bg-white px-6 md:hidden">
         <Link href="/dashboard" className="font-display text-2xl font-bold text-moss-700">
@@ -138,26 +140,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       >
         <div className="space-y-8">
           {/* Logo */}
-          <div className="hidden md:block">
-            <Link href="/dashboard" className="font-display text-3xl font-bold text-moss-700 tracking-tight">
-              Ecolution
+          <div className="hidden md:flex flex-col gap-1">
+            <Link href="/dashboard" className="inline-block">
+              <Image src="/logo-main.png" alt="Ecolution" width={140} height={44} className="h-8 w-auto object-contain" />
             </Link>
-            <p className="font-mono text-[10px] text-ink-400 uppercase tracking-widest mt-1">Act & Earn Rewards</p>
           </div>
 
           {/* Navigation Links */}
           <nav className="flex flex-col gap-1">
-            <Link
-              href="/"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="flex h-10 items-center rounded-md text-sm font-semibold text-moss-700 hover:bg-moss-50 pl-4 mb-1 transition-all duration-200"
-            >
-              <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              Kembali ke Landing Page
-            </Link>
-            <div className="border-b border-paper-100 mb-2"></div>
             {menuItems.map((item) => {
               // Exact match or specific route matching to avoid duplicate highlights (e.g. /activity vs /activity/new)
               const isActive =
@@ -187,24 +177,35 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
         {/* User Info / Profile & Logout */}
         <div className="border-t border-paper-100 pt-4 space-y-4">
-          <div className="flex items-center gap-3">
-            <Avatar
-              name={user.name}
-              src={user.profileImageUrl}
-              className="h-10 w-10 text-lg shadow-xs ring-1 ring-paper-200"
-            />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-ink-900 leading-tight">
-                {user.name}
-              </p>
-              <div className="flex items-center gap-1.5 mt-1">
-                <span className={`inline-block rounded-xs px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider ${getRoleBadgeClass(user.role)}`}>
-                  {getRoleLabel(user.role)}
-                </span>
-                <span className="font-mono text-[10px] text-ink-400">
-                  {user.totalPoint} pts
-                </span>
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Avatar
+                  name={user.name}
+                  src={user.profileImageUrl}
+                  className="h-10 w-10 text-lg shadow-xs ring-1 ring-paper-200"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-ink-900 leading-tight">
+                    {user.name}
+                  </p>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <span className={`inline-block rounded-xs px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider ${getRoleBadgeClass(user.role)}`}>
+                      {getRoleLabel(user.role)}
+                    </span>
+                    <span className="font-mono text-[10px] text-ink-400">
+                      {user.totalPoint} pts
+                    </span>
+                  </div>
+                </div>
               </div>
+              <Link 
+                href="/" 
+                className="p-2 text-ink-400 hover:text-moss-700 hover:bg-paper-100 rounded-md transition-colors"
+                title="Ke Beranda"
+              >
+                <Home className="h-5 w-5" />
+              </Link>
             </div>
           </div>
 
@@ -236,8 +237,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       )}
 
       {/* Main Content Area */}
-      <main className="flex-1 px-6 py-8 md:px-10 md:py-10 overflow-y-auto">
-        <div className="mx-auto max-w-4xl">{children}</div>
+      <main className="flex-1 h-full px-6 py-8 md:px-10 md:py-10 overflow-y-auto">
+        <div className="mx-auto max-w-7xl">{children}</div>
       </main>
     </div>
   );

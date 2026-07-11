@@ -15,14 +15,6 @@ export function ActivitySummary() {
       dot: null,
     },
     {
-      label: "Skor Kepercayaan",
-      value: isLoading ? "..." : `${metrics?.trustScore ?? 0}%`,
-      description: "Akurasi data foto & GPS",
-      bgColor: "bg-white text-ink-900",
-      valueClass: "font-mono text-3xl font-bold text-moss-700",
-      dot: null,
-    },
-    {
       label: "Total Aksi",
       value: isLoading ? "..." : metrics?.activitiesCount?.TOTAL ?? 0,
       description: "Aksi lingkungan terlaporkan",
@@ -41,7 +33,7 @@ export function ActivitySummary() {
     {
       label: "Menunggu",
       value: isLoading ? "..." : metrics?.activitiesCount?.PENDING ?? 0,
-      description: "Sedang proses verifikasi AI",
+      description: "Sedang proses verifikasi Admin",
       bgColor: "bg-white text-ink-900",
       valueClass: "font-display text-3xl font-semibold text-ochre-600",
       dot: { color: "bg-ochre-500", label: "PENDING" },
@@ -57,7 +49,7 @@ export function ActivitySummary() {
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
       {stats.map((stat, i) => (
         <div
           key={i}
