@@ -74,20 +74,39 @@ export default function RiwayatPage() {
   };
 
   return (
-    <div className="space-y-8 font-body">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4">
-        <div>
-          <h1 className="font-display text-3xl font-bold text-ink-900 tracking-tight">
-            Riwayat Aktivitas
-          </h1>
+    <div className="bg-[#F8F9FA] min-h-screen pb-12">
+      {/* Hero Section */}
+      <div className="relative border-b border-brand-line pt-32 pb-16 overflow-hidden">
+        {/* Background Image with Gradient Overlay */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src="/landing.jpg"
+            alt="Riwayat Background"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#e6eedd] via-[#e6eedd]/90 to-[#e6eedd]/50" />
+        </div>
+
+        <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="max-w-4xl lg:max-w-5xl">
+              <h1 className="font-display text-4xl sm:text-5xl font-black text-brand-text tracking-tight mb-3">
+                Riwayat Aktivitas
+              </h1>
+              <p className="font-body text-base text-brand-text-soft leading-relaxed lg:whitespace-nowrap">
+                Pantau seluruh aktivitas lingkunganmu yang telah dicatat dan poin yang kamu kumpulkan.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-30 font-body">
+
       {/* Filter and Search Bar */}
-      <div className="bg-white rounded-2xl border border-paper-200 p-5 shadow-xs grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="mb-8 bg-white rounded-2xl border border-paper-200 p-5 shadow-sm flex flex-col md:flex-row gap-4 items-end">
         {/* Search */}
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 flex-1 w-full">
           <label className="text-[10px] font-bold uppercase tracking-wider text-ink-400">Cari Aktivitas</label>
           <input
             type="text"
@@ -102,7 +121,7 @@ export default function RiwayatPage() {
         </div>
 
         {/* Status Filter */}
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 w-full md:w-56 shrink-0">
           <label className="text-[10px] font-bold uppercase tracking-wider text-ink-400">Filter Status</label>
           <select
             value={status}
@@ -110,7 +129,13 @@ export default function RiwayatPage() {
               setStatus(e.target.value);
               setPage(1);
             }}
-            className="w-full rounded-xl border border-paper-200 bg-white px-3 py-2 text-sm text-ink-900 outline-none focus:border-moss-500"
+            className="w-full rounded-xl border border-paper-200 bg-white px-3 py-2 text-sm text-ink-900 outline-none focus:border-moss-500 appearance-none"
+            style={{
+              backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "right 0.7rem center",
+              backgroundSize: "1em"
+            }}
           >
             <option value="">Semua Status</option>
             <option value="PENDING">Menunggu Verifikasi</option>
@@ -120,7 +145,7 @@ export default function RiwayatPage() {
         </div>
 
         {/* Date Filter */}
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 w-full md:w-48 shrink-0">
           <label className="text-[10px] font-bold uppercase tracking-wider text-ink-400">Filter Tanggal</label>
           <input
             type="date"
@@ -135,7 +160,7 @@ export default function RiwayatPage() {
       </div>
 
       {isError && (
-        <div className="rounded-md border border-rust-500/30 bg-rust-500/5 p-4 text-center text-sm text-rust-600">
+        <div className="mb-8 rounded-md border border-rust-500/30 bg-rust-500/5 p-4 text-center text-sm text-rust-600">
           Gagal memuat riwayat aktivitas. Silakan muat ulang halaman.
         </div>
       )}
@@ -228,6 +253,7 @@ export default function RiwayatPage() {
           </button>
         </div>
       )}
+      </div>
     </div>
   );
 }

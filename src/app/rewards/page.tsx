@@ -93,19 +93,37 @@ export default function RewardsPage() {
   };
 
   return (
-    <div className="space-y-8 font-body">
-      {/* Header */}
-      <div className="flex flex-col gap-2">
-        <h1 className="font-display text-4xl font-bold text-ink-900 tracking-tight">
-          Penukaran Reward
-        </h1>
-        <p className="text-sm text-ink-400">
-          Tukarkan akumulasi poin aksi lingkunganmu dengan voucher menarik dari UMKM mitra Ecolution.
-        </p>
+    <div className="bg-[#F8F9FA] min-h-screen pb-12">
+      {/* Hero Section */}
+      <div className="relative border-b border-brand-line pt-32 pb-16 overflow-hidden">
+        {/* Background Image with Gradient Overlay */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src="/landing.jpg"
+            alt="Rewards Background"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#e6eedd] via-[#e6eedd]/90 to-[#e6eedd]/50" />
+        </div>
+
+        <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="max-w-4xl lg:max-w-5xl">
+              <h1 className="font-display text-4xl sm:text-5xl font-black text-brand-text tracking-tight mb-3">
+                Penukaran Reward
+              </h1>
+              <p className="font-body text-base text-brand-text-soft leading-relaxed lg:whitespace-nowrap">
+                Tukarkan akumulasi poin aksi lingkunganmu dengan voucher menarik dari UMKM mitra Ecolution.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-30 font-body">
+
       {/* Point Balance & Level Summary Card */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-white rounded-3xl border border-paper-200 p-6 md:p-8 shadow-xs">
+      <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6 bg-white rounded-xl border border-paper-200 p-6 md:p-8 shadow-sm">
         <div className="md:col-span-1 border-b md:border-b-0 md:border-r border-paper-100 pb-6 md:pb-0 md:pr-8 flex flex-col justify-center">
           <p className="text-[10px] font-bold uppercase tracking-wider text-ink-400">Saldo Poin Anda</p>
           <p className="font-display text-4xl font-black text-moss-700 mt-1">
@@ -122,7 +140,7 @@ export default function RewardsPage() {
             </span>
           </div>
           <div className="w-full bg-paper-100 h-3 rounded-full overflow-hidden border border-paper-200">
-            <div className="bg-moss-750 h-full rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
+            <div className="bg-moss-700 h-full rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
           </div>
           <p className="text-xs text-ink-400">
             Kumpulkan <span className="font-bold text-moss-700">{pointsToNextLevel} poin</span> lagi untuk naik ke Level {level + 1}!
@@ -131,13 +149,13 @@ export default function RewardsPage() {
       </div>
 
       {errorMsg && (
-        <div className="rounded-md border border-rust-500/30 bg-rust-500/5 px-4 py-3 text-sm text-rust-600">
+        <div className="mb-8 rounded-md border border-rust-500/30 bg-rust-500/5 px-4 py-3 text-sm text-rust-600">
           {errorMsg}
         </div>
       )}
 
       {/* Tab Switchers */}
-      <div className="flex border-b border-paper-200 gap-6 text-sm font-semibold">
+      <div className="mb-8 flex border-b border-paper-200 gap-6 text-sm font-semibold">
         <button
           onClick={() => setActiveTab("available")}
           className={`pb-2 border-b-2 transition ${
@@ -184,7 +202,7 @@ export default function RewardsPage() {
               <p className="mt-1 text-sm">Saat ini belum ada voucher aktif yang dapat ditukarkan.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {vouchers.map((voucher: Voucher) => {
                 const hasEnoughPoints = totalPoint >= voucher.pointCost;
                 const isOutOfStock = voucher.stock <= 0;
@@ -192,55 +210,60 @@ export default function RewardsPage() {
                 return (
                   <div
                     key={voucher.id}
-                    className="flex flex-col bg-white rounded-2xl border border-paper-200 overflow-hidden shadow-xs hover:shadow-md transition duration-300"
+                    className="bg-white rounded-2xl border border-brand-line overflow-hidden flex flex-col md:flex-row shadow-xs hover:shadow-md transition duration-300 group"
                   >
-                    {/* Thumbnail Image */}
-                    <div className="relative h-44 w-full bg-paper-50 flex items-center justify-center overflow-hidden border-b border-paper-100">
-                      <span className="text-4xl">🎁</span>
-                      {isOutOfStock && (
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                          <span className="rounded bg-rust-600 px-3 py-1 font-mono text-[10px] font-bold text-white uppercase tracking-wider">
-                            Habis
-                          </span>
-                        </div>
-                      )}
+                    {/* Left side: Ticket Details */}
+                    <div className="flex-1 p-6 md:p-8 space-y-4 text-left">
+                      <div className="space-y-1">
+                        <p className="font-mono text-[10px] text-brand-gold-deep font-bold tracking-wider uppercase">
+                          Admin Ecolution • Stok: {voucher.stock}
+                        </p>
+                        <h3 className="font-display text-lg font-bold text-brand-text leading-snug">
+                          {voucher.title}
+                        </h3>
+                        <p className="font-body text-[13.5px] text-brand-text-soft leading-relaxed line-clamp-2">
+                          {voucher.description || "Tidak ada deskripsi."}
+                        </p>
+                      </div>
                     </div>
 
-                    {/* Voucher Details */}
-                    <div className="p-5 flex flex-col justify-between flex-1 space-y-4">
-                      <div>
-                        <div className="flex justify-between items-center text-[10px] text-ink-400 font-mono">
-                          <span>🎁 Admin Ecolution</span>
-                          <span>Stok: {voucher.stock}</span>
-                        </div>
-                        <h3 className="text-sm font-bold text-ink-900 mt-1.5 leading-snug line-clamp-2">{voucher.title}</h3>
-                        <p className="text-xs text-ink-400 mt-1.5 line-clamp-2 leading-relaxed">{voucher.description || "Tidak ada deskripsi."}</p>
+                    {/* Perforation Line */}
+                    <div className="hidden md:flex flex-col justify-between py-2 shrink-0">
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#F8F9FA] -mt-3.5 -ml-1 border-b border-r border-brand-line"></div>
+                      <div className="flex-1 border-r-2 border-dashed border-brand-line my-1"></div>
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#F8F9FA] -mb-3.5 -ml-1 border-t border-r border-brand-line"></div>
+                    </div>
+
+                    {/* Right side: Coupon Cost & Button */}
+                    <div className="w-full md:w-[220px] bg-brand-paper-3/40 p-6 md:p-8 flex flex-col justify-between items-center text-center shrink-0 border-t md:border-t-0 border-brand-line">
+                      <div className="space-y-1">
+                        <p className="font-mono text-[9px] text-brand-text-soft font-bold uppercase tracking-widest">
+                          Biaya Poin
+                        </p>
+                        <p className="font-display text-2xl font-semibold text-brand-forest flex items-center justify-center gap-1.5">
+                           {voucher.pointCost}
+                          <span className="font-sans text-xs font-normal text-brand-text-soft">Pts</span>
+                        </p>
+                        {voucher.discountAmount > 0 && (
+                          <p className="text-[10px] text-amber-600 font-bold mt-1">
+                            Diskon Rp {new Intl.NumberFormat("id-ID").format(voucher.discountAmount)}
+                          </p>
+                        )}
                       </div>
 
-                      <div className="border-t border-paper-100 pt-3 flex justify-between items-center">
-                        <div className="font-mono">
-                          <p className="text-[9px] uppercase tracking-wider text-ink-400 font-bold">Biaya Poin</p>
-                          <p className="text-lg font-black text-moss-700">{voucher.pointCost} Pts</p>
-                          {voucher.discountAmount > 0 && (
-                            <p className="text-[10px] text-amber-600 font-bold mt-0.5">
-                              = Diskon Rp {new Intl.NumberFormat("id-ID").format(voucher.discountAmount)}
-                            </p>
-                          )}
-                        </div>
-                        <button
-                          disabled={isOutOfStock || !hasEnoughPoints || redeemReward.isPending}
-                          onClick={() => handleRedeem(voucher)}
-                          className={`rounded-xl px-4 py-2 text-xs font-bold shadow-xs transition duration-200 ${
-                            isOutOfStock
-                              ? "bg-paper-100 text-ink-300 cursor-not-allowed"
-                              : !hasEnoughPoints
-                              ? "bg-paper-100 text-rust-500 cursor-not-allowed"
-                              : "bg-moss-700 text-paper-50 hover:bg-moss-900"
-                          }`}
-                        >
-                          {redeemReward.isPending ? "Proses..." : isOutOfStock ? "Habis" : !hasEnoughPoints ? "Poin Kurang" : "Tukarkan"}
-                        </button>
-                      </div>
+                      <button
+                        disabled={isOutOfStock || !hasEnoughPoints || redeemReward.isPending}
+                        onClick={() => handleRedeem(voucher)}
+                        className={`w-full mt-4 py-2.5 rounded-md font-bold text-xs text-center transition-all duration-200 shadow-xs ${
+                          isOutOfStock
+                            ? "bg-paper-200 text-ink-400 cursor-not-allowed"
+                            : !hasEnoughPoints
+                            ? "bg-paper-200 text-rust-500 cursor-not-allowed"
+                            : "bg-brand-forest text-white hover:bg-brand-forest-2"
+                        }`}
+                      >
+                        {redeemReward.isPending ? "Proses..." : isOutOfStock ? "Habis" : !hasEnoughPoints ? "Poin Kurang" : "Tukarkan"}
+                      </button>
                     </div>
                   </div>
                 );
@@ -266,47 +289,70 @@ export default function RewardsPage() {
               <p className="mt-1 text-sm">Anda belum pernah menukarkan poin dengan voucher belanja.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {myRedemptions.map((red: any) => {
                 const statusInfo = getStatusLabel(red.status);
                 return (
                   <div
                     key={red.id}
-                    className="rounded-2xl border border-paper-200 bg-white p-5 shadow-xs flex flex-col md:flex-row gap-5 items-start md:items-center justify-between hover:border-moss-500 transition duration-300"
+                    className="bg-white rounded-2xl border border-brand-line overflow-hidden flex flex-col md:flex-row shadow-xs hover:shadow-md transition duration-300 group"
                   >
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-[10px] text-ink-400 font-mono">
-                        <span>🏪 {red.voucher?.merchant?.businessName || "Mitra UMKM"}</span>
-                        <span>·</span>
-                        <span>Ditukar: {formatDate(red.redeemedAt)}</span>
+                    <div className="flex-1 p-6 md:p-8 space-y-4 text-left">
+                      <div className="space-y-3">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 text-[10px] text-brand-gold-deep font-bold font-mono tracking-wider uppercase">
+                            <span>{red.voucher?.merchant?.businessName || "Mitra UMKM"}</span>
+                            <span>·</span>
+                            <span>{formatDate(red.redeemedAt)}</span>
+                          </div>
+                          <h3 className="font-display text-lg font-bold text-brand-text leading-snug">
+                            {red.voucher?.title || "Voucher"}
+                          </h3>
+                          <p className="font-body text-[13.5px] text-brand-text-soft">
+                             Biaya: {red.voucher?.pointCost || 0} Pts
+                          </p>
+                        </div>
+                        <div>
+                          <span className={`inline-block border text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider ${statusInfo.class}`}>
+                            {statusInfo.text}
+                          </span>
+                        </div>
                       </div>
-                      <h3 className="text-sm font-bold text-ink-900 leading-tight">{red.voucher?.title || "Voucher"}</h3>
-                      <p className="text-xs text-moss-700 font-bold font-mono">Biaya: {red.voucher?.pointCost || 0} Pts</p>
                     </div>
 
-                    <div className="flex items-center justify-between md:justify-end gap-4 w-full md:w-auto border-t md:border-t-0 border-paper-100 pt-3 md:pt-0 shrink-0">
-                      <div className="flex items-center gap-2 font-mono">
-                        <span className="rounded-xl border border-moss-350 bg-moss-50/20 px-3 py-1.5 text-xs font-bold tracking-wider text-moss-700 select-all">
+                    {/* Perforation Line */}
+                    <div className="hidden md:flex flex-col justify-between py-2 shrink-0">
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#F8F9FA] -mt-3.5 -ml-1 border-b border-r border-brand-line"></div>
+                      <div className="flex-1 border-r-2 border-dashed border-brand-line my-1"></div>
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#F8F9FA] -mb-3.5 -ml-1 border-t border-r border-brand-line"></div>
+                    </div>
+
+                    {/* Right side: Status */}
+                    <div className="w-full md:w-[220px] bg-brand-paper-3/40 p-6 md:p-8 flex flex-col justify-center items-center text-center shrink-0 border-t md:border-t-0 border-brand-line">
+                      <p className="font-mono text-[9px] text-brand-text-soft font-bold uppercase tracking-widest mb-3">
+                        Kode Voucher
+                      </p>
+                      <div className="flex flex-col items-center gap-3 w-full">
+                        <span className="w-full truncate rounded-xl border border-brand-forest/20 bg-brand-forest/5 px-3 py-2 text-sm font-bold tracking-wider text-brand-forest select-all">
                           {red.voucherCode}
                         </span>
                         <button
                           onClick={() => handleCopy(red.id, red.voucherCode)}
-                          className="rounded-xl border border-paper-200 bg-white p-2 text-ink-400 hover:bg-paper-50 hover:text-moss-700 transition"
+                          className="w-full rounded-xl border border-brand-line bg-white py-2 text-xs font-bold text-brand-text-soft hover:bg-brand-paper-2 hover:text-brand-forest transition flex justify-center items-center gap-2 shadow-xs"
                           title="Salin Kode"
                         >
                           {copiedId === red.id ? (
-                            <span className="text-[10px] text-moss-700 font-bold">Tersalin!</span>
+                            <span className="text-[10px] text-brand-forest font-bold">Tersalin!</span>
                           ) : (
-                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2" />
-                            </svg>
+                            <>
+                              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2" />
+                              </svg>
+                              Salin Kode
+                            </>
                           )}
                         </button>
                       </div>
-
-                      <span className={`inline-block border text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${statusInfo.class}`}>
-                        {statusInfo.text}
-                      </span>
                     </div>
                   </div>
                 );
@@ -352,6 +398,7 @@ export default function RewardsPage() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
