@@ -3,118 +3,126 @@ import Image from "next/image";
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-[#fbfbf9] text-ink-900 font-sans flex flex-col">
-      <main className="flex-1 pb-20">
+    <div className="min-h-screen bg-white text-brand-ink font-sans flex flex-col">
+      <main className="flex-1 pt-32 pb-24 px-6 md:px-12 lg:px-24">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
 
-        {/* Section 1: Hero */}
-        <section className="relative pt-40 pb-24 px-4 bg-moss-900 text-white overflow-hidden">
-          {/* Subtle background decoration */}
-          <div className="absolute inset-0 opacity-10 pointer-events-none">
-            <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-white rounded-full mix-blend-overlay filter blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
-          </div>
-          <div className="max-w-7xl mx-auto relative z-10 text-center">
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight font-display">
-              Tentang <span className="text-[#fbbc04]">Ecolution</span>
+          {/* Left Column */}
+          <div className="flex flex-col">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-8 font-display text-brand-forest">
+              Tentang <span className="text-[#fbbc04] border-b-4 border-brand-forest pb-2">Ecolution</span>
             </h1>
 
-          </div>
-        </section>
+            <div className="text-brand-text-soft text-base md:text-lg leading-relaxed mb-12 space-y-6">
+              <p>
+                Ecolution adalah platform gamifikasi yang mendorong kebiasaan daur ulang dan kepedulian terhadap sampah. Terintegrasi dengan marketplace UMKM, kami menciptakan ekosistem yang memberi dampak nyata bagi lingkungan dan masyarakat.
+              </p>
 
-        {/* Section 2: Overview */}
-        <section className="py-20 px-4 bg-white">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-moss-800 mb-8 font-display">
-              Cerita Kami
-            </h2>
-            <p className="text-lg md:text-xl text-ink-600 leading-relaxed font-body">
-              Ecolution adalah platform yang mengubah kebiasaan kecil menjadi dampak besar bagi lingkungan.
-              Kami hadir untuk mendorong setiap orang agar lebih peduli terhadap sampah dan mulai membiasakan diri melakukan daur ulang dalam kehidupan sehari-hari.
-            </p>
-          </div>
-        </section>
+            </div>
 
-        {/* Section 3: Vision & Mission (Ref 2 Style) */}
-        <section className="py-24 px-4 bg-[#f0f2ec]">
-          <div className="max-w-7xl mx-auto">
-            <div className="grid md:grid-cols-2 gap-12 items-center">
-              {/* Image side - rounded, beautiful */}
-              <div className="relative h-[400px] md:h-[500px] rounded-[3rem] overflow-hidden shadow-xl">
+            <div className="relative w-full h-[400px] md:h-[500px] mt-12 lg:mt-16">
+              <div className="absolute inset-0 rounded-[2rem] overflow-hidden">
                 <Image
                   src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=2026&auto=format&fit=crop"
-                  alt="Sustainable future"
+                  alt="Sustainable lifestyle"
                   fill
                   className="object-cover"
+                  priority
                 />
-                <div className="absolute bottom-6 right-6 bg-moss-500 w-16 h-16 rounded-full flex items-center justify-center shadow-lg text-white">
-                  <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                  </svg>
-                </div>
               </div>
-
-              {/* Content side */}
-              <div className="space-y-8">
-                <div>
-                  <h2 className="text-4xl md:text-5xl font-bold text-moss-900 mb-4 font-display">
-                    Visi, Misi, & Nilai Kami
-                  </h2>
-                  <p className="text-ink-500 font-body text-lg">
-                    Pelajari komitmen kami terhadap keunggulan, inovasi, dan prinsip-prinsip yang memandu pekerjaan kami setiap hari.
-                  </p>
-                </div>
-
-                <div className="bg-moss-800 rounded-[2.5rem] p-8 md:p-10 text-white shadow-lg relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-moss-600 rounded-bl-full opacity-20"></div>
-                  <div className="flex items-center justify-between mb-6 relative z-10">
-                    <span className="text-moss-300 font-bold tracking-wider text-sm uppercase">Nilai Inti</span>
-                    <svg className="w-8 h-8 text-moss-400" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2L2 22h20L12 2zm0 4.5l6.5 13.5h-13L12 6.5z" />
-                    </svg>
-                  </div>
-
-                  <div className="space-y-6 relative z-10 font-body text-paper-50/90 text-sm md:text-base leading-relaxed">
-                    <p>
-                      Kami percaya pada kekuatan kolaborasi dan kreativitas. Dengan bermitra erat bersama klien dan komunitas, kami mendapatkan pemahaman mendalam mengenai kebutuhan dan tujuan unik mereka, memungkinkan kami menghadirkan solusi yang disesuaikan dan benar-benar membawa perubahan.
-                    </p>
-                    <p>
-                      Menjadi penggerak ekosistem digital yang mengonversi perilaku ramah
-                      lingkungan menjadi nilai ekonomi secara bertanggung jawab melalui
-                      pemberdayaan UMKM dan inovasi berbasis teknologi.
-                    </p>
-                    <p>
-                      Misi kami adalah memberdayakan masyarakat dengan menyediakan alternatif produk ramah lingkungan kelas atas untuk kebutuhan sehari-hari. Kami bertujuan untuk menginspirasi peralihan menuju kehidupan yang berkelanjutan, dimulai dari satu rumah pada satu waktu.
-                    </p>
-                  </div>
-                </div>
-              </div>
+              {/* Optional decorative cutout/shape resembling the reference design could be added here, 
+                  but a clean rounded rectangle fits modern SaaS perfectly. */}
             </div>
           </div>
-        </section>
 
-        {/* Section 4: Founders (Ref 1 Style) */}
-        <section className="py-24 px-4 bg-white">
+          {/* Right Column */}
+          <div className="flex flex-col justify-center space-y-16">
+
+            {/* Section 1: Values */}
+            <section>
+              <h2 className="text-2xl font-bold uppercase tracking-wide mb-4 font-display text-brand-forest">
+                Nilai Inti
+              </h2>
+              <p className="text-brand-text-soft leading-relaxed">
+                Kami percaya bahwa perubahan besar dimulai dari langkah kecil. Melalui kolaborasi dan aksi nyata, kami mendorong masyarakat untuk berkontribusi dalam menjaga lingkungan sekaligus memberdayakan komunitas lokal secara berkelanjutan.
+              </p>
+            </section>
+
+            {/* Section 2: Vision */}
+            <section>
+              <h2 className="text-2xl font-bold uppercase tracking-wide mb-4 font-display text-brand-forest">
+                Visi
+              </h2>
+              <p className="text-brand-text-soft leading-relaxed">
+                Menjadi penggerak ekosistem digital yang mengonversi perilaku ramah
+                lingkungan menjadi nilai ekonomi secara bertanggung jawab melalui
+                pemberdayaan UMKM dan inovasi berbasis teknologi.
+              </p>
+            </section>
+
+            {/* Section 3: Mission */}
+            <section>
+              <h2 className="text-2xl font-bold uppercase tracking-wide mb-4 font-display text-brand-forest">
+                Misi
+              </h2>
+              <ul className="space-y-4 text-brand-text-soft leading-relaxed">
+                <li className="flex items-start">
+                  <span className="mr-3 font-bold text-brand-forest">1. </span>
+                  <span>Memberdayakan UMKM Indonesia, khususnya di bidang pengolahan
+                    limbah plastik, melalui akses pasar digital yang lebih luas dan terintegrasi.</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="mr-3 font-bold text-brand-forest">2. </span>
+                  <span>Menghadirkan solusi inovatif berbasis teknologi untuk mengatasi
+                    permasalahan pengelolaan sampah plastik dengan menghubungkan
+                    aktivitas ramah lingkungan dengan nilai ekonomi.</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="mr-3 font-bold text-brand-forest">3. </span>
+                  <span>Mendorong keterlibatan aktif masyarakat dalam pengelolaan lingkungan
+                    melalui sistem interaktif yang mengapresiasi setiap kontribusi nyata.</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="mr-3 font-bold text-brand-forest">4. </span>
+                  <span>Menggerakkan pertumbuhan ekonomi berkelanjutan dengan menciptakan
+                    ekosistem yang menghubungkan masyarakat, UMKM, dan produk daur
+                    ulang dalam satu platform.</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="mr-3 font-bold text-brand-forest">5. </span>
+                  <span>Membangun kesadaran kolektif terhadap pentingnya pengelolaan limbah
+                    dan konsumsi bertanggung jawab sebagai bagian dari gaya hidup modern.</span>
+                </li>
+              </ul>
+            </section>
+
+          </div>
+        </div>
+
+        {/* Section: Founders (Dibalik Ecolution) */}
+        <section className="py-24 mt-24 border-t border-brand-line">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-4xl md:text-6xl font-bold text-center text-moss-900 mb-20 font-display tracking-tight">
-              Dibalik <span className="border-b-4 border-moss-500 pb-2">Ecolution</span>
+            <h2 className="text-4xl md:text-6xl font-bold text-center text-brand-forest mb-20 font-display tracking-tight">
+              Dibalik <span className="text-[#fbbc04] border-b-4 border-brand-forest pb-2">Ecolution</span>
             </h2>
 
-            <div className="space-y-32">
+            <div className="space-y-20">
               {/* Founder 1 */}
-              <div className="flex flex-col md:flex-row items-center gap-12 md:gap-20">
+              <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16">
                 <div className="w-full md:w-1/2 flex items-start gap-6">
-                  <span className="text-6xl md:text-8xl font-bold text-ink-900 leading-none">01</span>
+                  <span className="text-6xl md:text-8xl font-bold text-brand-text-soft opacity-20 leading-none">01</span>
                   <div>
-                    <h3 className="text-3xl md:text-4xl font-bold text-moss-900 mb-4 font-display">Felicia Wijaya</h3>
-                    <p className="text-ink-600 font-body leading-relaxed text-sm md:text-base">
-                      Seorang <span className="border-b border-ink-300 pb-0.5 text-ink-800">arsitek ternama</span> yang didorong oleh visi untuk mengurasi properti dan produk luar biasa yang sesuai dengan beragam kebutuhan klien. Keahlian Viktor dalam desain dan keberlanjutan memastikan bahwa setiap produk mewujudkan standar keunggulan tertinggi.
+                    <h3 className="text-3xl md:text-4xl font-bold text-brand-forest mb-4 font-display">Felicia Wijaya</h3>
+                    <p className="text-brand-text-soft font-body leading-relaxed text-sm md:text-base">
+                      <a href="mailto:feliciawijaya1910@gmail.com" className="hover:text-brand-forest hover:underline transition-colors">feliciawijaya1910@gmail.com</a>
                     </p>
                   </div>
                 </div>
                 <div className="w-full md:w-1/2">
-                  <div className="relative aspect-square w-full max-w-[400px] mx-auto bg-paper-100 overflow-hidden">
+                  <div className="relative aspect-square w-full max-w-[300px] mx-auto bg-brand-paper overflow-hidden">
                     <Image
-                      src="https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=1974&auto=format&fit=crop"
-                      alt="Viktor Sanjaya"
+                      src="/felicia.jpg"
+                      alt="Felicia Wijaya"
                       fill
                       className="object-cover grayscale hover:grayscale-0 transition-all duration-500"
                     />
@@ -123,21 +131,21 @@ export default function AboutPage() {
               </div>
 
               {/* Founder 2 */}
-              <div className="flex flex-col md:flex-row-reverse items-center gap-12 md:gap-20">
+              <div className="flex flex-col md:flex-row-reverse items-center gap-8 md:gap-16">
                 <div className="w-full md:w-1/2 flex items-start gap-6">
-                  <span className="text-6xl md:text-8xl font-bold text-ink-900 leading-none">02</span>
+                  <span className="text-6xl md:text-8xl font-bold text-brand-text-soft opacity-20 leading-none">02</span>
                   <div>
-                    <h3 className="text-3xl md:text-4xl font-bold text-moss-900 mb-4 font-display">Sophia Gusta</h3>
-                    <p className="text-ink-600 font-body leading-relaxed text-sm md:text-base">
-                      Seorang <span className="border-b border-ink-300 pb-0.5 text-ink-800">pakar pemasaran</span> berpengalaman, merupakan kekuatan pendorong di balik Ecolution. Memanfaatkan keahliannya dalam bercerita dan komunikasi, Sophia memastikan bahwa kami tampil menonjol sebagai penasihat terpercaya bagi pelanggan.
+                    <h3 className="text-3xl md:text-4xl font-bold text-brand-forest mb-4 font-display">Gavriel Theofilus</h3>
+                    <p className="text-brand-text-soft font-body leading-relaxed text-sm md:text-base">
+                      <a href="mailto:theofilus1777@gmail.com" className="hover:text-brand-forest hover:underline transition-colors">theofilus1777@gmail.com</a>
                     </p>
                   </div>
                 </div>
                 <div className="w-full md:w-1/2">
-                  <div className="relative aspect-square w-full max-w-[400px] mx-auto bg-paper-100 overflow-hidden">
+                  <div className="relative aspect-square w-full max-w-[300px] mx-auto bg-brand-paper overflow-hidden">
                     <Image
-                      src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1976&auto=format&fit=crop"
-                      alt="Sophia Gusta"
+                      src="/gavriel.jpeg"
+                      alt="Gavriel Theofilus"
                       fill
                       className="object-cover grayscale hover:grayscale-0 transition-all duration-500"
                     />
@@ -146,20 +154,20 @@ export default function AboutPage() {
               </div>
 
               {/* Founder 3 */}
-              <div className="flex flex-col md:flex-row items-center gap-12 md:gap-20">
+              <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16">
                 <div className="w-full md:w-1/2 flex items-start gap-6">
-                  <span className="text-6xl md:text-8xl font-bold text-ink-900 leading-none">03</span>
+                  <span className="text-6xl md:text-8xl font-bold text-brand-text-soft opacity-20 leading-none">03</span>
                   <div>
-                    <h3 className="text-3xl md:text-4xl font-bold text-moss-900 mb-4 font-display">Yrdn</h3>
-                    <p className="text-ink-600 font-body leading-relaxed text-sm md:text-base">
-                      Seorang <span className="border-b border-ink-300 pb-0.5 text-ink-800">arsitek ternama</span> yang didorong oleh visi untuk mengurasi properti dan produk luar biasa yang sesuai dengan beragam kebutuhan klien. Keahlian Viktor dalam desain dan keberlanjutan memastikan bahwa setiap produk mewujudkan standar keunggulan tertinggi.
+                    <h3 className="text-3xl md:text-4xl font-bold text-brand-forest mb-4 font-display">Sbstn Yrdn</h3>
+                    <p className="text-brand-text-soft font-body leading-relaxed text-sm md:text-base">
+                      <a href="mailto:sebastianyordanpratama@gmail.com" className="hover:text-brand-forest hover:underline transition-colors">sebastianyordanpratama@gmail.com</a>
                     </p>
                   </div>
                 </div>
                 <div className="w-full md:w-1/2">
-                  <div className="relative aspect-square w-full max-w-[400px] mx-auto bg-paper-100 overflow-hidden">
+                  <div className="relative aspect-square w-full max-w-[300px] mx-auto bg-brand-paper overflow-hidden">
                     <Image
-                      src="https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=1974&auto=format&fit=crop"
+                      src="/yrdn.jpeg"
                       alt="yrdn"
                       fill
                       className="object-cover grayscale hover:grayscale-0 transition-all duration-500"
@@ -171,7 +179,6 @@ export default function AboutPage() {
             </div>
           </div>
         </section>
-
       </main>
       <Footer />
     </div>
