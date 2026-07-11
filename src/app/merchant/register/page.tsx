@@ -39,7 +39,7 @@ export default function MerchantRegisterPage() {
         if (res.data?.merchant) {
           setExistingMerchant(res.data.merchant);
           if (res.data.merchant.status === "APPROVED") {
-            router.push("/merchant/products");
+            router.push("/dashboard");
           }
         }
       })
@@ -151,7 +151,7 @@ export default function MerchantRegisterPage() {
 
       setSuccessMsg("Pendaftaran berhasil! Akun toko Anda sedang menunggu persetujuan dari administrator.");
       setTimeout(() => {
-        router.push("/profile");
+        router.push("/dashboard");
       }, 3000);
     } catch (err: any) {
       setErrorMsg(err.message || "Gagal melakukan pendaftaran. Silakan coba lagi.");

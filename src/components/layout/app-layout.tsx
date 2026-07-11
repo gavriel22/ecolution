@@ -179,30 +179,32 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="space-y-4">
           <Link
             href="/"
-            className="flex w-full items-center justify-center gap-2 rounded-md border border-paper-200 bg-white py-2 text-xs font-semibold text-ink-700 transition hover:bg-paper-50 hover:text-moss-700"
+            className="hidden md:flex items-center gap-2 text-xs font-semibold text-ink-500 hover:text-moss-700 transition"
           >
-            <Home className="h-4 w-4" />
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
             Kembali ke Beranda
           </Link>
 
-          <div className="border-t border-paper-100 pt-4 space-y-4">
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
+          <div className="border-t border-paper-100 pt-4 space-y-4 w-full min-w-0">
+          <div className="flex flex-col gap-3 w-full min-w-0">
+            <div className="flex items-center justify-between w-full min-w-0">
+              <div className="flex items-center gap-3 w-full min-w-0">
                 <Avatar
                   name={user.name}
                   src={user.profileImageUrl}
-                  className="h-10 w-10 text-lg shadow-xs ring-1 ring-paper-200"
+                  className="h-10 w-10 shrink-0 text-lg shadow-xs ring-1 ring-paper-200"
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-ink-900 leading-tight">
+                  <p className="truncate text-sm font-semibold text-ink-900 leading-tight" title={user.name}>
                     {user.name}
                   </p>
                   <div className="flex items-center gap-1.5 mt-1">
-                    <span className={`inline-block rounded-xs px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider ${getRoleBadgeClass(user.role)}`}>
+                    <span className={`shrink-0 inline-block rounded-xs px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider ${getRoleBadgeClass(user.role)}`}>
                       {getRoleLabel(user.role)}
                     </span>
-                    <span className="font-mono text-[10px] text-ink-400">
+                    <span className="truncate font-mono text-[10px] text-ink-400">
                       {user.totalPoint} pts
                     </span>
                   </div>
@@ -241,7 +243,19 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Main Content Area */}
       <main className="flex-1 h-full px-6 py-8 md:px-10 md:py-10 overflow-y-auto">
-        <div className="mx-auto max-w-7xl">{children}</div>
+        <div className="mx-auto max-w-7xl">
+          {/* Mobile Back to Home */}
+          <Link
+            href="/"
+            className="md:hidden flex w-fit items-center gap-2 text-xs font-semibold text-ink-500 hover:text-moss-700 transition mb-6 bg-paper-100/50 pr-3 pl-2 py-1.5 rounded-full"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Kembali ke Beranda
+          </Link>
+          {children}
+        </div>
       </main>
     </div>
   );

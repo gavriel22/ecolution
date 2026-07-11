@@ -229,7 +229,7 @@ export default function MerchantProfilePage() {
   };
 
   const statusLabels: Record<string, string> = {
-    APPROVED: "Terverifikasi (Aktif)",
+    APPROVED: "Aktif",
     PENDING: "Menunggu Persetujuan Admin",
     REJECTED: "Ditolak",
     SUSPENDED: "Ditangguhkan",
@@ -240,9 +240,11 @@ export default function MerchantProfilePage() {
       {/* Mode Read (Melihat Toko) */}
       {!isEditing && merchant && (
         <>
-          <div className="rounded-lg border border-paper-200 bg-white p-6 shadow-xs flex flex-col md:flex-row gap-6 items-center justify-between">
-            <div className="flex flex-col md:flex-row gap-5 items-center text-center md:text-left">
-              <div className="h-24 w-24 shrink-0 rounded-full border border-paper-200 overflow-hidden bg-paper-50 flex items-center justify-center">
+          {/* Header Profile Section */}
+          <div className="rounded-2xl border border-paper-200 bg-white p-6 shadow-xs flex flex-col md:flex-row gap-6 items-center">
+            <div className="relative">
+              <div className="absolute inset-0 rounded-full bg-moss-400/20 scale-110"></div>
+              <div className="relative h-24 w-24 shrink-0 rounded-full border border-paper-200 overflow-hidden bg-white flex items-center justify-center shadow-sm">
                 {merchant.logoUrl ? (
                   <img loading="lazy" decoding="async" src={merchant.logoUrl} alt={merchant.businessName} className="h-full w-full object-cover" />
                 ) : (
@@ -251,67 +253,71 @@ export default function MerchantProfilePage() {
                   </svg>
                 )}
               </div>
-              <div className="space-y-2">
-                <div className="flex flex-wrap gap-2 justify-center md:justify-start items-center">
-                  <h1 className="font-display text-2xl font-bold text-ink-900 leading-tight">
-                    {merchant.businessName}
-                  </h1>
-                  <span className={`inline-block border text-[10px] font-bold font-mono uppercase tracking-wider px-2 py-0.5 rounded ${statusColors[merchant.status] || "bg-paper-100 text-ink-500"}`}>
-                    {statusLabels[merchant.status] || merchant.status}
-                  </span>
-                </div>
-                <p className="text-sm text-ink-400 max-w-xl">{merchant.description || "Tidak ada deskripsi toko."}</p>
-                <p className="text-xs text-ink-400 font-mono">Kategori: <span className="font-semibold text-moss-700">{merchant.category || "General"}</span></p>
-                <p className="text-xs text-ink-455 font-mono">Toko Terdaftar Sejak: {formatDate(merchant.createdAt)}</p>
-              </div>
             </div>
-            <div className="flex flex-col gap-2.5 w-full md:w-auto">
-              <button
-                onClick={handleStartEdit}
-                className="rounded-md bg-moss-700 px-5 py-2 text-xs font-semibold text-paper-50 hover:bg-moss-900 transition shadow-sm"
-              >
-                Edit Profil Toko
-              </button>
-              <button
-                onClick={handleDelete}
-                className="rounded-md border border-rust-200 bg-white px-5 py-2 text-xs font-semibold text-rust-600 hover:bg-rust-50 transition"
-              >
-                Hapus Profil Toko
-              </button>
+            <div className="space-y-1 text-center md:text-left w-full">
+              <div className="flex flex-col md:flex-row gap-2 justify-center md:justify-start items-center">
+                <h1 className="font-display text-xl font-bold text-moss-800 leading-tight">
+                  {merchant.businessName}
+                </h1>
+                <span className={`inline-block border text-[10px] font-bold font-mono uppercase tracking-wider px-2 py-0.5 rounded ${statusColors[merchant.status] || "bg-paper-100 text-ink-500"}`}>
+                  {statusLabels[merchant.status] || merchant.status}
+                </span>
+              </div>
+              <p className="text-sm font-medium text-ink-600">Mitra UMKM • {merchant.category || "General"}</p>
+              <p className="text-sm text-ink-500">Terdaftar sejak {formatDate(merchant.createdAt)}</p>
             </div>
           </div>
 
-          {/* Grid Detail Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="rounded-lg border border-paper-200 bg-white p-6 shadow-xs space-y-4">
-              <h2 className="font-display text-lg font-bold text-ink-900 border-b border-paper-100 pb-2">
+          {/* Informasi Bisnis & Kontak */}
+          <div className="rounded-2xl border border-paper-200 bg-white p-6 shadow-xs">
+            <div className="flex flex-wrap items-center justify-between border-b border-paper-100 pb-4 mb-6 gap-4">
+              <h2 className="font-display text-lg font-bold text-moss-800">
                 Informasi Bisnis & Kontak
               </h2>
-              <div className="grid grid-cols-1 gap-3.5 text-sm text-ink-700">
-                <div className="grid grid-cols-3">
-                  <span className="text-ink-400 font-medium">Email Bisnis</span>
-                  <span className="col-span-2 font-mono break-all">{merchant.email || "-"}</span>
-                </div>
-                <div className="grid grid-cols-3">
-                  <span className="text-ink-400 font-medium">Nomor Telepon</span>
-                  <span className="col-span-2 font-mono">{merchant.phone || "-"}</span>
-                </div>
-                <div className="grid grid-cols-3">
-                  <span className="text-ink-400 font-medium">Website</span>
-                  <span className="col-span-2 font-mono text-moss-700 hover:underline">
-                    {merchant.website ? (
-                      <a href={merchant.website} target="_blank" rel="noopener noreferrer">{merchant.website}</a>
-                    ) : "-"}
-                  </span>
-                </div>
-                <div className="grid grid-cols-3">
-                  <span className="text-ink-400 font-medium">Alamat Toko</span>
-                  <span className="col-span-2 leading-relaxed">{merchant.address || "-"}</span>
-                </div>
-                <div className="grid grid-cols-3">
-                  <span className="text-ink-400 font-medium">Jam Operasional</span>
-                  <span className="col-span-2 font-mono">{merchant.operasionalHours || "-"}</span>
-                </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleStartEdit}
+                  className="flex items-center gap-2 rounded-md bg-ochre-500 px-4 py-1.5 text-xs font-semibold text-white hover:bg-ochre-600 transition shadow-sm"
+                >
+                  Edit Profil <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="flex items-center gap-2 rounded-md border border-rust-200 bg-white px-4 py-1.5 text-xs font-semibold text-rust-600 hover:bg-rust-50 transition shadow-sm"
+                >
+                  Hapus Toko
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-4 text-sm">
+              <div className="md:col-span-2 lg:col-span-3">
+                <p className="text-ink-400 font-medium mb-1 text-xs">Deskripsi Toko</p>
+                <p className="font-semibold text-ink-900 leading-relaxed">{merchant.description || "Tidak ada deskripsi toko."}</p>
+              </div>
+              <div>
+                <p className="text-ink-400 font-medium mb-1 text-xs">Email Bisnis</p>
+                <p className="font-semibold text-ink-900 break-all">{merchant.email || "-"}</p>
+              </div>
+              <div>
+                <p className="text-ink-400 font-medium mb-1 text-xs">Nomor Telepon</p>
+                <p className="font-semibold text-ink-900">{merchant.phone || "-"}</p>
+              </div>
+              <div>
+                <p className="text-ink-400 font-medium mb-1 text-xs">Website</p>
+                <p className="font-semibold text-moss-700 hover:underline">
+                  {merchant.website ? (
+                    <a href={merchant.website} target="_blank" rel="noopener noreferrer">{merchant.website}</a>
+                  ) : "-"}
+                </p>
+              </div>
+              <div className="md:col-span-2 lg:col-span-2">
+                <p className="text-ink-400 font-medium mb-1 text-xs">Alamat Toko</p>
+                <p className="font-semibold text-ink-900 leading-relaxed">{merchant.address || "-"}</p>
+              </div>
+              <div>
+                <p className="text-ink-400 font-medium mb-1 text-xs">Jam Operasional</p>
+                <p className="font-semibold text-ink-900">{merchant.operasionalHours || "-"}</p>
               </div>
             </div>
           </div>

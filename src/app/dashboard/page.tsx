@@ -193,18 +193,12 @@ function MerchantDashboard({ name }: { name: string }) {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="font-display text-4xl font-bold text-ink-900 tracking-tight">
-            Panel Mitra Bisnis
+            Dashboard
           </h1>
           <p className="font-body text-sm text-ink-400 mt-1">
-            Selamat datang, pemilik <span className="font-semibold text-moss-700">{name}</span>. Kelola performa penjualan dan produk Anda di sini.
+            Selamat datang, <span className="font-semibold text-moss-700">{name}</span>. Kelola performa penjualan dan produk Anda di sini.
           </p>
         </div>
-        <Link
-          href="/merchant/products"
-          className="inline-flex items-center justify-center rounded-md bg-moss-700 px-4 py-2 text-sm font-medium text-paper-50 transition-all hover:bg-moss-900 shadow-sm self-start sm:self-auto"
-        >
-          Kelola Katalog Produk
-        </Link>
       </div>
 
       {isLoadingMetrics ? (

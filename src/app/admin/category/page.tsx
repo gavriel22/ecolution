@@ -76,14 +76,12 @@ export default function AdminCategoryPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [pointReward, setPointReward] = useState(50);
-  const [imageUrl, setImageUrl] = useState("");
 
   const openAddModal = () => {
     setEditingCategory(null);
     setName("");
     setDescription("");
     setPointReward(50);
-    setImageUrl("");
     setErrorMsg(null);
     setIsModalOpen(true);
   };
@@ -93,7 +91,6 @@ export default function AdminCategoryPage() {
     setName(cat.name);
     setDescription(cat.description || "");
     setPointReward(cat.pointReward);
-    setImageUrl(cat.imageUrl || "");
     setErrorMsg(null);
     setIsModalOpen(true);
   };
@@ -121,7 +118,6 @@ export default function AdminCategoryPage() {
       name: name.trim(),
       description: description.trim() || null,
       pointReward,
-      imageUrl: imageUrl.trim() || null,
     };
 
     if (editingCategory) {
@@ -187,15 +183,8 @@ export default function AdminCategoryPage() {
             <tbody className="divide-y divide-paper-100 text-sm text-ink-700">
               {categories.map((cat) => (
                 <tr key={cat.id} className="hover:bg-paper-50/40">
-                  <td className="px-5 py-3 font-semibold text-ink-900 flex items-center gap-3">
-                    <div className="h-10 w-10 shrink-0 overflow-hidden rounded border border-paper-100 bg-paper-50 flex items-center justify-center">
-                      {cat.imageUrl ? (
-                        <img loading="lazy" decoding="async" src={cat.imageUrl} alt={cat.name} className="h-full w-full object-cover" />
-                      ) : (
-                        <span className="text-[9px] text-ink-300 font-mono">No Image</span>
-                      )}
-                    </div>
-                    <span>{cat.name}</span>
+                  <td className="px-5 py-3 font-semibold text-ink-900">
+                    {cat.name}
                   </td>
                   <td className="px-5 py-3 text-ink-400 max-w-[300px] truncate" title={cat.description || ""}>
                     {cat.description || "-"}
@@ -247,28 +236,6 @@ export default function AdminCategoryPage() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4 text-left">
-              {/* Image url preview */}
-              <div className="flex gap-4 items-center">
-                <div className="h-16 w-16 shrink-0 overflow-hidden rounded border border-paper-200 bg-paper-50 flex items-center justify-center">
-                  {imageUrl && imageUrl.trim().startsWith("http") ? (
-                    <img loading="lazy" decoding="async" src={imageUrl} alt="Preview" className="h-full w-full object-cover" />
-                  ) : (
-                    <span className="text-[9px] text-ink-300 font-mono uppercase">Preview</span>
-                  )}
-                </div>
-                <div className="flex-1 space-y-1">
-                  <label htmlFor="catImage" className="text-xs font-semibold uppercase tracking-wider text-ink-400">URL Foto Kategori</label>
-                  <input
-                    id="catImage"
-                    type="url"
-                    placeholder="https://example.com/icon.jpg"
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    className="w-full rounded-md border border-paper-200 bg-white px-3 py-1.5 text-xs text-ink-900 outline-none focus:border-moss-500"
-                  />
-                </div>
-              </div>
-
               {/* Name */}
               <div className="space-y-1">
                 <label htmlFor="catName" className="text-xs font-semibold uppercase tracking-wider text-ink-400">Nama Kategori</label>
