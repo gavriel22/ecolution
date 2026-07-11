@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
       orderBy: {
         totalPoint: "desc",
       },
-      take: 3,
+      take: 10,
       select: {
         id: true,
         name: true,

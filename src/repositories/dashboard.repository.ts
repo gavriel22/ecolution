@@ -9,6 +9,9 @@ export class DashboardRepository {
       activitiesGrouped,
       pointsAggregate,
       topUsers,
+      totalProducts,
+      totalTransactions,
+      totalVouchers,
     ] = await Promise.all([
       prisma.user.count({
         where: { deletedAt: null },
@@ -33,15 +36,19 @@ export class DashboardRepository {
         orderBy: {
           totalPoint: "desc",
         },
-        take: 5,
+        take: 10,
         select: {
           id: true,
           name: true,
           username: true,
           totalPoint: true,
           trustScore: true,
+          profileImageUrl: true,
         },
       }),
+      prisma.product.count(),
+      prisma.order.count(),
+      prisma.voucher.count(),
     ]);
 
     // Format activities count
@@ -65,6 +72,9 @@ export class DashboardRepository {
       activitiesCount,
       totalPointsCirculation: pointsAggregate._sum.totalPoint || 0,
       topUsers,
+      totalProducts,
+      totalTransactions,
+      totalVouchers,
     };
   }
 
@@ -109,13 +119,14 @@ export class DashboardRepository {
         orderBy: {
           totalPoint: "desc",
         },
-        take: 5,
+        take: 10,
         select: {
           id: true,
           name: true,
           username: true,
           totalPoint: true,
           trustScore: true,
+          profileImageUrl: true,
         },
       }),
     ]);
@@ -157,6 +168,7 @@ export class DashboardRepository {
     const [
       totalProducts,
       activeProducts,
+      outOfStockProducts,
       recentProducts,
       orderItems,
     ] = await Promise.all([
@@ -167,6 +179,15 @@ export class DashboardRepository {
         where: {
           merchantId,
           status: "AVAILABLE",
+        },
+      }),
+      prisma.product.count({
+        where: {
+          merchantId,
+          OR: [
+            { stock: 0 },
+            { status: "OUT_OF_STOCK" },
+          ],
         },
       }),
       prisma.product.findMany({
@@ -268,6 +289,7 @@ export class DashboardRepository {
     return {
       totalProducts,
       activeProducts,
+      outOfStockProducts,
       recentProducts,
       salesSummary: {
         totalRevenue,

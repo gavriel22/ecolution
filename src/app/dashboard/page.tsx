@@ -135,7 +135,20 @@ function UserDashboard({ name }: { name: string }) {
                   {topUsers.map((usr: any, index: number) => (
                     <tr key={usr.id} className="hover:bg-paper-50/30">
                       <td className="py-2.5 font-mono font-bold text-moss-700">#{index + 1}</td>
-                      <td className="py-2.5 font-semibold text-ink-900">{usr.name}</td>
+                      <td className="py-2.5 font-semibold text-ink-900">
+                        <div className="flex items-center gap-2">
+                          <div className="h-7 w-7 rounded-full overflow-hidden bg-paper-100 border border-paper-200 flex items-center justify-center shrink-0">
+                            {usr.profileImageUrl ? (
+                              <img src={usr.profileImageUrl} alt={usr.name} className="h-full w-full object-cover" />
+                            ) : (
+                              <span className="font-display text-xs font-semibold text-moss-700">
+                                {usr.name ? usr.name[0].toUpperCase() : "?"}
+                              </span>
+                            )}
+                          </div>
+                          <span>{usr.name}</span>
+                        </div>
+                      </td>
                       <td className="py-2.5 font-mono text-xs">@{usr.username}</td>
                       <td className="py-2.5 font-mono font-bold text-right text-moss-700">{usr.totalPoint} Pts</td>
                     </tr>
@@ -207,14 +220,14 @@ function MerchantDashboard({ name }: { name: string }) {
       </div>
 
       {isLoadingMetrics ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 animate-pulse">
-          {Array.from({ length: 4 }).map((_, i) => (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5 animate-pulse">
+          {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="h-28 rounded bg-paper-100 border border-paper-200" />
           ))}
         </div>
       ) : (
         /* Summary Grid */
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <div className="rounded-lg border border-paper-200 bg-white p-5 shadow-xs flex flex-col justify-between">
             <div>
               <p className="font-mono text-xs uppercase tracking-wider text-ink-400">Total Produk</p>
@@ -229,6 +242,14 @@ function MerchantDashboard({ name }: { name: string }) {
               <p className="mt-2 font-display text-3xl font-bold text-moss-700">{metrics?.activeProducts ?? 0}</p>
             </div>
             <p className="mt-2 text-[10px] text-ink-400">Status produk yang aktif dijual</p>
+          </div>
+
+          <div className="rounded-lg border border-paper-200 bg-white p-5 shadow-xs flex flex-col justify-between">
+            <div>
+              <p className="font-mono text-xs uppercase tracking-wider text-ink-400">Produk Habis</p>
+              <p className="mt-2 font-display text-3xl font-bold text-rust-600">{metrics?.outOfStockProducts ?? 0}</p>
+            </div>
+            <p className="mt-2 text-[10px] text-ink-400">Jumlah produk dengan stok kosong</p>
           </div>
 
           <div className="rounded-lg border border-paper-200 bg-white p-5 shadow-xs flex flex-col justify-between">
@@ -399,6 +420,24 @@ function AdminDashboard({ name }: { name: string }) {
             <p className="mt-2 font-display text-3xl font-bold text-ink-900">{counts.TOTAL}</p>
             <p className="mt-2 text-[10px] text-ink-400">Laporan aksi lingkungan terkumpul</p>
           </div>
+
+          <div className="rounded-lg border border-paper-200 bg-white p-5 shadow-xs">
+            <p className="font-mono text-xs uppercase tracking-wider text-ink-400">Total Produk</p>
+            <p className="mt-2 font-display text-3xl font-bold text-ink-900">{metrics?.totalProducts ?? 0}</p>
+            <p className="mt-2 text-[10px] text-ink-400">Produk UMKM terdaftar</p>
+          </div>
+
+          <div className="rounded-lg border border-paper-200 bg-white p-5 shadow-xs">
+            <p className="font-mono text-xs uppercase tracking-wider text-ink-400">Total Transaksi</p>
+            <p className="mt-2 font-display text-3xl font-bold text-ochre-600">{metrics?.totalTransactions ?? 0}</p>
+            <p className="mt-2 text-[10px] text-ink-400">Transaksi lunas/berjalan</p>
+          </div>
+
+          <div className="rounded-lg border border-paper-200 bg-white p-5 shadow-xs">
+            <p className="font-mono text-xs uppercase tracking-wider text-ink-400">Total Voucher</p>
+            <p className="mt-2 font-display text-3xl font-bold text-moss-700">{metrics?.totalVouchers ?? 0}</p>
+            <p className="mt-2 text-[10px] text-ink-400">Voucher tersedia untuk ditukar</p>
+          </div>
         </div>
       )}
 
@@ -456,25 +495,38 @@ function AdminDashboard({ name }: { name: string }) {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-paper-100 text-[10px] font-mono uppercase tracking-wider text-ink-400 font-semibold">
-                  <th className="py-2">Rank</th>
-                  <th className="py-2">Nama</th>
-                  <th className="py-2">Username</th>
-                  <th className="py-2 text-right">Poin</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-paper-100 text-sm text-ink-700">
-                {topUsers.map((usr: any, index: number) => (
-                  <tr key={usr.id} className="hover:bg-paper-50/30">
-                    <td className="py-2.5 font-mono font-bold text-moss-700">#{index + 1}</td>
-                    <td className="py-2.5 font-semibold text-ink-900">{usr.name}</td>
-                    <td className="py-2.5 font-mono text-xs">@{usr.username}</td>
-                    <td className="py-2.5 font-mono font-bold text-right text-moss-700">{usr.totalPoint} Pts</td>
+                <thead>
+                  <tr className="border-b border-paper-100 text-[10px] font-mono uppercase tracking-wider text-ink-400 font-semibold">
+                    <th className="py-2">Rank</th>
+                    <th className="py-2">Nama</th>
+                    <th className="py-2">Username</th>
+                    <th className="py-2 text-right">Poin</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-paper-100 text-sm text-ink-700">
+                  {topUsers.map((usr: any, index: number) => (
+                    <tr key={usr.id} className="hover:bg-paper-50/30">
+                      <td className="py-2.5 font-mono font-bold text-moss-700">#{index + 1}</td>
+                      <td className="py-2.5 font-semibold text-ink-900">
+                        <div className="flex items-center gap-2">
+                          <div className="h-7 w-7 rounded-full overflow-hidden bg-paper-100 border border-paper-200 flex items-center justify-center shrink-0">
+                            {usr.profileImageUrl ? (
+                              <img src={usr.profileImageUrl} alt={usr.name} className="h-full w-full object-cover" />
+                            ) : (
+                              <span className="font-display text-xs font-semibold text-moss-700">
+                                {usr.name ? usr.name[0].toUpperCase() : "?"}
+                              </span>
+                            )}
+                          </div>
+                          <span>{usr.name}</span>
+                        </div>
+                      </td>
+                      <td className="py-2.5 font-mono text-xs">@{usr.username}</td>
+                      <td className="py-2.5 font-mono font-bold text-right text-moss-700">{usr.totalPoint} Pts</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
           </div>
         )}
       </div>

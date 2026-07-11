@@ -5,8 +5,8 @@ import { useProducts } from "@/features/marketplace/hooks/use-products";
 import { ProductCard } from "@/features/marketplace/components/product-card";
 
 export function MarketplacePreview() {
-  // Ambil 4 produk terbaru yang berstatus AVAILABLE
-  const { data, isLoading } = useProducts({ limit: 4, status: "AVAILABLE" });
+  // Ambil 6 produk terlaris yang berstatus AVAILABLE dari database
+  const { data, isLoading } = useProducts({ limit: 6, status: "AVAILABLE", sortBy: "sales", sortOrder: "desc" });
   const products = data?.products || [];
 
   return (
@@ -20,7 +20,7 @@ export function MarketplacePreview() {
               Produk Pilihan
             </p>
             <h2 className="font-display text-3xl font-semibold text-brand-text leading-tight">
-              Katalog Produk Populer
+              Produk Terlaris Pekan Ini
             </h2>
             <p className="font-body text-[15px] text-brand-text-soft max-w-xl leading-relaxed">
               Dukung gerakan zero-waste dengan menukarkan poin ramah lingkunganmu dengan barang berkelanjutan langsung dari mitra UMKM kami.
@@ -36,10 +36,10 @@ export function MarketplacePreview() {
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {isLoading ? (
             /* Loading Skeleton */
-            Array.from({ length: 4 }).map((_, i) => (
+            Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="animate-pulse rounded-2xl bg-white border border-brand-line overflow-hidden">
                 <div className="aspect-[4/3] bg-brand-line/50" />
                 <div className="p-5 space-y-4">
