@@ -13,6 +13,8 @@ export function RegisterForm() {
   const register = useRegister();
   const { user, isLoading, setUser } = useAuth();
   const [form, setForm] = useState({ name: "", username: "", email: "", password: "" });
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [localError, setLocalError] = useState<string | null>(null);
   const [googleLoading, setGoogleLoading] = useState(false);
 
   async function handleGoogleCredentialResponse(response: any) {
@@ -98,6 +100,11 @@ export function RegisterForm() {
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    setLocalError(null);
+    if (form.password !== confirmPassword) {
+      setLocalError("Konfirmasi kata sandi tidak cocok.");
+      return;
+    }
     register.mutate(form, {
       onSuccess: () => router.push("/login?registered=1"),
     });
@@ -110,12 +117,14 @@ export function RegisterForm() {
         ? "Registrasi gagal. Coba lagi."
         : null;
 
+  const displayError = localError || errorMessage;
+
   return (
     <form onSubmit={handleSubmit} className="w-full space-y-3.5">
 
-      {errorMessage && (
+      {displayError && (
         <div className="rounded-md border border-rust-500/30 bg-rust-500/5 px-3 py-2 text-sm text-rust-600">
-          {errorMessage}
+          {displayError}
         </div>
       )}
 
@@ -175,6 +184,22 @@ export function RegisterForm() {
           onChange={(e) => update("password", e.target.value)}
           className="w-full rounded-xl border border-brand-line bg-white px-4 py-2.5 text-sm text-brand-text outline-none focus:border-brand-forest focus:ring-2 focus:ring-brand-forest/20"
           placeholder="Minimal 8 karakter"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label htmlFor="confirmPassword" className="text-xs font-semibold uppercase tracking-wider text-brand-text-soft">
+          Konfirmasi Kata Sandi
+        </label>
+        <input
+          id="confirmPassword"
+          type="password"
+          required
+          minLength={8}
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          className="w-full rounded-xl border border-brand-line bg-white px-4 py-2.5 text-sm text-brand-text outline-none focus:border-brand-forest focus:ring-2 focus:ring-brand-forest/20"
+          placeholder="Ulangi kata sandi"
         />
       </div>
 
