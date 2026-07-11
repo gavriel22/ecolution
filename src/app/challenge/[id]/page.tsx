@@ -89,7 +89,7 @@ export default function ChallengeDetailPage({ params }: { params: Promise<{ id: 
   const isCompleted = progressInfo ? progressInfo.currentValue >= progressInfo.targetValue : false;
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-20 space-y-6">
       {/* Breadcrumbs */}
       <nav className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider text-ink-400">
         <Link href="/challenge" className="hover:text-moss-700">Tantangan</Link>

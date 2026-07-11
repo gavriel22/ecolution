@@ -3,13 +3,16 @@ import { LoginForm } from "@/features/auth/components/login-form";
 import Link from "next/link";
 import Image from "next/image";
 
-export default function LoginPage() {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const resolvedParams = await searchParams;
+  const callbackUrl = typeof resolvedParams.callbackUrl === 'string' ? resolvedParams.callbackUrl : '/';
+
   return (
     <main className="flex min-h-screen bg-white">
       {/* Left Column - Image */}
       <div className="hidden lg:flex lg:w-1/2 relative bg-brand-forest text-white p-12 flex-col justify-between overflow-hidden">
         <div className="relative z-10">
-          <Link href="/" className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors mb-12">
+          <Link href={callbackUrl} className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors mb-12">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
             </svg>
@@ -25,7 +28,7 @@ export default function LoginPage() {
       {/* Right Column - Form */}
       <div className="flex-1 flex flex-col justify-center px-4 py-12 sm:px-6 lg:px-20 xl:px-24 relative">
         {/* Mobile Back Button */}
-        <Link href="/" className="lg:hidden absolute top-6 left-6 inline-flex items-center gap-2 text-ink-400 hover:text-ink-900 transition-colors">
+        <Link href={callbackUrl} className="lg:hidden absolute top-6 left-6 inline-flex items-center gap-2 text-ink-400 hover:text-ink-900 transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
           </svg>
