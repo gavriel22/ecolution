@@ -3,6 +3,7 @@ import { activityUploadService } from "@/services/activity-upload.service";
 import { activityService } from "@/services/activity.service";
 import { successResponse, errorResponse } from "@/utils/response";
 import { getPaginationParams } from "@/utils/pagination";
+import { UnauthorizedError } from "@/utils/errors";
 
 /**
  * GET /api/activity
@@ -65,14 +66,25 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   try {
-    const userId = req.headers.get("x-user-id") || "";
+    const userId = req.headers.get("x-user-id");
+    console.log("[ACTIVITY:AUTH] x-user-id header:", userId);
+    if (!userId) {
+      console.error("[ACTIVITY:AUTH] Missing x-user-id — middleware did not inject auth headers");
+      throw new UnauthorizedError("User is not authenticated");
+    }
 
     // Next.js App Router mendukung formData() langsung dari request
+    console.log("[ACTIVITY:UPLOAD] Parsing form data...");
     const formData = await req.formData();
+    console.log("[ACTIVITY:UPLOAD] Form data parsed, calling uploadActivity service...");
+
     const result = await activityUploadService.uploadActivity(userId, formData);
+    console.log("[ACTIVITY:UPLOAD] Success, activity ID:", result.id);
 
     return successResponse(result, 201);
   } catch (error) {
+    console.error("[ACTIVITY:ERROR]", error instanceof Error ? error.stack : error);
     return errorResponse(error);
   }
 }
+

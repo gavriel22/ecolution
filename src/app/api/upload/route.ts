@@ -22,7 +22,9 @@ const ALLOWED_FOLDERS = new Set(["products", "merchants", "misc"]);
 export async function POST(req: NextRequest) {
   try {
     const userId = req.headers.get("x-user-id");
+    console.log("[UPLOAD:AUTH] x-user-id header:", userId);
     if (!userId) {
+      console.error("[UPLOAD:AUTH] Missing x-user-id — middleware did not inject auth headers");
       throw new UnauthorizedError("User is not authenticated");
     }
 
@@ -34,6 +36,9 @@ export async function POST(req: NextRequest) {
     if (!file || typeof file === "string") {
       throw new ValidationError("Field 'image' (file) wajib diisi");
     }
+
+    console.log("[UPLOAD:FILE] name:", file.name, "type:", file.type, "size:", file.size, "folder:", folder);
+
     if (!ALLOWED_MIME.has(file.type)) {
       throw new ValidationError(
         `Tipe file tidak didukung: ${file.type || "tidak diketahui"}. Gunakan JPG, PNG, WEBP, atau GIF.`
@@ -46,13 +51,21 @@ export async function POST(req: NextRequest) {
     }
 
     const original = Buffer.from(await file.arrayBuffer());
+    console.log("[UPLOAD:COMPRESS] Starting compression, original size:", original.length);
+
     const compressed = await compressImage(original, { maxSize: 1200, quality: 78 });
+    console.log("[UPLOAD:COMPRESS] Done, compressed size:", compressed.buffer.length);
 
     const filename = `${userId}-${Date.now()}${compressed.ext}`;
+    console.log("[UPLOAD:STORAGE] Uploading to storage, key:", folder + "/" + filename);
+
     const url = await saveUpload(folder, filename, compressed.buffer, compressed.contentType);
+    console.log("[UPLOAD:STORAGE] Success, URL:", url);
 
     return successResponse({ url }, 201);
   } catch (error) {
+    console.error("[UPLOAD:ERROR]", error instanceof Error ? error.stack : error);
     return errorResponse(error);
   }
 }
+

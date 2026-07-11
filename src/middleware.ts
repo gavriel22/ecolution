@@ -8,7 +8,9 @@ export async function middleware(req: NextRequest) {
     path.startsWith("/admin") ||
     path.startsWith("/dashboard") ||
     path.startsWith("/api/auth/me") ||
+    path.startsWith("/api/auth/avatar") ||
     path.startsWith("/api/activity") ||
+    path.startsWith("/api/upload") ||
     path.startsWith("/merchant/products") ||
     path.startsWith("/merchant/orders") ||
     path.startsWith("/merchant/statistics") ||
