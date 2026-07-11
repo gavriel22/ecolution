@@ -13,7 +13,18 @@ export async function POST(req: NextRequest) {
     }
 
     const result = await authService.refresh(refreshToken);
-    return successResponse(result, 200);
+    const response = successResponse(result, 200);
+
+    // Set accessToken cookie for middleware to read on page navigations
+    response.cookies.set("accessToken", result.accessToken, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 15, // 15 minutes (matches access-token JWT expiry)
+    });
+
+    return response;
   } catch (error) {
     return errorResponse(error);
   }
