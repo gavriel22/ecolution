@@ -15,31 +15,25 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <Link
       href={`/marketplace/${product.id}`}
-      className="flex flex-col overflow-hidden rounded-lg border border-paper-200 bg-white shadow-xs transition duration-300 hover:-translate-y-1 hover:border-moss-500 hover:shadow-md"
+      className="group flex flex-col bg-white overflow-hidden rounded-2xl border border-brand-line transition-all duration-300 hover:shadow-xl hover:shadow-brand-ink/5 hover:-translate-y-1"
     >
       {/* Thumbnail */}
-      <div className="relative aspect-square w-full bg-paper-50 flex items-center justify-center overflow-hidden">
-        {product.imageThumbnail ? (
-          <img
-            src={product.imageThumbnail}
-            alt={product.name}
-            loading="lazy"
-            decoding="async"
-            className="h-full w-full object-cover object-center transition duration-300 hover:scale-105"
-          />
-        ) : (
-          <div className="flex flex-col items-center justify-center text-ink-400">
-            <svg className="h-10 w-10 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            <span className="text-[10px] uppercase font-mono tracking-wider mt-1.5">No Photo</span>
-          </div>
-        )}
+      <div className="relative aspect-[4/3] w-full bg-[#F8F9FA] flex items-center justify-center overflow-hidden">
+        <img
+          src={product.imageThumbnail || "https://images.unsplash.com/photo-1610419207601-a56f8fd4a565?q=80&w=1887&auto=format&fit=crop"}
+          alt={product.name}
+          loading="lazy"
+          decoding="async"
+          onError={(e) => {
+            e.currentTarget.src = "https://images.unsplash.com/photo-1610419207601-a56f8fd4a565?q=80&w=1887&auto=format&fit=crop";
+          }}
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+        />
         
         {/* Out of Stock Overlay */}
         {isOutOfStock && (
-          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-            <span className="rounded-xs bg-rust-600 px-2 py-1 font-mono text-[10px] font-bold text-white uppercase tracking-wider">
+          <div className="absolute inset-0 bg-brand-ink/50 backdrop-blur-sm flex items-center justify-center z-10">
+            <span className="rounded-full bg-white px-3 py-1 text-[11px] font-bold text-brand-text uppercase tracking-widest shadow-sm">
               Habis
             </span>
           </div>
@@ -47,23 +41,30 @@ export function ProductCard({ product }: { product: Product }) {
       </div>
 
       {/* Info */}
-      <div className="flex flex-1 flex-col justify-between p-4 space-y-3">
-        <div className="space-y-1">
-          <p className="font-mono text-[9px] uppercase tracking-wider text-ink-400">
+      <div className="flex flex-1 flex-col p-4 sm:p-5">
+        <div className="flex items-center justify-between mb-1">
+          <p className="font-mono text-[10px] uppercase tracking-wider text-brand-text-soft truncate pr-2">
             {product.merchant?.businessName || "Mitra UMKM"}
           </p>
-          <h3 className="line-clamp-2 text-sm font-semibold text-ink-900 leading-tight">
-            {product.name}
-          </h3>
+          <span className={`shrink-0 font-mono text-[10px] ${isOutOfStock ? "text-red-500" : "text-brand-moss"}`}>
+            {isOutOfStock ? "Habis" : `Stok: ${product.stock}`}
+          </span>
         </div>
+        
+        <h3 className="line-clamp-2 text-sm sm:text-base font-semibold text-brand-text leading-snug mb-3 group-hover:text-brand-forest transition-colors">
+          {product.name}
+        </h3>
 
-        <div className="flex items-center justify-between gap-2">
-          <p className="font-display text-base font-bold text-moss-700">
+        <div className="mt-auto pt-3 border-t border-brand-line flex items-center justify-between">
+          <p className="font-display text-base sm:text-lg font-bold text-brand-forest">
             {formattedPrice}
           </p>
-          <span className={`font-mono text-[10px] ${isOutOfStock ? "text-rust-600" : "text-ink-400"}`}>
-            Stok: {product.stock}
-          </span>
+          {/* Quick Add Icon (Visual only) */}
+          <div className="h-8 w-8 rounded-full bg-brand-paper flex items-center justify-center text-brand-forest transition-colors group-hover:bg-brand-forest group-hover:text-white">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+          </div>
         </div>
       </div>
     </Link>

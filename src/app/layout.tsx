@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { fraunces, inter, plexMono } from "@/lib/fonts";
+import { plusJakartaSans, plexMono } from "@/lib/fonts";
 import "./globals.css";
 import { AppProviders } from "@/providers/app-providers";
 import { Navbar } from "@/features/landing/components/Navbar";
@@ -17,7 +17,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${fraunces.variable} ${inter.variable} ${plexMono.variable} h-full antialiased`}
+      className={`${plusJakartaSans.variable} ${plexMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col font-body bg-paper-50 text-ink-900" suppressHydrationWarning>

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { apiFetch } from "@/lib/api-client";
 import { useAuth } from "@/context/auth-context";
 import Link from "next/link";
+import { Medal, Star } from "lucide-react";
 
 export function EcoChampions() {
   const { user } = useAuth();
@@ -15,8 +16,8 @@ export function EcoChampions() {
   // Fallback top users
   const dummyUsers = [
     { name: "Gavriel", totalPoint: 2450, username: "gavriel" },
-    { name: "Hana", totalPoint: 2180, username: "hana" },
-    { name: "Feli", totalPoint: 1960, username: "feli" },
+    { name: "Feli", totalPoint: 2180, username: "feli" },
+    { name: "Yordan", totalPoint: 1960, username: "yordan" },
     { name: "Dimas", totalPoint: 1720, username: "dimas" },
     { name: "Rina", totalPoint: 1540, username: "rina" },
   ];
@@ -25,27 +26,29 @@ export function EcoChampions() {
     apiFetch<any>("/api/leaderboard")
       .then((res) => {
         if (res.data && res.data.topUsers && res.data.topUsers.length > 0) {
-          setTopUsers(res.data.topUsers);
+          // Explicitly sort by totalPoint descending
+          const sortedUsers = [...res.data.topUsers].sort((a, b) => (b.totalPoint || 0) - (a.totalPoint || 0));
+          setTopUsers(sortedUsers);
           setUserRank(res.data.userRank);
           setUserPoints(res.data.userPoints);
         } else {
-          setTopUsers(dummyUsers);
+          setTopUsers([...dummyUsers].sort((a, b) => b.totalPoint - a.totalPoint));
         }
       })
       .catch((err) => {
         console.error("Failed to load leaderboard data", err);
-        setTopUsers(dummyUsers);
+        setTopUsers([...dummyUsers].sort((a, b) => b.totalPoint - a.totalPoint));
       })
       .finally(() => {
         setLoading(false);
       });
   }, [user]);
 
-  // Construct podium order (2nd place on left, 1st in center, 3rd on right)
+  // Construct podium order logically
   const podium: any[] = [];
-  if (topUsers[1]) podium.push({ ...topUsers[1], rank: 2, medal: "🥈", medalBg: "bg-slate-200 text-slate-800" });
-  if (topUsers[0]) podium.push({ ...topUsers[0], rank: 1, medal: "🥇", medalBg: "bg-amber-100 text-amber-800 ring-1 ring-amber-400" });
-  if (topUsers[2]) podium.push({ ...topUsers[2], rank: 3, medal: "🥉", medalBg: "bg-amber-200 text-amber-900" });
+  if (topUsers[0]) podium.push({ ...topUsers[0], rank: 1, medal: <Medal className="w-7 h-7" />, medalBg: "bg-amber-100 text-amber-800 ring-1 ring-amber-400" });
+  if (topUsers[1]) podium.push({ ...topUsers[1], rank: 2, medal: <Medal className="w-6 h-6" />, medalBg: "bg-slate-200 text-slate-800" });
+  if (topUsers[2]) podium.push({ ...topUsers[2], rank: 3, medal: <Medal className="w-6 h-6" />, medalBg: "bg-amber-200 text-amber-900" });
 
   const remaining = topUsers.slice(3);
 
@@ -67,17 +70,25 @@ export function EcoChampions() {
         </div>
 
         {/* Podium Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end mb-12 max-w-3xl mx-auto">
+        <div className="flex flex-col md:flex-row justify-center items-end gap-6 mb-16 max-w-3xl mx-auto pt-8">
           {podium.map((usr) => {
             const isFirst = usr.rank === 1;
+            const isSecond = usr.rank === 2;
+            const isThird = usr.rank === 3;
+
+            // Order: Mobile -> 1, 2, 3 | Desktop -> 2, 1, 3
+            let orderClass = "";
+            if (isFirst) orderClass = "order-1 md:order-2";
+            if (isSecond) orderClass = "order-2 md:order-1";
+            if (isThird) orderClass = "order-3 md:order-3";
+
             return (
               <div
                 key={usr.id || usr.username}
-                className={`rounded-2xl bg-brand-paper p-6 text-center border transition duration-300 hover:-translate-y-0.5 flex flex-col justify-between items-center ${
-                  isFirst
-                    ? "border-brand-gold shadow-sm ring-2 ring-brand-gold/15 md:min-h-[360px] order-1 md:order-2"
-                    : "border-brand-line md:min-h-[310px] order-2 md:order-1"
-                }`}
+                className={`rounded-2xl bg-brand-paper p-6 text-center border flex flex-col justify-between items-center w-full md:w-1/3 relative transition-all duration-300 hover:-translate-y-2 ${orderClass} ${isFirst
+                    ? "border-brand-gold shadow-md ring-2 ring-brand-gold/20 md:min-h-[350px] z-10 md:-translate-y-6"
+                    : "border-brand-line shadow-sm md:min-h-[290px]"
+                  }`}
               >
                 {/* Medal Icon inside stamp circle */}
                 <div className={`w-12 h-12 rounded-full ${usr.medalBg} flex items-center justify-center text-2xl mb-4 font-mono shadow-xs`}>
@@ -86,9 +97,8 @@ export function EcoChampions() {
 
                 {/* Avatar */}
                 <div
-                  className={`mx-auto rounded-full overflow-hidden bg-brand-paper-2 border flex items-center justify-center mb-4 ${
-                    isFirst ? "h-22 w-22 border-brand-gold" : "h-18 w-18 border-brand-line"
-                  }`}
+                  className={`mx-auto rounded-full overflow-hidden bg-brand-paper-2 border flex items-center justify-center mb-4 ${isFirst ? "h-22 w-22 border-brand-gold" : "h-18 w-18 border-brand-line"
+                    }`}
                 >
                   {usr.profileImageUrl ? (
                     <img loading="lazy" decoding="async" src={usr.profileImageUrl} alt={usr.name} className="h-full w-full object-cover" />
@@ -162,7 +172,7 @@ export function EcoChampions() {
         {user && userRank !== null && (
           <div className="rounded-xl border border-brand-line bg-brand-paper-2 p-5 flex flex-col sm:flex-row justify-between items-center gap-4 mb-8 max-w-2xl mx-auto">
             <div className="flex items-center gap-3">
-              <span className="text-2xl">⭐</span>
+              <Star className="w-6 h-6 text-brand-gold-deep fill-brand-gold" />
               <div className="text-left">
                 <h4 className="font-display font-semibold text-brand-text text-sm">Peringkat Anda</h4>
                 <p className="text-xs text-brand-text-soft mt-0.5">Kumpulkan poin lebih banyak untuk masuk ke 3 besar pejuang teratas.</p>

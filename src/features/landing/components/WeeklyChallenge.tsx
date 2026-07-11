@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { apiFetch } from "@/lib/api-client";
 import { useAuth } from "@/context/auth-context";
 import Link from "next/link";
+import { Recycle, Clock, Coins } from "lucide-react";
 
 export function WeeklyChallenge() {
   const { user } = useAuth();
@@ -12,7 +13,6 @@ export function WeeklyChallenge() {
   const dummyChallenge = {
     title: "Daur Ulang Botol Plastik",
     description: "Kumpulkan dan daur ulang botol plastik di lingkungan sekitarmu.",
-    icon: "♻️",
     targetValue: 5,
     currentValue: 4,
     points: 100,
@@ -84,8 +84,8 @@ export function WeeklyChallenge() {
                         {ch.description}
                       </p>
                     </div>
-                    <span className="text-3xl shrink-0 p-3 bg-brand-paper-2 rounded-xl border border-brand-line">
-                      {ch.icon || "♻️"}
+                    <span className="flex items-center justify-center w-14 h-14 shrink-0 bg-brand-paper-2 rounded-xl border border-brand-line text-brand-forest">
+                      <Recycle className="w-8 h-8" strokeWidth={1.5} />
                     </span>
                   </div>
 
@@ -104,8 +104,8 @@ export function WeeklyChallenge() {
                   </div>
 
                   {/* Deadline text */}
-                  <div className="inline-flex items-center gap-1.5 bg-brand-paper-2 px-3 py-1 rounded-lg text-[11px] text-brand-text-soft font-mono">
-                    ⏱️ Batas Waktu: {deadline}
+                  <div className="inline-flex items-center gap-1.5 bg-brand-paper-2 px-3 py-1.5 rounded-lg text-[11px] text-brand-text-soft font-mono">
+                    <Clock className="w-3.5 h-3.5" /> Batas Waktu: {deadline}
                   </div>
                 </div>
 
@@ -122,8 +122,8 @@ export function WeeklyChallenge() {
                     <p className="font-mono text-[9px] text-brand-text-soft font-bold uppercase tracking-widest">
                       Kupon Hadiah
                     </p>
-                    <p className="font-display text-2xl font-semibold text-brand-forest">
-                      🪙 +{ch.points || 100}{" "}
+                    <p className="font-display text-2xl font-semibold text-brand-forest flex items-center justify-center gap-1.5">
+                      <Coins className="w-6 h-6 text-brand-gold-deep" /> +{ch.points || 100}
                       <span className="font-sans text-xs font-normal text-brand-text-soft">Pts</span>
                     </p>
                   </div>

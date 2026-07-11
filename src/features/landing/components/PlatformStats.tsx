@@ -1,7 +1,65 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { apiFetch } from "@/lib/api-client";
+
+function AnimatedNumber({ value, duration = 500, isFloat = false }: { value: number, duration?: number, isFloat?: boolean }) {
+  const [count, setCount] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) return;
+
+    let startTime: number | null = null;
+    let animationFrame: number;
+
+    const updateCount = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = timestamp - startTime;
+      const percentage = Math.min(progress / duration, 1);
+
+      const easeOutExpo = percentage === 1 ? 1 : 1 - Math.pow(2, -10 * percentage);
+      const currentVal = value * easeOutExpo;
+
+      setCount(currentVal);
+
+      if (percentage < 1) {
+        animationFrame = requestAnimationFrame(updateCount);
+      } else {
+        setCount(value); // ensure it lands exactly on the value
+      }
+    };
+
+    animationFrame = requestAnimationFrame(updateCount);
+
+    return () => cancelAnimationFrame(animationFrame);
+  }, [value, duration, isVisible]);
+
+  if (isFloat) {
+    return <span ref={ref}>{count.toFixed(1)}</span>;
+  }
+
+  return <span ref={ref}>{Math.floor(count).toLocaleString("id-ID")}</span>;
+}
 
 export function PlatformStats() {
   const [stats, setStats] = useState({
@@ -25,112 +83,59 @@ export function PlatformStats() {
           });
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   return (
-    <section className="bg-brand-ink text-white font-sans py-[88px]">
-      <div className="max-w-[1180px] mx-auto px-8 md:px-10">
-        {/* Section Header */}
-        <div className="text-left mb-12 space-y-2">
-          <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-brand-gold flex items-center gap-2">
-            <span className="inline-block w-[22px] h-[1px] bg-brand-gold" />
-            Catatan Dampak
-          </p>
-          <h2 className="font-display text-3xl font-semibold text-white leading-tight">
-            Logbook Kontribusi Komunitas
-          </h2>
-          <p className="font-body text-[15px] text-brand-moss-light max-w-xl leading-relaxed">
-            Data tercatat secara real-time berdasarkan laporan aktivitas hijau yang terverifikasi di seluruh wilayah.
-          </p>
-        </div>
+    <section className="bg-brand-ink py-24 border-t border-white/5">
+      <div className="max-w-[1100px] mx-auto px-6 md:px-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:flex lg:flex-row lg:justify-between gap-10 lg:gap-6">
 
-        {/* Ledger Rows */}
-        <div className="border-t border-white/12 divide-y divide-white/12">
-          {/* Row 1 */}
-          <div className="py-6 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-[52px] h-[52px] rounded-full border border-dashed border-brand-gold/55 flex items-center justify-center text-brand-gold text-xl shrink-0">
-                👥
-              </div>
-              <div className="text-left">
-                <p className="font-body text-sm font-semibold text-white leading-tight">User Aktif</p>
-                <p className="font-body text-[12px] text-brand-moss-light/80 mt-1">Anggota penjaga kelestarian lingkungan</p>
-              </div>
-            </div>
-            <p className="font-display text-2xl font-semibold text-white">
-              <span className="font-mono">{stats.totalUsers.toLocaleString("id-ID")}</span>
-              <span className="font-mono text-sm text-brand-gold ml-1">+</span>
+          <div className="flex flex-col">
+            <h3 className="font-display text-4xl md:text-5xl font-medium text-white/95 tracking-tight">
+              <AnimatedNumber value={stats.totalUsers} /><span className="text-2xl text-white/40 ml-1">+</span>
+            </h3>
+            <p className="font-body text-sm text-white/60 mt-3 leading-relaxed">
+              Anggota komunitas Ecolution
             </p>
           </div>
 
-          {/* Row 2 */}
-          <div className="py-6 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-[52px] h-[52px] rounded-full border border-dashed border-brand-gold/55 flex items-center justify-center text-brand-gold text-xl shrink-0">
-                🏪
-              </div>
-              <div className="text-left">
-                <p className="font-body text-sm font-semibold text-white leading-tight">Mitra UMKM</p>
-                <p className="font-body text-[12px] text-brand-moss-light/80 mt-1">Penyedia produk ramah lingkungan pilihan</p>
-              </div>
-            </div>
-            <p className="font-display text-2xl font-semibold text-white">
-              <span className="font-mono">{stats.totalMerchants}</span>
-              <span className="font-mono text-sm text-brand-gold ml-1">toko</span>
+          <div className="flex flex-col">
+            <h3 className="font-display text-4xl md:text-5xl font-medium text-white/95 tracking-tight">
+              <AnimatedNumber value={stats.totalMerchants} />
+            </h3>
+            <p className="font-body text-sm text-white/60 mt-3 leading-relaxed">
+              Mitra UMKM
             </p>
           </div>
 
-          {/* Row 3 */}
-          <div className="py-6 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-[52px] h-[52px] rounded-full border border-dashed border-brand-gold/55 flex items-center justify-center text-brand-gold text-xl shrink-0">
-                ✅
-              </div>
-              <div className="text-left">
-                <p className="font-body text-sm font-semibold text-white leading-tight">Aksi Terverifikasi</p>
-                <p className="font-body text-[12px] text-brand-moss-light/80 mt-1">Aksi lingkungan terverifikasi foto GPS</p>
-              </div>
-            </div>
-            <p className="font-display text-2xl font-semibold text-white">
-              <span className="font-mono">{stats.totalVerifiedActivities.toLocaleString("id-ID")}</span>
-              <span className="font-mono text-sm text-brand-gold ml-1">aksi</span>
+          <div className="flex flex-col">
+            <h3 className="font-display text-4xl md:text-5xl font-medium text-white/95 tracking-tight">
+              <AnimatedNumber value={stats.totalVerifiedActivities} />
+            </h3>
+            <p className="font-body text-sm text-white/60 mt-3 leading-relaxed">
+              Aksi lingkungan terverifikasi
             </p>
           </div>
 
-          {/* Row 4 */}
-          <div className="py-6 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-[52px] h-[52px] rounded-full border border-dashed border-brand-gold/55 flex items-center justify-center text-brand-gold text-xl shrink-0">
-                ♻️
-              </div>
-              <div className="text-left">
-                <p className="font-body text-sm font-semibold text-white leading-tight">Sampah Terdaur Ulang</p>
-                <p className="font-body text-[12px] text-brand-moss-light/80 mt-1">Total sampah plastik &amp; organik tereduksi</p>
-              </div>
-            </div>
-            <p className="font-display text-2xl font-semibold text-white">
-              <span className="font-mono">{stats.totalRecycledWaste}</span>
-              <span className="font-mono text-sm text-brand-gold ml-1">Ton</span>
+          <div className="flex flex-col">
+            <h3 className="font-display text-4xl md:text-5xl font-medium text-white/95 tracking-tight">
+              <AnimatedNumber value={stats.totalRecycledWaste} isFloat={true} /><span className="text-2xl text-white/40 ml-1">t</span>
+            </h3>
+            <p className="font-body text-sm text-white/60 mt-3 leading-relaxed">
+              Sampah berhasil dikurangi
             </p>
           </div>
 
-          {/* Row 5 */}
-          <div className="py-6 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-[52px] h-[52px] rounded-full border border-dashed border-brand-gold/55 flex items-center justify-center text-brand-gold text-xl shrink-0">
-                🎁
-              </div>
-              <div className="text-left">
-                <p className="font-body text-sm font-semibold text-white leading-tight">Voucher Ditukar</p>
-                <p className="font-body text-[12px] text-brand-moss-light/80 mt-1">Reward terdistribusi bagi pejuang aksi hijau</p>
-              </div>
-            </div>
-            <p className="font-display text-2xl font-semibold text-white">
-              <span className="font-mono">{stats.totalRewardsRedeemed.toLocaleString("id-ID")}</span>
-              <span className="font-mono text-sm text-brand-gold ml-1">kali</span>
+          <div className="flex flex-col">
+            <h3 className="font-display text-4xl md:text-5xl font-medium text-white/95 tracking-tight">
+              <AnimatedNumber value={stats.totalRewardsRedeemed} />
+            </h3>
+            <p className="font-body text-sm text-white/60 mt-3 leading-relaxed">
+              Reward telah dibagikan
             </p>
           </div>
+
         </div>
       </div>
     </section>

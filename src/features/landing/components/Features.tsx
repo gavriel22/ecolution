@@ -1,6 +1,6 @@
 "use client";
 
-import { Camera, Gift, Trophy, Store } from "lucide-react";
+import { Camera, Gift, Trophy, Store, Sprout } from "lucide-react";
 
 export function Features() {
   const steps = [
@@ -71,37 +71,33 @@ export function Features() {
             {/* Soft decorative background glows */}
             <div className="absolute inset-0 bg-brand-moss-light/20 rounded-[3rem] rotate-3 opacity-30 blur-2xl"></div>
 
-            <div className="relative w-full max-w-[340px] bg-brand-paper-2 border border-brand-line rounded-[40px] shadow-sm p-6 aspect-[4/5] flex flex-col justify-between">
-              <div className="flex items-center justify-between border-b border-brand-line pb-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-full bg-brand-paper-3 flex items-center justify-center">
-                    <span className="text-base">🧑‍🌾</span>
-                  </div>
-                  <div className="text-left">
-                    <div className="text-xs font-bold text-brand-text">Misi Daur Ulang</div>
-                    <div className="text-[9px] text-brand-text-soft font-mono">GPS VERIFIED</div>
-                  </div>
-                </div>
-                <div className="px-2.5 py-0.5 bg-brand-forest text-brand-paper text-[10px] font-bold rounded-full font-mono">
-                  Lvl 3
-                </div>
+            <div className="relative w-full max-w-[340px] group">
+              {/* Main Image Container */}
+              <div className="w-full aspect-[4/5] rounded-[32px] overflow-hidden shadow-md border border-brand-line relative">
+                <img 
+                  src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=2013&auto=format&fit=crop" 
+                  alt="Ilustrasi Aktivitas Hijau"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  loading="lazy"
+                  decoding="async"
+                />
+                {/* Subtle Gradient for contrast */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent"></div>
               </div>
 
-              <div className="flex-1 bg-brand-paper rounded-2xl border border-brand-line p-6 flex flex-col justify-center items-center text-center my-4 space-y-4">
-                <div className="w-16 h-16 bg-brand-paper-2 text-brand-forest rounded-full flex items-center justify-center shadow-xs">
-                  <Camera className="w-6 h-6" />
+              {/* Floating Outer Overlay (Layered Depth) */}
+              <div className="absolute -bottom-5 -left-6 sm:-left-10 bg-brand-paper/95 backdrop-blur-md rounded-[20px] px-5 py-4 flex items-center gap-3 shadow-[0_15px_40px_-10px_rgba(0,0,0,0.15)] border border-white/20 z-10 transition-transform duration-500 group-hover:-translate-y-1">
+                <div className="w-10 h-10 rounded-full bg-brand-gold/10 flex items-center justify-center shrink-0">
+                  <span className="text-xl leading-none">🪙</span>
                 </div>
-                <div className="space-y-1">
-                  <h5 className="font-display font-semibold text-sm text-brand-text">Upload Foto Botol Plastik</h5>
-                  <p className="text-xs text-brand-text-soft max-w-[200px] leading-relaxed">Ambil foto bukti aktivitas daur ulang botol plastik di tempat sampah khusus.</p>
+                <div className="flex flex-col justify-center">
+                  <p className="font-display text-[15px] font-bold text-brand-text leading-none mb-1">
+                    +50 Poin
+                  </p>
+                  <p className="font-body text-[10px] text-brand-forest font-semibold tracking-widest uppercase leading-none">
+                    Terverifikasi
+                  </p>
                 </div>
-                <div className="w-full bg-brand-forest text-white py-2 rounded-lg text-xs font-semibold shadow-xs hover:bg-brand-forest-2 transition duration-300">
-                  Ambil Foto Aksi
-                </div>
-              </div>
-
-              <div className="bg-brand-paper-3/40 p-2.5 rounded-xl border border-brand-line text-center">
-                <p className="text-[10.5px] text-brand-forest font-bold font-mono">🪙 +50 Poin terverifikasi instan</p>
               </div>
             </div>
           </div>

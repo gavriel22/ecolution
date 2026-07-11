@@ -42,6 +42,14 @@ export function Navbar() {
   // Routes that render their own chrome (AppLayout sidebar) or a focused auth
   // screen must NOT also show the global landing navbar — otherwise the fixed
   // navbar overlaps their content. Keep this in sync with the AppLayout routes.
+  const isMerchantDashboard =
+    pathname.startsWith("/merchant/products") ||
+    pathname.startsWith("/merchant/orders") ||
+    pathname.startsWith("/merchant/statistics") ||
+    pathname.startsWith("/merchant/profile") ||
+    pathname.startsWith("/merchant/vouchers") ||
+    pathname === "/merchant/register";
+
   const isHidden =
     pathname === "/login" ||
     pathname === "/register" ||
@@ -50,7 +58,7 @@ export function Navbar() {
     pathname.startsWith("/activity") ||
     pathname.startsWith("/profile") ||
     pathname.startsWith("/orders") ||
-    pathname.startsWith("/merchant");
+    isMerchantDashboard;
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -79,13 +87,15 @@ export function Navbar() {
 
   const isTransparent = isLandingPage && !isScrolled;
 
-  const navClass = isTransparent
-    ? "absolute top-0 w-full z-50 bg-transparent py-6 transition-all duration-300"
-    : "fixed top-0 w-full z-50 py-4 transition-all duration-300 bg-white/90 backdrop-blur-md shadow-sm border-b border-gray-200";
+  const navClass = `fixed top-0 left-0 right-0 z-50 py-4 transition-all duration-200 ${isTransparent
+      ? "bg-transparent border-b border-transparent"
+      : "bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-200"
+    }`;
 
-  const linkClass = isTransparent
-    ? "text-white font-medium hover:text-[#fbbc04] transition-colors text-lg"
-    : "text-ink-900 font-medium hover:text-[#fbbc04] transition-colors text-lg";
+  const linkClass = `text-[15px] font-semibold transition-colors duration-200 ${isTransparent
+      ? "text-white/90 hover:text-white"
+      : "text-ink-700 hover:text-brand-forest"
+    }`;
 
   function closeMobileMenu() {
     setIsMobileMenuOpen(false);
@@ -99,11 +109,11 @@ export function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <Image
-              src="/logo-main.png"
+              src={isTransparent ? "/logo-main-white.png" : "/logo-main.png"}
               alt="Ecolution Logo"
               width={140}
               height={45}
-              className="object-contain"
+              className="object-contain transition-opacity duration-300"
             />
           </Link>
 
@@ -122,7 +132,7 @@ export function Navbar() {
             {/* Cart */}
             <Link
               href={user ? "/cart" : "/login?callbackUrl=/cart"}
-              className={`p-2 rounded-full transition flex items-center justify-center ${isTransparent ? "text-white hover:bg-white/10 hover:text-[#fbbc04]" : "text-ink-900 hover:bg-paper-100 hover:text-[#fbbc04]"}`}
+              className={`p-2 rounded-full transition-colors duration-300 flex items-center justify-center ${isTransparent ? "text-white/90 hover:bg-white/10 hover:text-white" : "text-ink-700 hover:bg-paper-100 hover:text-brand-forest"}`}
               title="Keranjang Belanja"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -135,7 +145,7 @@ export function Navbar() {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className={`font-semibold text-sm font-mono flex items-center gap-2 focus:outline-none hover:opacity-80 transition ${isTransparent ? "text-white" : "text-ink-900"}`}
+                  className={`font-semibold text-[15px] flex items-center gap-2 focus:outline-none transition-colors duration-300 ${isTransparent ? "text-white/90 hover:text-white" : "text-ink-700 hover:text-brand-forest"}`}
                 >
                   <Avatar
                     name={user.name}
@@ -220,7 +230,7 @@ export function Navbar() {
                 </Link>
                 <Link
                   href="/register"
-                  className="px-5 py-2.5 bg-[#fbbc04] hover:bg-[#e3aa04] text-gray-900 rounded-full font-medium transition shadow-sm text-sm"
+                  className="px-5 py-2.5 bg-brand-gold hover:bg-brand-gold-deep text-brand-text rounded-full font-bold transition-all duration-300 shadow-sm text-sm"
                 >
                   Daftar
                 </Link>
@@ -233,7 +243,7 @@ export function Navbar() {
             {/* Cart icon — always visible on mobile */}
             <Link
               href={user ? "/cart" : "/login?callbackUrl=/cart"}
-              className={`p-2 rounded-full transition ${isTransparent ? "text-white hover:bg-white/10" : "text-ink-900 hover:bg-paper-100"}`}
+              className={`p-2 rounded-full transition-colors duration-300 ${isTransparent ? "text-white/90 hover:bg-white/10 hover:text-white" : "text-ink-700 hover:bg-paper-100 hover:text-brand-forest"}`}
               title="Keranjang Belanja"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -244,7 +254,7 @@ export function Navbar() {
             {/* Hamburger */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className={`p-2 rounded-lg focus:outline-none transition ${isTransparent ? "text-white hover:bg-white/10" : "text-ink-900 hover:bg-paper-100"}`}
+              className={`p-2 rounded-lg focus:outline-none transition-colors duration-300 ${isTransparent ? "text-white/90 hover:bg-white/10 hover:text-white" : "text-ink-700 hover:bg-paper-100 hover:text-brand-forest"}`}
               aria-label={isMobileMenuOpen ? "Tutup menu" : "Buka menu"}
               aria-expanded={isMobileMenuOpen}
             >
