@@ -22,20 +22,110 @@ export default function MerchantRegisterPage() {
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
+  const [existingMerchant, setExistingMerchant] = useState<any>(null);
+  const [checkingExisting, setCheckingExisting] = useState(true);
+
   useEffect(() => {
     if (!isLoading && !user) {
       router.push("/login?callbackUrl=/merchant/register");
     }
   }, [user, isLoading, router]);
 
-  if (isLoading || !user) {
+  useEffect(() => {
+    if (!user) return;
+    
+    apiFetch<{ merchant: any }>("/api/merchant/my")
+      .then((res) => {
+        if (res.data?.merchant) {
+          setExistingMerchant(res.data.merchant);
+          if (res.data.merchant.status === "APPROVED") {
+            router.push("/merchant/products");
+          }
+        }
+      })
+      .catch((err) => {
+        console.error("Gagal memeriksa status mitra:", err);
+      })
+      .finally(() => {
+        setCheckingExisting(false);
+      });
+  }, [user, router]);
+
+  if (isLoading || !user || checkingExisting) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-paper-50 font-body">
         <div className="flex flex-col items-center gap-3">
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-moss-200 border-t-moss-700"></div>
-          <p className="font-mono text-xs text-ink-400">Memeriksa akun...</p>
+          <p className="font-mono text-xs text-ink-400">Memeriksa status toko...</p>
         </div>
       </div>
+    );
+  }
+
+  if (existingMerchant && existingMerchant.status === "PENDING") {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-paper-50 px-4 py-12">
+        <div className="w-full max-w-lg rounded-2xl border border-paper-200 bg-white p-6 sm:p-8 text-center shadow-md space-y-6">
+          <div className="mx-auto w-16 h-16 bg-ochre-50 rounded-full flex items-center justify-center text-ochre-600">
+            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          
+          <div className="space-y-2">
+            <h1 className="font-display text-2xl font-bold text-ink-900">
+              Pendaftaran Toko Sedang Ditinjau
+            </h1>
+            <p className="text-sm text-ink-500 font-body leading-relaxed">
+              Terima kasih telah mendaftar sebagai Mitra UMKM. Saat ini pendaftaran toko <span className="font-semibold text-moss-700">{existingMerchant.businessName}</span> sedang dalam proses verifikasi oleh administrator.
+            </p>
+            <p className="text-xs text-ink-400 font-body italic">
+              Silakan periksa kembali halaman ini atau dashboard Anda secara berkala.
+            </p>
+          </div>
+
+          <div className="pt-4 border-t border-paper-100 flex flex-col gap-2">
+            <Link
+              href="/"
+              className="w-full rounded-md bg-moss-700 py-2.5 text-center text-sm font-semibold text-paper-50 hover:bg-moss-900 transition shadow-sm"
+            >
+              Kembali ke Beranda
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (existingMerchant && existingMerchant.status === "SUSPENDED") {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-paper-50 px-4 py-12">
+        <div className="w-full max-w-lg rounded-2xl border border-paper-200 bg-white p-6 sm:p-8 text-center shadow-md space-y-6">
+          <div className="mx-auto w-16 h-16 bg-rust-50 rounded-full flex items-center justify-center text-rust-600">
+            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          
+          <div className="space-y-2">
+            <h1 className="font-display text-2xl font-bold text-rust-600">
+              Toko Anda Ditangguhkan
+            </h1>
+            <p className="text-sm text-ink-500 font-body leading-relaxed">
+              Toko <span className="font-semibold text-rust-600">{existingMerchant.businessName}</span> saat ini sedang ditangguhkan. Silakan hubungi administrator Ecolution untuk informasi lebih lanjut.
+            </p>
+          </div>
+
+          <div className="pt-4 border-t border-paper-100 flex flex-col gap-2">
+            <Link
+              href="/"
+              className="w-full rounded-md bg-moss-700 py-2.5 text-center text-sm font-semibold text-paper-50 hover:bg-moss-900 transition shadow-sm"
+            >
+              Kembali ke Beranda
+            </Link>
+          </div>
+        </div>
+      </main>
     );
   }
 

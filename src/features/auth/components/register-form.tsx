@@ -31,7 +31,7 @@ export function RegisterForm() {
       });
 
       setTimeout(() => {
-        router.push("/dashboard");
+        router.push("/");
       }, 800);
     } catch (error: any) {
       toast.error(error.message || "Gagal mendaftar menggunakan Google", {

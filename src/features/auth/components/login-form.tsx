@@ -38,7 +38,7 @@ export function LoginForm() {
         if (callbackUrl) {
           router.push(callbackUrl);
         } else {
-          router.push("/dashboard");
+          router.push("/");
         }
       }, 800);
     } catch (error: any) {
@@ -101,13 +101,13 @@ export function LoginForm() {
       });
   }, [user, isLoading]);
 
-  // Redirect to dashboard if user is already logged in
+  // Redirect to landing page if user is already logged in
   useEffect(() => {
     if (!isLoading && user) {
       if (callbackUrl) {
         router.push(callbackUrl);
       } else {
-        router.push("/dashboard");
+        router.push("/");
       }
     }
   }, [user, isLoading, callbackUrl, router]);
@@ -122,7 +122,7 @@ export function LoginForm() {
       { email, password },
       {
         onSuccess: () => {
-          toast.success("Login berhasil, mengalihkan ke dashboard...", {
+          toast.success("Login berhasil, mengalihkan...", {
             duration: 2000,
             position: "top-center",
           });
@@ -132,7 +132,7 @@ export function LoginForm() {
             if (callbackUrl) {
               router.push(callbackUrl);
             } else {
-              router.push("/dashboard");
+              router.push("/");
             }
           }, 800);
         },
@@ -167,7 +167,7 @@ export function LoginForm() {
       <div className="flex w-full max-w-sm flex-col items-center justify-center gap-3 py-16">
         <div className="h-9 w-9 animate-spin rounded-full border-4 border-moss-200 border-t-moss-700" />
         <p className="font-mono text-xs text-ink-400">
-          {user ? "Mengalihkan ke dashboard..." : "Menyiapkan halaman masuk..."}
+          {user ? "Mengalihkan..." : "Menyiapkan halaman masuk..."}
         </p>
       </div>
     );

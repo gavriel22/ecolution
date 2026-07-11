@@ -173,14 +173,14 @@ export default function RiwayatPage() {
                 key={act.id}
                 className="rounded-2xl border border-paper-200 bg-white p-5 shadow-xs flex flex-col md:flex-row gap-5 items-start md:items-center justify-between hover:border-moss-500 transition duration-300"
               >
-                <div className="flex gap-4 items-center flex-1 min-w-0">
+                <div className="flex gap-4 items-center flex-1 min-w-0 w-full">
                   {/* Photo Thumbnail */}
                   <div className="h-16 w-16 shrink-0 rounded-xl border border-paper-200 bg-paper-50 overflow-hidden flex items-center justify-center">
                     <ActivityImage src={photoUrl} alt={act.title} />
                   </div>
                   
                   {/* Info details */}
-                  <div className="space-y-1 min-w-0">
+                  <div className="space-y-1 min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] font-bold text-moss-700 bg-moss-50 px-2 py-0.5 rounded-md font-mono">
                         {act.category?.name || "Aksi"}

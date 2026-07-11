@@ -47,20 +47,29 @@ export async function middleware(req: NextRequest) {
   // Silent refresh at the edge: on a hard page refresh there is no Authorization
   // header, and the short-lived access token cookie (15m) may already be expired
   // even though the 30-day refresh token is still valid. Fall back to the refresh
-  // token and mint a fresh access token so the user is NOT bounced to /login.
+  // token and call /api/auth/refresh to get a fresh access token with the latest
+  // database role so the user is NOT bounced to /login.
   let refreshedAccessToken: string | null = null;
   if (!payload) {
     const refreshToken = req.cookies.get("refresh_token")?.value;
     if (refreshToken) {
-      const refreshPayload = await verifyRefreshToken(refreshToken);
-      if (refreshPayload) {
-        payload = refreshPayload;
-        refreshedAccessToken = await generateAccessToken({
-          id: refreshPayload.id,
-          email: refreshPayload.email,
-          role: refreshPayload.role,
-          username: refreshPayload.username,
+      try {
+        const refreshRes = await fetch(new URL("/api/auth/refresh", req.url), {
+          method: "POST",
+          headers: {
+            cookie: req.headers.get("cookie") || "",
+          },
         });
+        if (refreshRes.ok) {
+          const json = await refreshRes.json();
+          if (json.success && typeof json.data?.accessToken === "string") {
+            const tokenStr = json.data.accessToken;
+            refreshedAccessToken = tokenStr;
+            payload = await verifyAccessToken(tokenStr);
+          }
+        }
+      } catch (e) {
+        console.error("Middleware silent-refresh fetch failed:", e);
       }
     }
   }
