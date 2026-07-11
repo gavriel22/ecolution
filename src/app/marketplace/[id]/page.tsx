@@ -73,6 +73,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const isOutOfStock = product.stock <= 0 || product.status === "OUT_OF_STOCK";
 
   const handleAddToCart = (redirect: boolean) => {
+    if (!user) {
+      router.push(`/login?callbackUrl=/marketplace/${product.id}`);
+      return;
+    }
     if (isOutOfStock) return;
 
     const cart: CartItem[] = JSON.parse(localStorage.getItem(cartKey) || "[]");
@@ -104,20 +108,15 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   };
 
   return (
-    <div className="bg-white min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 space-y-8">
+    <div className="bg-white min-h-screen pt-24 lg:pt-28">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 lg:pb-12 space-y-8">
         
         {/* Breadcrumbs */}
-        <nav className="flex items-center gap-3 text-[13px] font-medium text-brand-text-soft">
+        <nav className="flex items-center gap-2 text-sm font-medium text-brand-text-soft mb-2">
           <Link href="/marketplace" className="hover:text-brand-forest transition-colors">Marketplace</Link>
-          <span className="text-brand-line-strong">•</span>
-          {product.merchantId && (
-             <Link href={`/merchant/${product.merchantId}`} className="hover:text-brand-forest transition-colors">
-               {product.merchant?.businessName || "Mitra UMKM"}
-             </Link>
-          )}
-          {!product.merchantId && <span>{product.merchant?.businessName || "Mitra UMKM"}</span>}
-          <span className="text-brand-line-strong">•</span>
+          <svg className="w-4 h-4 text-brand-text-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
           <span className="text-brand-text truncate max-w-[200px] sm:max-w-xs">{product.name}</span>
         </nav>
 
@@ -137,11 +136,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         )}
 
         {/* Main Product Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
+        <div className="flex flex-col lg:flex-row gap-10 lg:gap-16 items-start">
           
           {/* Left Column: Gallery */}
-          <div className="lg:col-span-7 space-y-4">
-            <div className="aspect-[4/3] w-full rounded-3xl bg-[#F8F9FA] flex items-center justify-center overflow-hidden border border-brand-line">
+          <div className="w-full lg:w-1/2 space-y-4">
+            <div className="aspect-square w-full rounded-none bg-[#F8F9FA] flex items-center justify-center overflow-hidden border border-brand-line">
               {displayImage && displayImage !== "/placeholder.png" ? (
                 <img
                   src={displayImage}
@@ -171,7 +170,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                   <button
                     key={i}
                     onClick={() => setActiveImage(url)}
-                    className={`aspect-square w-20 sm:w-24 shrink-0 rounded-2xl overflow-hidden transition-all duration-200 border-2 ${
+                    className={`aspect-square w-20 sm:w-24 shrink-0 rounded-none overflow-hidden transition-all duration-200 border-2 ${
                       displayImage === url 
                         ? "border-brand-forest shadow-md scale-100" 
                         : "border-transparent bg-[#F8F9FA] hover:border-brand-line hover:scale-[1.02]"
@@ -185,39 +184,17 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           </div>
 
           {/* Right Column: Info & Buy Section */}
-          <div className="lg:col-span-5 flex flex-col">
+          <div className="w-full lg:w-1/2 flex flex-col">
             <div className="space-y-6">
               
-              {/* Brand Header */}
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-full bg-brand-forest flex items-center justify-center text-white text-xs font-bold">
-                  {(product.merchant?.businessName || "M").charAt(0).toUpperCase()}
-                </div>
-                <div className="flex flex-col">
-                  {product.merchantId ? (
-                    <Link
-                      href={`/merchant/${product.merchantId}`}
-                      className="text-sm font-bold text-brand-text hover:text-brand-forest transition-colors"
-                    >
-                      {product.merchant?.businessName || "Mitra UMKM"}
-                    </Link>
-                  ) : (
-                    <span className="text-sm font-bold text-brand-text">
-                      {product.merchant?.businessName || "Mitra UMKM"}
-                    </span>
-                  )}
-                  <span className="text-[10px] text-brand-text-soft font-mono uppercase tracking-widest">Penjual Terverifikasi</span>
-                </div>
-              </div>
-
               {/* Title */}
-              <h1 className="font-display text-3xl sm:text-4xl font-black text-brand-text leading-[1.1] tracking-tight">
+              <h1 className="font-display text-2xl sm:text-3xl font-black text-brand-text leading-tight tracking-tight">
                 {product.name}
               </h1>
 
               {/* Price */}
               <div className="flex items-end gap-3">
-                <p className="font-display text-4xl font-bold text-brand-forest">
+                <p className="font-display text-3xl sm:text-4xl font-bold text-brand-text">
                   {formattedPrice}
                 </p>
                 {isOutOfStock && (
@@ -300,6 +277,33 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 <p className="font-body text-base text-brand-text-soft whitespace-pre-wrap leading-relaxed">
                   {product.description || "Tidak ada deskripsi produk yang tersedia."}
                 </p>
+              </div>
+
+              <div className="h-px w-full bg-brand-line/50 my-6" />
+
+              {/* Brand Header */}
+              <div>
+                <h3 className="text-sm font-bold text-brand-text mb-3">Informasi Toko</h3>
+                <div className="inline-flex items-center gap-3 shrink-0 rounded-xl border border-brand-forest p-3 bg-white shadow-sm hover:shadow-md transition-shadow">
+                  <div className="h-10 w-10 rounded-full bg-brand-forest flex items-center justify-center text-white text-sm font-bold">
+                    {(product.merchant?.businessName || "M").charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex flex-col pr-4">
+                    {product.merchantId ? (
+                      <Link
+                        href={`/merchant/${product.merchantId}`}
+                        className="text-sm font-bold text-brand-text hover:text-brand-forest transition-colors"
+                      >
+                        {product.merchant?.businessName || "Mitra UMKM"}
+                      </Link>
+                    ) : (
+                      <span className="text-sm font-bold text-brand-text">
+                        {product.merchant?.businessName || "Mitra UMKM"}
+                      </span>
+                    )}
+                    <span className="text-[10px] text-brand-text-soft font-mono uppercase tracking-widest">Penjual Terverifikasi</span>
+                  </div>
+                </div>
               </div>
 
             </div>
