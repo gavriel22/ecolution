@@ -54,27 +54,26 @@ export default function MarketplacePage() {
   return (
     <div className="bg-[#F8F9FA] min-h-screen pb-12">
       {/* Header Section */}
-      <div className="bg-white border-b border-brand-line py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div className="max-w-2xl">
+      <div className="relative border-b border-brand-line pt-32 pb-16 overflow-hidden">
+        {/* Background Image with Gradient Overlay */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="/landing.jpg" 
+            alt="Marketplace Background" 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#e6eedd] via-[#e6eedd]/90 to-[#e6eedd]/50" />
+        </div>
+        
+        <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="max-w-4xl lg:max-w-5xl">
               <h1 className="font-display text-4xl sm:text-5xl font-black text-brand-text tracking-tight mb-3">
                 Marketplace UMKM
               </h1>
-              <p className="font-body text-base text-brand-text-soft leading-relaxed">
+              <p className="font-body text-base text-brand-text-soft leading-relaxed lg:whitespace-nowrap">
                 Gunakan poin hasil daur ulang dan aksi lingkunganmu untuk membeli produk ramah lingkungan dari mitra lokal pilihan.
               </p>
-            </div>
-            <div className="flex shrink-0">
-              <Link
-                href="/cart"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-forest px-6 py-3 text-sm font-bold text-white transition-all hover:bg-brand-forest-2 hover:shadow-lg hover:-translate-y-0.5"
-              >
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                Keranjang Belanja
-              </Link>
             </div>
           </div>
         </div>
@@ -84,7 +83,7 @@ export default function MarketplacePage() {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar Filters */}
           <aside className="w-full lg:w-64 shrink-0 space-y-6">
-            <div className="bg-white rounded-2xl border border-brand-line p-5 sticky top-24 shadow-sm">
+            <div className="bg-white rounded-none border border-brand-line p-5 sticky top-24 shadow-sm">
               <div className="flex items-center justify-between mb-6 pb-4 border-b border-brand-line">
                 <h2 className="font-display font-bold text-brand-text text-lg">Filter</h2>
                 <button 
@@ -108,7 +107,7 @@ export default function MarketplacePage() {
                         setSearch(e.target.value);
                         setPage(1);
                       }}
-                      className="w-full rounded-xl border border-brand-line bg-[#F8F9FA] pl-10 pr-4 py-2.5 text-sm text-brand-text outline-none focus:border-brand-moss focus:ring-2 focus:ring-brand-moss/20 transition-all"
+                      className="w-full rounded-none border border-brand-line bg-[#F8F9FA] pl-10 pr-4 py-2.5 text-sm text-brand-text outline-none focus:border-brand-moss focus:ring-2 focus:ring-brand-moss/20 transition-all"
                     />
                     <svg className="absolute left-3 top-3 h-4 w-4 text-brand-text-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -128,7 +127,7 @@ export default function MarketplacePage() {
                         setMinPrice(e.target.value ? Number(e.target.value) : undefined);
                         setPage(1);
                       }}
-                      className="w-full rounded-xl border border-brand-line bg-[#F8F9FA] px-3 py-2 text-sm text-brand-text outline-none focus:border-brand-moss focus:ring-2 focus:ring-brand-moss/20 transition-all"
+                      className="w-full rounded-none border border-brand-line bg-[#F8F9FA] px-3 py-2 text-sm text-brand-text outline-none focus:border-brand-moss focus:ring-2 focus:ring-brand-moss/20 transition-all"
                     />
                     <span className="text-brand-text-soft">-</span>
                     <input
@@ -139,7 +138,7 @@ export default function MarketplacePage() {
                         setMaxPrice(e.target.value ? Number(e.target.value) : undefined);
                         setPage(1);
                       }}
-                      className="w-full rounded-xl border border-brand-line bg-[#F8F9FA] px-3 py-2 text-sm text-brand-text outline-none focus:border-brand-moss focus:ring-2 focus:ring-brand-moss/20 transition-all"
+                      className="w-full rounded-none border border-brand-line bg-[#F8F9FA] px-3 py-2 text-sm text-brand-text outline-none focus:border-brand-moss focus:ring-2 focus:ring-brand-moss/20 transition-all"
                     />
                   </div>
                 </div>
@@ -159,15 +158,20 @@ export default function MarketplacePage() {
               
               <div className="flex items-center gap-2 shrink-0">
                 <span className="text-sm text-brand-text-soft">Urutkan:</span>
-                <select
-                  value={sortBy === "createdAt" ? "latest" : (sortOrder === "asc" ? "price_asc" : "price_desc")}
-                  onChange={(e) => handleSortChange(e.target.value)}
-                  className="rounded-lg border-none bg-white py-1.5 pl-3 pr-8 text-sm font-semibold text-brand-text shadow-sm outline-none focus:ring-2 focus:ring-brand-moss/20 cursor-pointer"
-                >
-                  <option value="latest">Terbaru</option>
-                  <option value="price_asc">Harga Terendah</option>
-                  <option value="price_desc">Harga Tertinggi</option>
-                </select>
+                <div className="relative">
+                  <select
+                    value={sortBy === "createdAt" ? "latest" : (sortOrder === "asc" ? "price_asc" : "price_desc")}
+                    onChange={(e) => handleSortChange(e.target.value)}
+                    className="appearance-none rounded-md border border-brand-line bg-white py-1.5 pl-3 pr-8 text-sm font-semibold text-brand-text outline-none focus:border-brand-moss focus:ring-1 focus:ring-brand-moss cursor-pointer"
+                  >
+                    <option value="latest">Terbaru</option>
+                    <option value="price_asc">Harga Terendah</option>
+                    <option value="price_desc">Harga Tertinggi</option>
+                  </select>
+                  <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-text-soft pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
               </div>
             </div>
 
@@ -178,8 +182,7 @@ export default function MarketplacePage() {
             )}
 
             {isLoading ? (
-              /* Loading Skeleton */
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
                 {Array.from({ length: 8 }).map((_, i) => (
                   <div key={i} className="animate-pulse rounded-2xl bg-white border border-brand-line overflow-hidden">
                     <div className="aspect-[4/3] bg-brand-line/50" />
@@ -213,7 +216,7 @@ export default function MarketplacePage() {
               </div>
             ) : (
               /* Grid */
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
                 {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}

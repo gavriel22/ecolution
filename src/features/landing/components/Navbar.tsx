@@ -129,17 +129,6 @@ export function Navbar() {
 
           {/* ── Desktop Right Actions ───────────────────────────────────────── */}
           <div className="hidden md:flex items-center space-x-4">
-            {/* Cart */}
-            <Link
-              href={user ? "/cart" : "/login?callbackUrl=/cart"}
-              className={`p-2 rounded-full transition-colors duration-300 flex items-center justify-center ${isTransparent ? "text-white/90 hover:bg-white/10 hover:text-white" : "text-ink-700 hover:bg-paper-100 hover:text-brand-forest"}`}
-              title="Keranjang Belanja"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-            </Link>
-
             {/* Desktop Profile Dropdown */}
             {user ? (
               <div className="relative" ref={dropdownRef}>
@@ -240,17 +229,6 @@ export function Navbar() {
 
           {/* ── Mobile Right: Cart + Hamburger only ────────────────────────── */}
           <div className="flex md:hidden items-center gap-2">
-            {/* Cart icon — always visible on mobile */}
-            <Link
-              href={user ? "/cart" : "/login?callbackUrl=/cart"}
-              className={`p-2 rounded-full transition-colors duration-300 ${isTransparent ? "text-white/90 hover:bg-white/10 hover:text-white" : "text-ink-700 hover:bg-paper-100 hover:text-brand-forest"}`}
-              title="Keranjang Belanja"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-            </Link>
-
             {/* Hamburger */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
