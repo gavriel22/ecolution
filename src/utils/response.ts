@@ -29,7 +29,7 @@ export function successResponse<T>(data: T, statusCode = 200, meta?: StandardRes
   );
 }
 
-export function errorResponse(error: unknown): NextResponse<StandardResponse> {
+export function errorResponse(error: unknown): NextResponse<any> {
   if (error instanceof AppError) {
     return NextResponse.json(
       {
@@ -39,6 +39,11 @@ export function errorResponse(error: unknown): NextResponse<StandardResponse> {
           message: error.message,
           ...(error.details && { details: error.details }),
         },
+        ...(process.env.NODE_ENV !== "production" && {
+          message: error.message,
+          details: error.details || null,
+          errorCode: error.code,
+        }),
       },
       { status: error.statusCode }
     );
@@ -46,6 +51,7 @@ export function errorResponse(error: unknown): NextResponse<StandardResponse> {
 
   // Fallback for unexpected errors
   const errorMsg = error instanceof Error ? error.message : String(error);
+  const errorStack = error instanceof Error ? error.stack : undefined;
   logger.error("Unhandled API Error", error);
 
   return NextResponse.json(
@@ -55,6 +61,11 @@ export function errorResponse(error: unknown): NextResponse<StandardResponse> {
         code: "INTERNAL_SERVER_ERROR",
         message: process.env.NODE_ENV === "production" ? "Internal Server Error" : errorMsg,
       },
+      ...(process.env.NODE_ENV !== "production" && {
+        message: errorMsg,
+        details: errorStack || null,
+        errorCode: "INTERNAL_SERVER_ERROR",
+      }),
     },
     { status: 500 }
   );

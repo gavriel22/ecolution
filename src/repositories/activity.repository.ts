@@ -3,17 +3,35 @@ import { Activity, ActivityStatus, ActivityPhoto, ActivityVerification, Verifica
 
 export class ActivityRepository {
   async findCategoryById(id: string): Promise<ActivityCategory | null> {
-    return prisma.activityCategory.findUnique({
-      where: { id },
-    });
+    try {
+      console.log("[PRISMA:findCategoryById] Finding category with ID:", id);
+      const res = await prisma.activityCategory.findUnique({
+        where: { id },
+      });
+      console.log("[PRISMA:findCategoryById] Category found:", res);
+      return res;
+    } catch (error: any) {
+      console.error("[PRISMA:findCategoryById] Error code:", error.code);
+      console.error("[PRISMA:findCategoryById] Error message:", error.message);
+      console.error("[PRISMA:findCategoryById] Error meta:", error.meta);
+      console.error("[PRISMA:findCategoryById] Stack trace:", error.stack);
+      throw error;
+    }
   }
 
   async findManyCategories(): Promise<ActivityCategory[]> {
-    return prisma.activityCategory.findMany({
-      where: { isActive: true },
-      orderBy: { name: "asc" },
-    });
+    try {
+      return await prisma.activityCategory.findMany({
+        where: { isActive: true },
+        orderBy: { name: "asc" },
+      });
+    } catch (error: any) {
+      console.error("[PRISMA:findManyCategories] Error code:", error.code);
+      console.error("[PRISMA:findManyCategories] Error message:", error.message);
+      throw error;
+    }
   }
+
   async create(data: {
     userId: string;
     categoryId: string;
@@ -22,17 +40,44 @@ export class ActivityRepository {
     activityDate: Date;
     location?: string;
   }): Promise<Activity> {
-    return prisma.activity.create({
-      data: {
+    try {
+      console.log("[PRISMA:create] Attempting to create Activity with data:", {
         userId: data.userId,
         categoryId: data.categoryId,
         title: data.title,
         description: data.description || null,
         activityDate: data.activityDate,
         location: data.location || null,
-        status: ActivityStatus.PENDING,
-      },
-    });
+      });
+
+      // Data validation check before Prisma call
+      if (!data.userId || data.userId === "undefined" || data.userId === "null") {
+        console.error("[VALIDATION:create] userId is invalid:", data.userId);
+      }
+      if (!data.categoryId) {
+        console.error("[VALIDATION:create] categoryId is missing");
+      }
+
+      const res = await prisma.activity.create({
+        data: {
+          userId: data.userId,
+          categoryId: data.categoryId,
+          title: data.title,
+          description: data.description || null,
+          activityDate: data.activityDate,
+          location: data.location || null,
+          status: ActivityStatus.PENDING,
+        },
+      });
+      console.log("[PRISMA:create] Activity successfully created in DB:", res);
+      return res;
+    } catch (error: any) {
+      console.error("[PRISMA:create] Error code:", error.code);
+      console.error("[PRISMA:create] Error message:", error.message);
+      console.error("[PRISMA:create] Error meta:", error.meta);
+      console.error("[PRISMA:create] Stack trace:", error.stack);
+      throw error;
+    }
   }
 
   async findById(id: string): Promise<(Activity & {
@@ -178,16 +223,35 @@ export class ActivityRepository {
       hasExif: boolean;
     }
   ): Promise<ActivityPhoto> {
-    return prisma.activityPhoto.create({
-      data: {
+    try {
+      console.log("[PRISMA:addPhotoWithExif] Adding photo to Activity with data:", {
         activityId,
         imageUrl,
         latitude: exif.latitude ?? null,
         longitude: exif.longitude ?? null,
         takenAt: exif.takenAt ?? null,
         hasExif: exif.hasExif,
-      },
-    });
+      });
+
+      const res = await prisma.activityPhoto.create({
+        data: {
+          activityId,
+          imageUrl,
+          latitude: exif.latitude ?? null,
+          longitude: exif.longitude ?? null,
+          takenAt: exif.takenAt ?? null,
+          hasExif: exif.hasExif,
+        },
+      });
+      console.log("[PRISMA:addPhotoWithExif] Photo successfully added to DB:", res);
+      return res;
+    } catch (error: any) {
+      console.error("[PRISMA:addPhotoWithExif] Error code:", error.code);
+      console.error("[PRISMA:addPhotoWithExif] Error message:", error.message);
+      console.error("[PRISMA:addPhotoWithExif] Error meta:", error.meta);
+      console.error("[PRISMA:addPhotoWithExif] Stack trace:", error.stack);
+      throw error;
+    }
   }
 
   async submitVerification(

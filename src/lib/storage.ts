@@ -5,14 +5,11 @@ import path from "path";
 /**
  * Portable image storage.
  *
- * - On Vercel (or anywhere `BLOB_READ_WRITE_TOKEN` is set) → uploads to Vercel
- *   Blob and returns a public https URL. Vercel's filesystem is read-only, so
- *   writing to `public/uploads` there is impossible.
- * - On localhost / any writable host (no token) → writes to `public/uploads`
- *   and returns a relative `/uploads/...` path served statically by Next.
+ * - Vercel (BLOB_READ_WRITE_TOKEN tersedia):
+ *   Upload ke Vercel Blob dan mengembalikan URL publik.
  *
- * Returned value is stored directly on the entity (activity photo, product,
- * avatar, merchant logo). Both forms fit in the existing VarChar(255) columns.
+ * - Local Development:
+ *   Simpan ke public/uploads agar tetap bisa digunakan saat development.
  */
 export async function saveUpload(
   folder: string,
@@ -22,18 +19,23 @@ export async function saveUpload(
 ): Promise<string> {
   const key = `${folder}/${filename}`;
 
+  // Production / Vercel Blob
   if (process.env.BLOB_READ_WRITE_TOKEN) {
     const blob = await put(key, buffer, {
       access: "public",
       contentType,
       addRandomSuffix: false,
     });
+
     return blob.url;
   }
 
-  // Local fallback (development / self-hosted with a writable disk).
+  // Local development fallback
   const dir = path.join(process.cwd(), "public", "uploads", folder);
+
   await fs.mkdir(dir, { recursive: true });
+
   await fs.writeFile(path.join(dir, filename), buffer);
+
   return `/uploads/${folder}/${filename}`;
 }
