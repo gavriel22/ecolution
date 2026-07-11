@@ -49,13 +49,10 @@ export default function OrdersPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="font-display text-4xl font-bold text-ink-900 tracking-tight">
+      <div className="mb-4">
+        <h1 className="font-display text-3xl font-bold text-ink-900 tracking-tight">
           Riwayat Transaksi
         </h1>
-        <p className="font-body text-sm text-ink-400 mt-1">
-          Pantau status pemesanan barang dan riwayat checkout belanjamu.
-        </p>
       </div>
 
       {isError && (

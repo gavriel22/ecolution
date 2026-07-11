@@ -68,7 +68,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       { label: "Dashboard", href: "/dashboard" },
       { label: "Upload Aktivitas", href: "/activity/new" },
       { label: "Riwayat Aktivitas", href: "/activity" },
-      { label: "Pesanan", href: "/orders" },
+      { label: "Transaksi", href: "/orders" },
       { label: "Profil", href: "/profile" },
     ];
   }
@@ -140,9 +140,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       >
         <div className="space-y-8">
           {/* Logo */}
-          <div className="hidden md:flex flex-col gap-1">
+          <div className="hidden md:flex flex-col items-center justify-center gap-1">
             <Link href="/dashboard" className="inline-block">
-              <Image src="/logo-main.png" alt="Ecolution" width={140} height={44} className="h-8 w-auto object-contain" />
+              <Image src="/logo-main.png" alt="Ecolution" width={100} height={32} className="h-6 w-auto object-contain" />
             </Link>
           </div>
 
@@ -175,8 +175,17 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </nav>
         </div>
 
-        {/* User Info / Profile & Logout */}
-        <div className="border-t border-paper-100 pt-4 space-y-4">
+        {/* Bottom Actions & User Info */}
+        <div className="space-y-4">
+          <Link
+            href="/"
+            className="flex w-full items-center justify-center gap-2 rounded-md border border-paper-200 bg-white py-2 text-xs font-semibold text-ink-700 transition hover:bg-paper-50 hover:text-moss-700"
+          >
+            <Home className="h-4 w-4" />
+            Kembali ke Beranda
+          </Link>
+
+          <div className="border-t border-paper-100 pt-4 space-y-4">
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -199,13 +208,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   </div>
                 </div>
               </div>
-              <Link 
-                href="/" 
-                className="p-2 text-ink-400 hover:text-moss-700 hover:bg-paper-100 rounded-md transition-colors"
-                title="Ke Beranda"
-              >
-                <Home className="h-5 w-5" />
-              </Link>
             </div>
           </div>
 
@@ -225,6 +227,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </>
             )}
           </button>
+        </div>
         </div>
       </aside>
 

@@ -193,7 +193,7 @@ export default function ProfilePage() {
       case "UMKM":
         return "Mitra UMKM";
       default:
-        return "Anggota Penduduk";
+        return "Pengguna";
     }
   };
 
@@ -222,111 +222,80 @@ export default function ProfilePage() {
       )}
 
       {/* Header Profile Section */}
-      <div className="rounded-lg border border-paper-200 bg-white p-6 shadow-xs flex flex-col sm:flex-row gap-6 items-center justify-between">
-        <div className="flex flex-col sm:flex-row gap-5 items-center text-center sm:text-left">
+      <div className="rounded-2xl border border-paper-200 bg-white p-6 shadow-xs flex flex-col sm:flex-row gap-6 items-center">
+        <div className="relative">
+          <div className="absolute inset-0 rounded-full bg-ochre-400/20 scale-110"></div>
           <Avatar
             name={user.name}
             src={user.profileImageUrl}
-            className="h-20 w-20 text-3xl border border-paper-200"
+            className="relative h-24 w-24 text-3xl shadow-sm border border-paper-200"
           />
-          <div className="space-y-1">
-            <h1 className="font-display text-2xl font-bold text-ink-900">{user.name}</h1>
-            <p className="text-sm text-ink-400 font-mono">@{user.username}</p>
-            <div className="flex flex-wrap gap-2 items-center justify-center sm:justify-start">
-              <span className={`inline-block border text-[10px] font-bold font-mono uppercase tracking-wider px-2 py-0.5 rounded ${getRoleBadgeClass(user.role)}`}>
-                {getRoleLabel(user.role)}
-              </span>
-              <span className="text-xs text-ink-450 font-mono">Bergabung {dateJoined}</span>
-            </div>
-          </div>
         </div>
-        <button
-          onClick={handleOpenEditModal}
-          className="rounded-md bg-moss-700 px-5 py-2 text-xs font-semibold text-paper-50 hover:bg-moss-900 transition shadow-sm self-center sm:self-start"
-        >
-          Edit Profil
-        </button>
+        <div className="space-y-1 text-center sm:text-left">
+          <h1 className="font-display text-xl font-bold text-moss-800">{user.name}</h1>
+          <p className="text-sm font-medium text-ink-600">{getRoleLabel(user.role)}</p>
+          <p className="text-sm text-ink-500">{user.address || "Belum ada alamat"}</p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Section 1: Informasi Akun */}
-        <div className="rounded-lg border border-paper-200 bg-white p-6 shadow-xs space-y-4">
-          <h2 className="font-display text-lg font-bold text-ink-900 border-b border-paper-100 pb-2">
-            Informasi Akun
+      {/* Personal Information */}
+      <div className="rounded-2xl border border-paper-200 bg-white p-6 shadow-xs">
+        <div className="flex items-center justify-between border-b border-paper-100 pb-4 mb-6">
+          <h2 className="font-display text-lg font-bold text-moss-800">
+            Personal Information
           </h2>
-          <div className="space-y-3 text-sm text-ink-700">
-            <div className="grid grid-cols-3">
-              <span className="text-ink-400 font-medium">Bio</span>
-              <span className="col-span-2 italic text-ink-600">{user.bio || "Belum ada bio."}</span>
-            </div>
-            <div className="grid grid-cols-3">
-              <span className="text-ink-400 font-medium">Email</span>
-              <span className="col-span-2 font-mono break-all">{user.email}</span>
-            </div>
-            <div className="grid grid-cols-3">
-              <span className="text-ink-400 font-medium">No. Telepon</span>
-              <span className="col-span-2 font-mono">{user.phone || "-"}</span>
-            </div>
-            <div className="grid grid-cols-3">
-              <span className="text-ink-400 font-medium">Alamat</span>
-              <span className="col-span-2 leading-relaxed">{user.address || "-"}</span>
-            </div>
+          <button
+            onClick={handleOpenEditModal}
+            className="flex items-center gap-2 rounded-md bg-ochre-500 px-4 py-1.5 text-xs font-semibold text-white hover:bg-ochre-600 transition shadow-sm"
+          >
+            Edit <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+          </button>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-y-8 gap-x-4 text-sm">
+          <div>
+            <p className="text-ink-400 font-medium mb-1 text-xs">Nama Lengkap</p>
+            <p className="font-semibold text-ink-900">{user.name}</p>
+          </div>
+          <div>
+            <p className="text-ink-400 font-medium mb-1 text-xs">Username</p>
+            <p className="font-semibold text-ink-900">@{user.username}</p>
+          </div>
+          <div>
+            <p className="text-ink-400 font-medium mb-1 text-xs">Bio</p>
+            <p className="font-semibold text-ink-900">{user.bio || "-"}</p>
+          </div>
+          <div>
+            <p className="text-ink-400 font-medium mb-1 text-xs">Email Address</p>
+            <p className="font-semibold text-ink-900 break-all">{user.email}</p>
+          </div>
+          <div>
+            <p className="text-ink-400 font-medium mb-1 text-xs">Phone Number</p>
+            <p className="font-semibold text-ink-900">{user.phone || "-"}</p>
+          </div>
+          <div>
+            <p className="text-ink-400 font-medium mb-1 text-xs">Peran Pengguna</p>
+            <p className="font-semibold text-ink-900">{getRoleLabel(user.role)}</p>
           </div>
         </div>
+      </div>
 
-        {/* Section 2: Statistik Kontribusi & Poin */}
-        <div className="rounded-lg border border-paper-200 bg-white p-6 shadow-xs space-y-4">
-          <h2 className="font-display text-lg font-bold text-ink-900 border-b border-paper-100 pb-2">
-            Statistik Kontribusi & Reward
+      {/* Address */}
+      <div className="rounded-2xl border border-paper-200 bg-white p-6 shadow-xs">
+        <div className="flex items-center justify-between border-b border-paper-100 pb-4 mb-6">
+          <h2 className="font-display text-lg font-bold text-moss-800">
+            Address
           </h2>
-          {loadingMetrics ? (
-            <div className="space-y-2 animate-pulse">
-              <div className="h-6 bg-paper-50 rounded" />
-              <div className="h-6 bg-paper-50 rounded" />
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <div className="p-3 bg-moss-50 border border-moss-200 rounded-md">
-                <p className="font-mono text-[10px] uppercase text-moss-700 font-bold">Total Poin</p>
-                <p className="mt-1 font-display text-xl font-bold text-moss-700">{user.totalPoint} Pts</p>
-              </div>
-              <div className="p-3 bg-ochre-50/20 border border-ochre-200 rounded-md">
-                <p className="font-mono text-[10px] uppercase text-ochre-700 font-bold">Trust Score</p>
-                <p className="mt-1 font-display text-xl font-bold text-ochre-600">{user.trustScore}%</p>
-              </div>
-              <div className="p-3 bg-paper-50 border border-paper-100 rounded-md">
-                <p className="font-mono text-[10px] uppercase text-ink-400 font-bold">Aksi Hijau (Total)</p>
-                <p className="mt-1 font-display text-lg font-bold text-ink-900">{actCount.TOTAL}</p>
-              </div>
-              <div className="p-3 bg-paper-50 border border-paper-100 rounded-md">
-                <p className="font-mono text-[10px] uppercase text-ink-400 font-bold">Disetujui</p>
-                <p className="mt-1 font-display text-lg font-bold text-moss-700">{actCount.APPROVED}</p>
-              </div>
-            </div>
-          )}
+          <button
+            onClick={handleOpenEditModal}
+            className="flex items-center gap-2 rounded-md border border-paper-200 px-4 py-1.5 text-xs font-semibold text-ink-600 hover:bg-paper-50 transition shadow-sm"
+          >
+            Edit <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+          </button>
         </div>
-
-        {/* Section 3: Keamanan Akun */}
-        <div className="rounded-lg border border-paper-200 bg-white p-6 shadow-xs space-y-4">
-          <h2 className="font-display text-lg font-bold text-ink-900 border-b border-paper-100 pb-2">
-            Keamanan Akun
-          </h2>
-          <div className="space-y-3.5 text-sm text-ink-700">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="font-medium text-ink-900">Kata Sandi</p>
-                <p className="text-xs text-ink-400 mt-0.5">Terakhir diperbarui beberapa saat yang lalu</p>
-              </div>
-              <span className="font-mono text-xs font-semibold bg-paper-100 text-ink-650 px-2 py-0.5 rounded">Aktif</span>
-            </div>
-            <div className="flex justify-between items-center border-t border-paper-100 pt-3">
-              <div>
-                <p className="font-medium text-ink-900">Autentikasi Dua Faktor (2FA)</p>
-                <p className="text-xs text-ink-400 mt-0.5">Amankan akun Anda dengan verifikasi OTP</p>
-              </div>
-              <span className="font-mono text-xs font-semibold bg-rust-50 text-rust-600 px-2 py-0.5 rounded">Nonaktif</span>
-            </div>
-          </div>
+        <div className="text-sm">
+            <p className="text-ink-400 font-medium mb-1 text-xs">Alamat Lengkap</p>
+            <p className="font-semibold text-ink-900 leading-relaxed">{user.address || "Belum ada alamat."}</p>
         </div>
       </div>
 

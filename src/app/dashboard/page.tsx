@@ -43,14 +43,11 @@ function UserDashboard({ name }: { name: string }) {
   return (
     <div className="space-y-8">
       {/* Header Section */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
         <div>
-          <h1 className="font-display text-4xl font-bold text-ink-900 tracking-tight">
+          <h1 className="font-display text-3xl font-bold text-ink-900 tracking-tight">
             Dashboard
           </h1>
-          <p className="font-body text-sm text-ink-400 mt-1">
-            Selamat datang kembali, <span className="font-semibold text-moss-700">{name}</span>! Pantau kontribusi lingkunganmu di sini.
-          </p>
         </div>
       </div>
 

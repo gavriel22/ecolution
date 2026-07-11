@@ -84,11 +84,8 @@ export function ActivityForm() {
 
   return (
     <form onSubmit={handleSubmit} className="w-full space-y-5">
-      <div className="space-y-1">
-        <h1 className="font-display text-3xl font-semibold text-ink-900">Upload Aktivitas</h1>
-        <p className="text-sm text-ink-400">
-          Catat aksi lingkunganmu untuk mendapatkan poin. Tanggal dan lokasi diambil otomatis dari foto.
-        </p>
+      <div className="space-y-1 mb-4">
+        <h1 className="font-display text-3xl font-bold text-ink-900 tracking-tight">Upload Aktivitas</h1>
       </div>
 
       {/* API error banner */}

@@ -76,21 +76,12 @@ export default function RiwayatPage() {
   return (
     <div className="space-y-8 font-body">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4">
         <div>
-          <h1 className="font-display text-4xl font-bold text-ink-900 tracking-tight">
+          <h1 className="font-display text-3xl font-bold text-ink-900 tracking-tight">
             Riwayat Aktivitas
           </h1>
-          <p className="text-sm text-ink-400 mt-1">
-            Pantau seluruh aksi pengelolaan sampah dan pelestarian lingkungan yang telah Anda laporkan.
-          </p>
         </div>
-        <Link
-          href="/activity/new"
-          className="inline-flex items-center justify-center gap-2 rounded-md bg-moss-700 px-5 py-2.5 text-xs font-bold text-paper-50 hover:bg-moss-900 transition shadow-sm self-start sm:self-auto"
-        >
-          + Lapor Aktivitas Baru
-        </Link>
       </div>
 
       {/* Filter and Search Bar */}
