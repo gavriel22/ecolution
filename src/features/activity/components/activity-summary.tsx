@@ -1,23 +1,14 @@
 "use client";
 
-import { useAuth } from "@/context/auth-context";
-import { useActivities } from "../hooks/use-activities";
+import { useUserDashboardMetrics } from "../hooks/use-dashboard-metrics";
 
 export function ActivitySummary() {
-  const { user } = useAuth();
-
-  // Fetch counts by status with limit 1 to retrieve meta.totalCount efficiently
-  const { data: allData, isLoading: isLoadingAll } = useActivities({ limit: 1 });
-  const { data: pendingData, isLoading: isLoadingPending } = useActivities({ status: "PENDING", limit: 1 });
-  const { data: approvedData, isLoading: isLoadingApproved } = useActivities({ status: "APPROVED", limit: 1 });
-  const { data: rejectedData, isLoading: isLoadingRejected } = useActivities({ status: "REJECTED", limit: 1 });
-
-  const isLoading = isLoadingAll || isLoadingPending || isLoadingApproved || isLoadingRejected;
+  const { data: metrics, isLoading } = useUserDashboardMetrics();
 
   const stats = [
     {
       label: "Total Poin",
-      value: user?.totalPoint ?? 0,
+      value: isLoading ? "..." : metrics?.totalPoint ?? 0,
       description: "Poin terkumpul saat ini",
       bgColor: "bg-moss-900 text-paper-50",
       valueClass: "font-display text-3xl font-bold text-ochre-400",
@@ -25,7 +16,7 @@ export function ActivitySummary() {
     },
     {
       label: "Skor Kepercayaan",
-      value: `${user?.trustScore ?? 0}%`,
+      value: isLoading ? "..." : `${metrics?.trustScore ?? 0}%`,
       description: "Akurasi data foto & GPS",
       bgColor: "bg-white text-ink-900",
       valueClass: "font-mono text-3xl font-bold text-moss-700",
@@ -33,7 +24,7 @@ export function ActivitySummary() {
     },
     {
       label: "Total Aksi",
-      value: isLoading ? "..." : allData?.meta?.totalCount ?? 0,
+      value: isLoading ? "..." : metrics?.activitiesCount?.TOTAL ?? 0,
       description: "Aksi lingkungan terlaporkan",
       bgColor: "bg-white text-ink-900",
       valueClass: "font-display text-3xl font-bold text-ink-900",
@@ -41,7 +32,7 @@ export function ActivitySummary() {
     },
     {
       label: "Disetujui",
-      value: isLoading ? "..." : approvedData?.meta?.totalCount ?? 0,
+      value: isLoading ? "..." : metrics?.activitiesCount?.APPROVED ?? 0,
       description: "Mendapatkan poin reward",
       bgColor: "bg-white text-ink-900",
       valueClass: "font-display text-3xl font-semibold text-moss-700",
@@ -49,7 +40,7 @@ export function ActivitySummary() {
     },
     {
       label: "Menunggu",
-      value: isLoading ? "..." : pendingData?.meta?.totalCount ?? 0,
+      value: isLoading ? "..." : metrics?.activitiesCount?.PENDING ?? 0,
       description: "Sedang proses verifikasi AI",
       bgColor: "bg-white text-ink-900",
       valueClass: "font-display text-3xl font-semibold text-ochre-600",
@@ -57,7 +48,7 @@ export function ActivitySummary() {
     },
     {
       label: "Ditolak",
-      value: isLoading ? "..." : rejectedData?.meta?.totalCount ?? 0,
+      value: isLoading ? "..." : metrics?.activitiesCount?.REJECTED ?? 0,
       description: "Aksi tidak memenuhi kriteria",
       bgColor: "bg-white text-ink-900",
       valueClass: "font-display text-3xl font-semibold text-rust-600",

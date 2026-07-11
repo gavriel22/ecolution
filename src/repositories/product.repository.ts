@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { Product, ProductStatus, Prisma } from "@prisma/client";
+import { Product, ProductStatus, OrderStatus, Prisma } from "@prisma/client";
 
 export class ProductRepository {
   async findById(id: string): Promise<any | null> {
@@ -138,6 +138,49 @@ export class ProductRepository {
       if (params.maxPrice !== undefined) {
         where.price.lte = params.maxPrice;
       }
+    }
+
+    // Special case for sorting by sales (best sellers)
+    if (params.sortBy === "sales") {
+      const allMatchingProducts = await prisma.product.findMany({
+        where,
+        include: {
+          images: true,
+          merchant: true,
+          orderItems: {
+            where: {
+              order: {
+                status: {
+                  in: [OrderStatus.PAID, OrderStatus.PROCESSING, OrderStatus.COMPLETED],
+                },
+              },
+            },
+            select: {
+              quantity: true,
+            },
+          },
+        },
+      });
+
+      const productsWithSales = allMatchingProducts.map((p) => {
+        const salesCount = p.orderItems.reduce((acc, item) => acc + item.quantity, 0);
+        return {
+          ...p,
+          salesCount,
+        };
+      });
+
+      productsWithSales.sort((a, b) => {
+        if (b.salesCount !== a.salesCount) {
+          return b.salesCount - a.salesCount;
+        }
+        return b.createdAt.getTime() - a.createdAt.getTime();
+      });
+
+      const totalCount = productsWithSales.length;
+      const paginatedProducts = productsWithSales.slice(params.skip, params.skip + params.limit);
+
+      return { products: paginatedProducts, totalCount };
     }
 
     const orderBy: any = {};
