@@ -32,6 +32,9 @@ export class DashboardRepository {
         where: {
           deletedAt: null,
           role: "USER",
+          totalPoint: {
+            gt: 0,
+          },
         },
         orderBy: {
           totalPoint: "desc",
@@ -115,6 +118,9 @@ export class DashboardRepository {
         where: {
           deletedAt: null,
           role: "USER",
+          totalPoint: {
+            gt: 0,
+          },
         },
         orderBy: {
           totalPoint: "desc",

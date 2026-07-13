@@ -5,11 +5,14 @@ import { verifyAccessToken } from "@/lib/jwt";
 
 export async function GET(req: NextRequest) {
   try {
-    // 1. Get top 3 users
+    // 1. Get top users (only with points > 0)
     const topUsers = await prisma.user.findMany({
       where: {
         deletedAt: null,
         role: "USER",
+        totalPoint: {
+          gt: 0,
+        },
       },
       orderBy: {
         totalPoint: "desc",
@@ -36,9 +39,15 @@ export async function GET(req: NextRequest) {
         if (payload) {
           const loggedInUserId = payload.id;
           
-          // Calculate rank by ordering all active users by points descending
+          // Calculate rank by ordering all active users with points > 0 descending
           const allUsers = await prisma.user.findMany({
-            where: { deletedAt: null, role: "USER" },
+            where: { 
+              deletedAt: null, 
+              role: "USER",
+              totalPoint: {
+                gt: 0,
+              },
+            },
             orderBy: { totalPoint: "desc" },
             select: { id: true, totalPoint: true },
           });
