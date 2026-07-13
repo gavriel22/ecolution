@@ -215,7 +215,7 @@ export function EcoChampions() {
 
         <div className="text-center">
           <Link
-            href={user ? "/challenge" : "/login"}
+            href="/leaderboard"
             className="inline-block px-6 py-3 rounded-md bg-brand-forest hover:bg-brand-forest-2 text-white text-xs font-bold tracking-wide transition duration-200 shadow-xs"
           >
             Lihat Leaderboard Lengkap
