@@ -63,27 +63,29 @@ function AnimatedNumber({ value, duration = 500, isFloat = false }: { value: num
 
 export function PlatformStats() {
   const [stats, setStats] = useState({
-    totalUsers: 1240,
-    totalMerchants: 45,
-    totalVerifiedActivities: 8920,
-    totalRecycledWaste: 4.2, // Tons
-    totalRewardsRedeemed: 1850,
+    totalUsers: 0,
+    totalMerchants: 0,
+    totalVerifiedActivities: 0,
+    totalRecycledWaste: 0.0, // Tons
+    totalRewardsRedeemed: 0,
   });
 
   useEffect(() => {
-    apiFetch<any>("/api/dashboard/admin")
+    apiFetch<any>("/api/stats")
       .then((res) => {
         if (res.data) {
           setStats({
-            totalUsers: res.data.totalUsers || 1240,
-            totalMerchants: res.data.totalMerchants || 45,
-            totalVerifiedActivities: res.data.activitiesCount?.APPROVED || 8920,
-            totalRecycledWaste: 4.2,
-            totalRewardsRedeemed: 1850,
+            totalUsers: res.data.totalUsers ?? 0,
+            totalMerchants: res.data.totalMerchants ?? 0,
+            totalVerifiedActivities: res.data.totalVerifiedActivities ?? 0,
+            totalRecycledWaste: res.data.totalRecycledWaste ?? 0.0,
+            totalRewardsRedeemed: res.data.totalRewardsRedeemed ?? 0,
           });
         }
       })
-      .catch(() => { });
+      .catch((err) => {
+        console.error("Failed to load platform stats", err);
+      });
   }, []);
 
   return (
