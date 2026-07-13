@@ -9,7 +9,9 @@ export async function GET(req: NextRequest) {
     const topUsers = await prisma.user.findMany({
       where: {
         deletedAt: null,
-        role: "USER",
+        role: {
+          in: ["USER", "UMKM"],
+        },
         totalPoint: {
           gt: 0,
         },
@@ -43,7 +45,9 @@ export async function GET(req: NextRequest) {
           const allUsers = await prisma.user.findMany({
             where: { 
               deletedAt: null, 
-              role: "USER",
+              role: {
+                in: ["USER", "UMKM"],
+              },
               totalPoint: {
                 gt: 0,
               },

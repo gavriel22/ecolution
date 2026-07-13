@@ -31,7 +31,9 @@ export class DashboardRepository {
       prisma.user.findMany({
         where: {
           deletedAt: null,
-          role: "USER",
+          role: {
+            in: ["USER", "UMKM"],
+          },
           totalPoint: {
             gt: 0,
           },
@@ -117,7 +119,9 @@ export class DashboardRepository {
       prisma.user.findMany({
         where: {
           deletedAt: null,
-          role: "USER",
+          role: {
+            in: ["USER", "UMKM"],
+          },
           totalPoint: {
             gt: 0,
           },
