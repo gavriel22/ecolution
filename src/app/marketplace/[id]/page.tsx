@@ -98,6 +98,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     }
 
     localStorage.setItem(cartKey, JSON.stringify(cart));
+    window.dispatchEvent(new Event("cart-updated"));
 
     if (redirect) {
       router.push("/cart");

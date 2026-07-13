@@ -9,6 +9,7 @@ import { logoutUser } from "@/features/auth/api";
 import { Avatar } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api-client";
+import { ShoppingCart } from "lucide-react";
 
 export function Navbar() {
   const { user, logoutLocally, setActiveRole } = useAuth();
@@ -17,7 +18,31 @@ export function Navbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileAccountOpen, setIsMobileAccountOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const updateCartCount = () => {
+      const cartKey = user ? `ecolution_cart_${user.id}` : "ecolution_cart_guest";
+      try {
+        const cart = JSON.parse(localStorage.getItem(cartKey) || "[]");
+        const count = cart.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0);
+        setCartCount(count);
+      } catch (e) {
+        setCartCount(0);
+      }
+    };
+
+    updateCartCount();
+
+    window.addEventListener("storage", updateCartCount);
+    window.addEventListener("cart-updated", updateCartCount);
+
+    return () => {
+      window.removeEventListener("storage", updateCartCount);
+      window.removeEventListener("cart-updated", updateCartCount);
+    };
+  }, [user, pathname]);
 
   const { data: myMerchantResponse } = useQuery({
     queryKey: ["myMerchant", user?.id],
@@ -129,6 +154,19 @@ export function Navbar() {
 
           {/* ── Desktop Right Actions ───────────────────────────────────────── */}
           <div className="hidden md:flex items-center space-x-4">
+            <Link
+              href="/cart"
+              className={`p-2 rounded-full relative transition-colors duration-200 ${isTransparent ? "text-white/90 hover:bg-white/10 hover:text-white" : "text-ink-700 hover:bg-paper-100 hover:text-brand-forest"}`}
+              aria-label="Keranjang Belanja"
+            >
+              <ShoppingCart className="w-5 h-5" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-brand-gold text-brand-text text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center font-mono border border-white">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+
             {/* Desktop Profile Dropdown */}
             {user ? (
               <div className="relative" ref={dropdownRef}>
@@ -229,6 +267,19 @@ export function Navbar() {
 
           {/* ── Mobile Right: Cart + Hamburger only ────────────────────────── */}
           <div className="flex md:hidden items-center gap-2">
+            <Link
+              href="/cart"
+              className={`p-2 rounded-full relative transition-colors duration-200 ${isTransparent ? "text-white/90 hover:bg-white/10 hover:text-white" : "text-ink-700 hover:bg-paper-100 hover:text-brand-forest"}`}
+              aria-label="Keranjang Belanja"
+            >
+              <ShoppingCart className="w-[22px] h-[22px]" />
+              {cartCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-brand-gold text-brand-text text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center font-mono border border-white">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+
             {/* Hamburger */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
